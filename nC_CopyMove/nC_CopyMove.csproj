@@ -43,15 +43,28 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Pages\tree-view-site.html" />
+    <None Include="DocumentButton\SharePointProjectItem.spdata">
+      <SharePointProjectItemId>{0bb3a421-b2c8-4d5c-b59d-4e63400e9d56}</SharePointProjectItemId>
+    </None>
+    <None Include="packages.config" />
     <None Include="Pages\SharePointProjectItem.spdata">
       <SharePointProjectItemId>{26d4e671-be1f-4373-8ec9-47593121410a}</SharePointProjectItemId>
     </None>
+    <Content Include="DocumentButton\Elements.xml">
+      <OpcRelationship>feature-elementmanifest</OpcRelationship>
+    </Content>
     <Content Include="Elements.xml" />
     <Content Include="Pages\Elements.xml" />
     <Content Include="Pages\Default.aspx" />
     <None Include="Scripts\app.component.js.map" />
     <None Include="Scripts\app.module.js.map" />
     <None Include="Scripts\boot.js.map" />
+    <None Include="Scripts\dataservice.js.map" />
+    <None Include="Scripts\documentlibrary.js.map" />
+    <None Include="Scripts\SiteCollection.js.map" />
+    <None Include="Scripts\treeview.js.map" />
+    <None Include="Scripts\treeviewsite.js.map" />
     <None Include="SharePointProjectItem.spdata">
       <SharePointProjectItemId>{6de9d0c9-42e0-4316-b4f8-a1df4033b18b}</SharePointProjectItemId>
     </None>
@@ -64,9 +77,15 @@
     <Content Include="Scripts\app.component.js" />
     <Content Include="Scripts\app.module.js" />
     <Content Include="Scripts\boot.js" />
+    <Content Include="Scripts\dataservice.js" />
+    <Content Include="Scripts\documentlibrary.js" />
     <Content Include="Scripts\Elements.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Scripts\ItemExtract.js" />
+    <Content Include="Scripts\SiteCollection.js" />
+    <Content Include="Scripts\treeview.js" />
+    <Content Include="Scripts\treeviewSite.js" />
     <Content Include="Scripts\_references.js" />
   </ItemGroup>
   <ItemGroup>
@@ -108,7 +127,25 @@
     <TypeScriptCompile Include="app\app.component.ts" />
     <TypeScriptCompile Include="app\app.module.ts" />
     <TypeScriptCompile Include="app\boot.ts" />
+    <TypeScriptCompile Include="app\dataservice.ts" />
+    <TypeScriptCompile Include="app\documentlibrary.ts" />
+    <TypeScriptCompile Include="app\ItemExtract.ts" />
+    <TypeScriptCompile Include="app\sitecollection.ts" />
+    <TypeScriptCompile Include="app\treeview.ts" />
+    <TypeScriptCompile Include="app\treeviewsite.ts" />
+    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-animate.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-component-router.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-cookies.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-mocks.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-resource.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-route.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-sanitize.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\angularjs\angular.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\microsoft-ajax\microsoft.ajax.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\sharepoint\SharePoint.d.ts" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
