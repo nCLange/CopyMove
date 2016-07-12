@@ -1,4 +1,4 @@
-System.register(["angular2/core", './treeView', './ItemExtract'], function(exports_1, context_1) {
+System.register(["angular2/core", './treeView', './ItemExtract', './targetsites'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(["angular2/core", './treeView', './ItemExtract'], function(expor
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, treeView_1, ItemExtract_1;
+    var core_1, treeView_1, ItemExtract_1, targetsites_1;
     var TreeViewSite;
     return {
         setters:[
@@ -22,9 +22,15 @@ System.register(["angular2/core", './treeView', './ItemExtract'], function(expor
             },
             function (ItemExtract_1_1) {
                 ItemExtract_1 = ItemExtract_1_1;
+            },
+            function (targetsites_1_1) {
+                targetsites_1 = targetsites_1_1;
             }],
         execute: function() {
             let TreeViewSite = class TreeViewSite {
+                constructor() {
+                    this.target = new targetsites_1.TargetSites();
+                }
             };
             __decorate([
                 core_1.Input(), 

@@ -1307,5 +1307,6 @@
     <ProjectItemFile Source="node_modules\angular\compiler\testing\xhr_mock.d.ts" Type="ElementFile" />
     <ProjectItemFile Source="node_modules\angular\compiler\testing\xhr_mock.js" Type="ElementFile" />
     <ProjectItemFile Source="node_modules\angular\compiler\testing\xhr_mock.js.map" Type="ElementFile" />
+    <ProjectItemFile Source="app\delegate.ts" Target="app\" Type="ElementFile" />
   </Files>
 </ProjectItem>

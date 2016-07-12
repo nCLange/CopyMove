@@ -31,16 +31,19 @@ System.register(['angular2/core', './treeviewsite', './sitecollection', './docum
             }],
         execute: function() {
             let AppComponent = class AppComponent {
-                constructor(dataService) {
-                    this.dataService = dataService;
-                    //  let music = new Directory('Music',[],['song1.mp3','song2.mp3']);
-                    let docLib = new documentlibrary_1.DocumentLibrary("Doclib");
-                    let ZRR2012 = new sitecollection_1.SiteCollection('ZRR-2014', [docLib, docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
-                    let ZRR2013 = new sitecollection_1.SiteCollection('ZRR-2015', [docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
-                    let ZRR2014 = new sitecollection_1.SiteCollection('ZRR-2016', [docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
-                    let ZRR2015 = new sitecollection_1.SiteCollection('ZRR-2017', [docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
-                    let ZRR2016 = new sitecollection_1.SiteCollection('ZRR-2018', [docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
-                    this.sitecollection = [ZRR2012, ZRR2013, ZRR2014, ZRR2015, ZRR2016];
+                /* constructor(private dataService: DataService) {
+                     //  let music = new Directory('Music',[],['song1.mp3','song2.mp3']);
+                     let docLib = new DocumentLibrary("Doclib");
+                     let ZRR2012 = new SiteCollection('ZRR-2014', [docLib, docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
+                     let ZRR2013 = new SiteCollection('ZRR-2015', [docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
+                     let ZRR2014 = new SiteCollection('ZRR-2016', [docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
+                     let ZRR2015 = new SiteCollection('ZRR-2017', [docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
+                     let ZRR2016 = new SiteCollection('ZRR-2018', [docLib], ['image1.jpg', 'image2.jpg', 'image3.jpg']);
+                 
+                     this.sitecollection = [ZRR2012, ZRR2013, ZRR2014, ZRR2015, ZRR2016];
+                 */
+                constructor() {
+                    this.sitecollection = [new sitecollection_1.SiteCollection('bla', [new documentlibrary_1.DocumentLibrary('DocLib')], ['bla.jpg'])];
                 }
             };
             AppComponent = __decorate([
@@ -52,7 +55,7 @@ System.register(['angular2/core', './treeviewsite', './sitecollection', './docum
                     //template: '<treeviewsite></treeviewsite>',
                     directives: [treeviewsite_1.TreeViewSite]
                 }), 
-                __metadata('design:paramtypes', [dataservice_1.DataService])
+                __metadata('design:paramtypes', [])
             ], AppComponent);
             exports_1("AppComponent", AppComponent);
         }

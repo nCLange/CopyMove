@@ -28,7 +28,8 @@
       </CommandUIDefinitions>
       <CommandUIHandlers>
         <CommandUIHandler Command="Invoke_DocumentButtonButtonRequest"
-                          CommandAction="~appWebUrl/Pages/Default.aspx?SPListId={SelectedListId}&amp;SPListItemId={SelectedItemId}"/>
+                          EnabledScript="javascript:SP.ListOperation.Selection.getSelectedItems().length>0;"
+                          CommandAction="~appWebUrl/Pages/Default.aspx?SPListId={SelectedListId}&amp;SPListItemId={SelectedItemId}&amp;SPHostURL={HostUrl}"/>
       </CommandUIHandlers>
     </CommandUIExtension >
   </CustomAction>

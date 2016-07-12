@@ -30,5 +30,6 @@
     <ProjectItemFile Source="typings\angularjs\angular-cookies.d.ts" Target="Scripts\typings\angularjs\" Type="ElementFile" />
     <ProjectItemFile Source="typings\angularjs\angular-component-router.d.ts" Target="Scripts\typings\angularjs\" Type="ElementFile" />
     <ProjectItemFile Source="typings\angularjs\angular-animate.d.ts" Target="Scripts\typings\angularjs\" Type="ElementFile" />
+    <ProjectItemFile Source="targetsites.js" Target="Scripts\" Type="ElementFile" />
   </Files>
 </ProjectItem>

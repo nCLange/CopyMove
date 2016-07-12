@@ -11,12 +11,19 @@
    
 <asp:Content ContentPlaceHolderID="PlaceHolderAdditionalPageHead" runat="server">
      <WebPartPages:AllowFraming runat="server" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.33.3/es6-shim.min.js"></script>
+    <script type="text/javascript" src="/_layouts/15/sp.RequestExecutor.js"></script>
+    <script type="text/javascript" src="/_layouts/15/sp.runtime.js"></script>
+    <script type="text/javascript" src="/_layouts/15/sp.js"></script>
+    <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/4.0/1/MicrosoftAjax.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.34.1/es6-shim.js"></script>
+    <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.19.16/system-polyfills.js"></script>
-    <script src="https://code.angularjs.org/2.0.0-beta.0/angular2-polyfills.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.1/angular2-polyfills.js"></script>
     <script src="https://code.angularjs.org/tools/system.js"></script>
-    <script src="https://code.angularjs.org/2.0.0-beta.0/Rx.js"></script>
-    <script src="https://code.angularjs.org/2.0.0-beta.0/angular2.dev.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.1/Rx.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.1/angular2.dev.js"></script>
+   
+   
     <script>
         System.config({
             packages: {

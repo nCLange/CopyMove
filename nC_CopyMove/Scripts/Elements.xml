@@ -29,5 +29,6 @@
     <File Path="Scripts\typings\angularjs\angular-cookies.d.ts" Url="Scripts/typings/angularjs/angular-cookies.d.ts" ReplaceContent="TRUE" />
     <File Path="Scripts\typings\angularjs\angular-component-router.d.ts" Url="Scripts/typings/angularjs/angular-component-router.d.ts" ReplaceContent="TRUE" />
     <File Path="Scripts\typings\angularjs\angular-animate.d.ts" Url="Scripts/typings/angularjs/angular-animate.d.ts" ReplaceContent="TRUE" />
+    <File Path="Scripts\targetsites.js" Url="Scripts/targetsites.js" ReplaceContent="TRUE" />
   </Module>
 </Elements>

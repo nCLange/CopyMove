@@ -84,6 +84,7 @@
     </Content>
     <Content Include="Scripts\ItemExtract.js" />
     <Content Include="Scripts\SiteCollection.js" />
+    <Content Include="Scripts\targetsites.js" />
     <Content Include="Scripts\treeview.js" />
     <Content Include="Scripts\treeviewSite.js" />
     <Content Include="Scripts\_references.js" />
@@ -128,9 +129,11 @@
     <TypeScriptCompile Include="app\app.module.ts" />
     <TypeScriptCompile Include="app\boot.ts" />
     <TypeScriptCompile Include="app\dataservice.ts" />
+    <TypeScriptCompile Include="app\delegate.ts" />
     <TypeScriptCompile Include="app\documentlibrary.ts" />
     <TypeScriptCompile Include="app\ItemExtract.ts" />
     <TypeScriptCompile Include="app\sitecollection.ts" />
+    <TypeScriptCompile Include="app\targetsites.ts" />
     <TypeScriptCompile Include="app\treeview.ts" />
     <TypeScriptCompile Include="app\treeviewsite.ts" />
     <TypeScriptCompile Include="Scripts\typings\angularjs\angular-animate.d.ts" />

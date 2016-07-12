@@ -2,6 +2,7 @@
 import {SiteCollection} from './sitecollection';
 import {TreeViewDocLib} from './treeView';
 import {ItemExtract} from './ItemExtract';
+import {TargetSites} from './targetsites';
 
 
 @Component({
@@ -12,6 +13,11 @@ import {ItemExtract} from './ItemExtract';
 
 export class TreeViewSite  {
     @Input() sitecollection: Array<SiteCollection>;
+    target: TargetSites;
+
+    constructor() {
+        this.target = new TargetSites();
+    }
 
  
 }
