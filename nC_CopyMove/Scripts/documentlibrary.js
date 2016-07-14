@@ -6,8 +6,9 @@ System.register([], function(exports_1, context_1) {
         setters:[],
         execute: function() {
             class DocumentLibrary {
-                constructor(name) {
+                constructor(name, path = "") {
                     this.name = name;
+                    this.path = path;
                     this.selected = false;
                 }
                 getStyle() {

@@ -11,7 +11,5 @@
     "experimentalDecorators": true,
     "outDir": "./scripts"
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

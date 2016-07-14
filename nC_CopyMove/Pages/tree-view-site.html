@@ -4,13 +4,16 @@
     <p>Selected params</p>
     
     <ul id="listIcon">
-        <li *ngFor="#site of sitecollection" selection-model>
-            <!--<span><input type="checkbox" [checked]="dir.checked" (click)="dir.check()"    /></span> -->
+       <!-- <li *ngFor="#site of sitecollection" selection-model>
+            <!--<span><input type="checkbox" [checked]="dir.checked" (click)="dir.check()"    /></span>
 
             <span (click)="site.toggle()">{{ site.name }}</span>
             <div *ngIf="site.expanded">
                 <tree-view-doclib [documentlibrary]="site.documentLibraries"></tree-view-doclib>
             </div>
+        </li>!-->
+        <li *ngFor="#dossier of doclibs | async" selection-model>
+            <span>{{dossier.name}}</span>
         </li>
     </ul>
     <button id="cm-button" (click)="clicked()">Copy</button>

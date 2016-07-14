@@ -126,29 +126,18 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app\app.component.ts" />
-    <TypeScriptCompile Include="app\app.module.ts" />
     <TypeScriptCompile Include="app\boot.ts" />
     <TypeScriptCompile Include="app\dataservice.ts" />
-    <TypeScriptCompile Include="app\delegate.ts" />
     <TypeScriptCompile Include="app\documentlibrary.ts" />
     <TypeScriptCompile Include="app\ItemExtract.ts" />
     <TypeScriptCompile Include="app\sitecollection.ts" />
     <TypeScriptCompile Include="app\targetsites.ts" />
     <TypeScriptCompile Include="app\treeview.ts" />
     <TypeScriptCompile Include="app\treeviewsite.ts" />
-    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-animate.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-component-router.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-cookies.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-mocks.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-resource.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-route.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\angularjs\angular-sanitize.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\angularjs\angular.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\microsoft-ajax\microsoft.ajax.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\sharepoint\SharePoint.d.ts" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="node_modules\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

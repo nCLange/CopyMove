@@ -1,4 +1,12 @@
-﻿
+﻿import {DocumentLibrary} from './documentlibrary';
+import {Http} from 'angular2/http';
+//import {Promise} from 'es6-promise';
+
+
+
+
+
+
 export class TargetSites {
 
     ListID;
@@ -10,58 +18,92 @@ export class TargetSites {
     appWebUrl;
     queryText;
     oWebSite;
+    documentlibraries: Array<DocumentLibrary>
 
     constructor() {
-
+        var bla;
 
         // this.webAppURL = "http://win-iprrvsfootq";
         // this.hostWebUrl = decodeURIComponent(this.getQueryStringParameter('SPHostUrl'));
         this.hostWebUrl = "http://win-iprrvsfootq/sites/dev";
         this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
-        // this.siteURL = _spPageContextInfo.webAbsoluteUrl;
         console.log("Host Web is: " + this.hostWebUrl + "\n AppWebUrl is: " + this.appWebUrl);
         //this.getDocLib();
         //this.getSiteCollections();
         // this.getDocumentLibraries();
         this.doJSOMStuff(this.hostWebUrl);
-        this.doRESTStuff(this.hostWebUrl);
+        this.searchDocumentLibrary(this.hostWebUrl).then(response => { bla = response; this.documentlibraries = bla; console.log(bla); }, response => { console.log("Failure " + response); });
     }
 
-    doRESTStuff(siteURL) {
+
+
+    searchDocumentLibrary(siteURL) {
         var executor = new SP.RequestExecutor(this.appWebUrl);
+        let that = this;
 
-        executor.executeAsync(
-            {
-                //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'",
-                // url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/search/query?querytext='contentclass:sts_site'&@target='" + siteURL + "'",
-                url: this.appWebUrl + "/_api/search/query?querytext='contentclass:sts_site'",
 
-                method: "GET",
-                headers: { "Accept": "application/json; odata=verbose" },
-                success: function (data) {
-                    var myoutput = JSON.parse(JSON.stringify(data.body));
-                    console.log(myoutput);
-                },
-                error: function (data) {
-                    console.log(JSON.stringify(data));
+
+        this.documentlibraries = [];
+
+        return new Promise(function (resolve, reject) {
+            executor.executeAsync(
+                {
+                    //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
+                    //Leere Bibliotheken werden ignoriert , beheben?
+                    url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_list_documentlibrary'&trimduplicates=false",
+
+                    method: "GET",
+                    headers: { "Accept": "application/json; odata=verbose" },
+                    success: function (data) {
+                        var myoutput = JSON.parse((data.body.toString()));
+                        var documentlibraries = [];
+                        var dossierResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                        console.log(dossierResult);
+                        for (var x = 0; x < dossierResult.length; x++) {
+
+                            documentlibraries.push(new DocumentLibrary(that.searchJSONForValue(dossierResult[x].Cells.results, "Title"), that.searchJSONForValue(dossierResult[x].Cells.results, "Path")));
+                        }
+
+                        resolve(documentlibraries);
+                    },
+                    error: function (data) {
+                        console.log(JSON.stringify(data));
+                        var documentlibraries = [];
+                        reject(documentlibraries);
+                    }
+
                 }
+            )
+        });
 
 
-            }
-        );
+
+
+
+
 
     }
+
+    searchJSONForValue(input: any, key: string) {
+        input = JSON.stringify(input);
+        input = input.match("Key\":\"" + key + ".*?}").toString();
+        input = input.match("(?=Value\":\").*?(?=\",)").toString().substring(8);
+
+        return input.toString();
+
+    }
+
 
     doJSOMStuff(siteURL) {
 
-       /*
-
-        var clientContext = new SP.ClientContext(siteURL);
-        this.oWebSite = clientContext.get_web();
-        clientContext.load(this.oWebSite);
-
-        clientContext.executeQueryAsync(this.onQuerySuceeded, this.onQueryFailed);
-        */
+        /*
+ 
+         var clientContext = new SP.ClientContext(siteURL);
+         this.oWebSite = clientContext.get_web();
+         clientContext.load(this.oWebSite);
+ 
+         clientContext.executeQueryAsync(this.onQuerySuceeded, this.onQueryFailed);
+         */
 
         var clientContext = new SP.ClientContext(this.appWebUrl);
         var factory = new SP.ProxyWebRequestExecutorFactory(this.appWebUrl);
@@ -76,120 +118,12 @@ export class TargetSites {
     }
 
     onQueryFailed(sender, args) {
-        console.log('Request failed ' + args.get_message()+ '\n'+args.get_stackTrace());
+        console.log('Request failed ' + args.get_message() + '\n' + args.get_stackTrace());
     }
 
     onQuerySuceeded(sender, args) {
         console.log('Title' + this.oWebSite.get_title());
     }
 
-    getDocLib() {
 
-        this.queryText = 'contentclass:sts_site';
-        
-        var url = this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/lists?&@target='"+this.hostWebUrl+"'";
-        //var executor = new SP.RequestExecutor(_spPageContextInfo.webAbsoluteUrl);
-        var executor = new SP.RequestExecutor(this.appWebUrl);
-        executor.executeAsync({
-            url: url,
-            method: "GET",
-            headers: { "Accept": "application/json; odata=verbose" },
-            success: function (data) {
-                console.log("Data: Site Col");
-                var myoutput = JSON.parse(JSON.stringify(data.body));
-                console.log(myoutput);
-            },
-            error: function (data) {
-                console.log("Error: Site Col");
-                console.log(JSON.stringify(data));
-            }
-        });
-
-
-    }
-
-    getSiteCollections() {
-
-
-        this.queryText = 'contentclass:sts_site';
-        /*
-        //var url = this.appWebUrl + "/_api/SP.AppContextSite(@target)/search/query?querytext='" + queryText + "'&@target='"+this.hostWebUrl+"'";
-        var url = this.appWebUrl + "/_api/search/query?querytext='" + queryText + "'";
-        console.log("SiteColQueryURL: " + url);
-        //var executor = new SP.RequestExecutor(_spPageContextInfo.webAbsoluteUrl);
-        var executor = new SP.RequestExecutor(this.appWebUrl);
-        executor.executeAsync({
-            url: url,
-            method: "GET",
-            headers: { "Accept": "application/json; odata=verbose" },
-            success: function (data) {
-                console.log("Data: Site Col");
-                var myoutput = JSON.parse(JSON.stringify(data.body));
-                console.log(myoutput);
-            },
-            error: function (data) {
-                console.log("Error: Site Col");
-                console.log(JSON.stringify(data));
-            }
-        });
-       
-    */
-
-
-/*XMLHttpRequest cannot load http://win-iprrvsfootq/sites/dev/_api/search/query?querytext=%27contentclass:sts_site%27. No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://app-e7c2da331e0246.app.labs.novasolutions.local' is therefore not allowed access. The response had HTTP status code 401
-        */
-    $.ajax({
-        url: "http://win-iprrvsfootq/sites/dev/_api/search/query?querytext='contentclass:sts_site'",
-        method: "GET",
-        headers: {
-            "accept": "application/json; odata=verbose",
-        },
-        success: function (data) {
-            console.log("Data: Site Col");
-            var myoutput = JSON.parse(JSON.stringify(data));
-            console.log(myoutput);
-
-        },
-        error: function (data) {
-            console.log("Error: Site Col");
-            console.log(JSON.stringify(data));
-
-        }
-
-    });
-
-}
-
-    getDocumentLibraries() {
-
-        var queryText = 'contentclass:sts_list_documentlibrary';
-        var url = this.siteURL + "/_api/search/query?querytext='" + queryText + "'";
-        var executor = new SP.RequestExecutor(_spPageContextInfo.webAbsoluteUrl);
-        executor.executeAsync({
-            url: url,
-            method: "GET",
-            headers: { "Accept": "application/json; odata=verbose" },
-            success: function (data) {
-                console.log("Data: DocumentLibraries");
-                var myoutput = JSON.parse(JSON.stringify(data));
-                console.log(myoutput);
-            },
-            error: function (data) {
-                console.log("Error: DocumentLibraries");
-                console.log(JSON.stringify(data));
-            }
-        });
-
-    }
-
-    getQueryStringParameter(paramToRetrieve) {
-        var params =
-            document.URL.split("?")[1].split("&");
-        var strParams = "";
-        for (var i = 0; i < params.length; i = i + 1) {
-            var singleParam = params[i].split("=");
-            if (singleParam[0] == paramToRetrieve)
-                return singleParam[1];
-        }
-    }
 }
