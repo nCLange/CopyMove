@@ -9,12 +9,12 @@ import {DocumentLibrary} from './documentlibrary';
 @Component({
     selector: 'treeviewsite',
     templateUrl: './tree-view-site.html',
-    directives: [TreeViewDocLib,ItemExtract]
+    directives: [TreeViewDocLib,TargetSites]
 })
 
 export class TreeViewSite  {
-    @Input() sitecollection: Array<SiteCollection>;
-    @Input() doclibs: Array<DocumentLibrary>
+   // @Input() sitecollection: Array<SiteCollection>;
+   // @Input() doclibs: Array<DocumentLibrary>
 
 
  

@@ -1,4 +1,4 @@
-System.register(['angular2/core', './treeviewsite', './dataservice', './targetSites'], function(exports_1, context_1) {
+System.register(['angular2/core', 'rxjs/Rx', './treeviewsite', './sitecollection', './dataservice'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,21 +10,22 @@ System.register(['angular2/core', './treeviewsite', './dataservice', './targetSi
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, treeviewsite_1, dataservice_1, targetSites_1;
+    var core_1, treeviewsite_1, sitecollection_1, dataservice_1;
     var AppComponent;
     return {
         setters:[
             function (core_1_1) {
                 core_1 = core_1_1;
             },
+            function (_1) {},
             function (treeviewsite_1_1) {
                 treeviewsite_1 = treeviewsite_1_1;
             },
+            function (sitecollection_1_1) {
+                sitecollection_1 = sitecollection_1_1;
+            },
             function (dataservice_1_1) {
                 dataservice_1 = dataservice_1_1;
-            },
-            function (targetSites_1_1) {
-                targetSites_1 = targetSites_1_1;
             }],
         execute: function() {
             let AppComponent = class AppComponent {
@@ -40,14 +41,12 @@ System.register(['angular2/core', './treeviewsite', './dataservice', './targetSi
                      this.sitecollection = [ZRR2012, ZRR2013, ZRR2014, ZRR2015, ZRR2016];
                  */
                 constructor() {
-                    //  this.sitecollection = [new SiteCollection('bla', [new DocumentLibrary('DocLib')], ['bla.jpg'])];
-                    this.targetsites = new targetSites_1.TargetSites();
+                    this.sitecollection = [new sitecollection_1.SiteCollection('bla', "2")];
+                    //  this.targetsites = new TargetSites();
+                    // this.targetsites.subscribe((event) => this.getLibs());
                     /* this.doclibs.subscribe(res => { this.targetsites.documentlibraries }, err => { });
                      this.getLibs.subscribe(
                      */
-                }
-                getLibs() {
-                    this.doclibs = this.targetsites.documentlibraries;
                 }
             };
             AppComponent = __decorate([
@@ -55,8 +54,8 @@ System.register(['angular2/core', './treeviewsite', './dataservice', './targetSi
                     selector: "app-main",
                     providers: [dataservice_1.DataService],
                     // template:'<H1>Hello</H1>',
-                    template: '<treeviewsite [doclibs]="doclibs"></treeviewsite>',
-                    //template: '<treeviewsite></treeviewsite>',
+                    // template: '<treeviewsite [sitecollection]="sitecollection"></treeviewsite>',
+                    template: '<treeviewsite></treeviewsite>',
                     directives: [treeviewsite_1.TreeViewSite]
                 }), 
                 __metadata('design:paramtypes', [])

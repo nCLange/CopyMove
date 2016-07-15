@@ -19,10 +19,13 @@
   
     <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.19.16/system-polyfills.js"></script>
-    <script src="https://code.angularjs.org/2.0.0-beta.1/angular2-polyfills.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.17/angular2-polyfills.js"></script>
     <script src="https://code.angularjs.org/tools/system.js"></script>
-    <script src="https://code.angularjs.org/2.0.0-beta.1/Rx.js"></script>
-    <script src="https://code.angularjs.org/2.0.0-beta.1/angular2.dev.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.17/Rx.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.17/angular2.dev.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.17/http.dev.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.17/router.dev.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-beta.17/upgrade.js"></script>
    
    
     <script>

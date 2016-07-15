@@ -1,10 +1,13 @@
 ﻿import {DocumentLibrary} from './documentlibrary';
-import {Http} from 'angular2/http';
-//import {Promise} from 'es6-promise';
+import {SiteCollection} from './sitecollection';
+import {Http, Response} from 'angular2/http';
+import {Observable} from 'rxjs/Observable';
+import { Input, Component} from 'angular2/core';
 
-
-
-
+@Component({
+    selector: "sitecol",
+    template: '<ul><li *ngFor="let site of siteCollection; let i = index" (click)="clickedSC(i)"selection-model>{{site.name}}  <div *ngIf="site.expanded"><ul><li *ngFor="let doclib of documentlibraries" selection-model>{{doclib.name}}</li></ul></div></li></ul>'
+})
 
 
 export class TargetSites {
@@ -18,10 +21,19 @@ export class TargetSites {
     appWebUrl;
     queryText;
     oWebSite;
-    documentlibraries: Array<DocumentLibrary>
+    documentlibraries: Array<DocumentLibrary>;
+   @Input() siteCollection: Array<SiteCollection>;
+    
+   clickedSC(i) {
+       var tempresponse;
+       console.log(this.siteCollection[i]);
+       this.siteCollection[i].toggle();
+       this.searchDocumentLibrary(this.hostWebUrl).then(response => { tempresponse = response; this.documentlibraries = tempresponse; console.log(tempresponse); }, response => { console.log("Failure " + response); });
+
+   }
 
     constructor() {
-        var bla;
+        var tempresponse;
 
         // this.webAppURL = "http://win-iprrvsfootq";
         // this.hostWebUrl = decodeURIComponent(this.getQueryStringParameter('SPHostUrl'));
@@ -29,15 +41,53 @@ export class TargetSites {
         this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
         console.log("Host Web is: " + this.hostWebUrl + "\n AppWebUrl is: " + this.appWebUrl);
         //this.getDocLib();
-        //this.getSiteCollections();
         // this.getDocumentLibraries();
         this.doJSOMStuff(this.hostWebUrl);
-        this.searchDocumentLibrary(this.hostWebUrl).then(response => { bla = response; this.documentlibraries = bla; console.log(bla); }, response => { console.log("Failure " + response); });
+     //   this.searchDocumentLibrary(this.hostWebUrl).then(response => { tempresponse = response; this.documentlibraries = tempresponse; console.log(tempresponse); }, response => { console.log("Failure " + response); });
+        this.searchSiteCollection(this.hostWebUrl).then(response => { tempresponse = response; this.siteCollection = tempresponse; console.log(tempresponse); }, response => { console.log("Failure " + response); });
     }
 
+ 
 
+    searchSiteCollection(siteURL) {
+        var executor = new SP.RequestExecutor(this.appWebUrl);
+        let that = this;
 
-    searchDocumentLibrary(siteURL) {
+        this.siteCollection = [];
+
+        return new Promise(function (resolve, reject) {
+            executor.executeAsync(
+                {
+                    //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
+                    //Leere Bibliotheken werden ignoriert , beheben?
+                    url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false",
+
+                    method: "GET",
+                    headers: { "Accept": "application/json; odata=verbose" },
+                    success: function (data) {
+                        var myoutput = JSON.parse((data.body.toString()));
+                        var sitecollection = [];
+                        var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                        console.log(siteResult);
+                        for (var x = 0; x < siteResult.length; x++) {
+
+                            sitecollection.push(new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path")));
+                        }
+
+                        resolve(sitecollection);
+                    },
+                    error: function (data) {
+                        console.log(JSON.stringify(data));
+                        var sitecollection = [];
+                        reject(sitecollection);
+                    }
+
+                }
+            )
+        });
+    }
+
+    searchDocumentLibrary(siteURL,pathURL) {
         var executor = new SP.RequestExecutor(this.appWebUrl);
         let that = this;
 
@@ -75,13 +125,6 @@ export class TargetSites {
                 }
             )
         });
-
-
-
-
-
-
-
     }
 
     searchJSONForValue(input: any, key: string) {

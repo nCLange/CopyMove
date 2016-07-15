@@ -6,15 +6,18 @@ System.register([], function(exports_1, context_1) {
         setters:[],
         execute: function() {
             class SiteCollection {
-                constructor(name, directories, files) {
+                constructor(name, path = "", files = [""]) {
                     this.name = name;
                     this.files = files;
-                    this.documentLibraries = directories;
+                    this.documentLibraries = [];
                     this.expanded = false;
                     this.checked = false;
+                    this.path = path;
                 }
                 toggle() {
                     this.expanded = !this.expanded;
+                    if (this.expanded) {
+                    }
                 }
                 check() {
                     let newState = !this.checked;
@@ -32,4 +35,4 @@ System.register([], function(exports_1, context_1) {
 //         d.checkRecursive(state);
 //     })
 // } 
-//# sourceMappingURL=SiteCollection.js.map
+//# sourceMappingURL=sitecollection.js.map

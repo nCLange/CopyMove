@@ -1,4 +1,6 @@
-﻿import {Component} from 'angular2/core';
+﻿import {Component,EventEmitter, Input} from 'angular2/core';
+import {Control, FORM_DIRECTIVES} from 'angular2/common';
+import 'rxjs/Rx';
 import {TreeViewSite} from './treeviewsite';
 import {SiteCollection} from './sitecollection';
 import {DocumentLibrary} from './documentlibrary';
@@ -10,15 +12,14 @@ import {TargetSites} from './targetSites';
     selector: "app-main",
     providers: [DataService],
    // template:'<H1>Hello</H1>',
-    template: '<treeviewsite [doclibs]="doclibs"></treeviewsite>',
-    //template: '<treeviewsite></treeviewsite>',
+   // template: '<treeviewsite [sitecollection]="sitecollection"></treeviewsite>',
+   template: '<treeviewsite></treeviewsite>',
     directives: [TreeViewSite]
 })
 
 export class AppComponent {
     sitecollection: Array<SiteCollection>;
     doclibs: Array<DocumentLibrary>;
-    targetsites: TargetSites;
    /* constructor(private dataService: DataService) {
         //  let music = new Directory('Music',[],['song1.mp3','song2.mp3']);
         let docLib = new DocumentLibrary("Doclib");
@@ -31,16 +32,24 @@ export class AppComponent {
         this.sitecollection = [ZRR2012, ZRR2013, ZRR2014, ZRR2015, ZRR2016];
     */
     constructor() {
-      //  this.sitecollection = [new SiteCollection('bla', [new DocumentLibrary('DocLib')], ['bla.jpg'])];
-        this.targetsites = new TargetSites();
+        this.sitecollection = [new SiteCollection('bla', "2")];
+      //  this.targetsites = new TargetSites();
+
+       // this.targetsites.subscribe((event) => this.getLibs());
+   
        /* this.doclibs.subscribe(res => { this.targetsites.documentlibraries }, err => { });
         this.getLibs.subscribe(
         */
-    }
 
-    getLibs() {
-        this.doclibs = this.targetsites.documentlibraries;
-        
+
+       
     }
+/*
+    getLibs() {
+        this.sitecollection = this.targetsites.siteCollection;
+        console.log("ABC");
+        
+    }*/
+
     
 }
