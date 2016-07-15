@@ -35,7 +35,7 @@ export class TargetSites {
     constructor() {
         var tempresponse;
 
-        // this.webAppURL = "http://win-iprrvsfootq";
+         this.webAppURL = "http://win-iprrvsfootq";
         // this.hostWebUrl = decodeURIComponent(this.getQueryStringParameter('SPHostUrl'));
         this.hostWebUrl = "http://win-iprrvsfootq/sites/dev";
         this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
@@ -87,7 +87,7 @@ export class TargetSites {
         });
     }
 
-    searchDocumentLibrary(siteURL,pathURL) {
+    searchDocumentLibrary(siteURL, pathURL = this.webAppURL) {
         var executor = new SP.RequestExecutor(this.appWebUrl);
         let that = this;
 
@@ -100,7 +100,7 @@ export class TargetSites {
                 {
                     //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
                     //Leere Bibliotheken werden ignoriert , beheben?
-                    url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_list_documentlibrary'&trimduplicates=false",
+                    url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_list_documentlibrary+path:"+pathURL+"'&trimduplicates=false",
 
                     method: "GET",
                     headers: { "Accept": "application/json; odata=verbose" },

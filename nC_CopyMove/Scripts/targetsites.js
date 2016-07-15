@@ -27,7 +27,7 @@ System.register(['./documentlibrary', './sitecollection', 'angular2/core'], func
             let TargetSites = class TargetSites {
                 constructor() {
                     var tempresponse;
-                    // this.webAppURL = "http://win-iprrvsfootq";
+                    this.webAppURL = "http://win-iprrvsfootq";
                     // this.hostWebUrl = decodeURIComponent(this.getQueryStringParameter('SPHostUrl'));
                     this.hostWebUrl = "http://win-iprrvsfootq/sites/dev";
                     this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
@@ -35,7 +35,7 @@ System.register(['./documentlibrary', './sitecollection', 'angular2/core'], func
                     //this.getDocLib();
                     // this.getDocumentLibraries();
                     this.doJSOMStuff(this.hostWebUrl);
-                    this.searchDocumentLibrary(this.hostWebUrl).then(response => { tempresponse = response; this.documentlibraries = tempresponse; console.log(tempresponse); }, response => { console.log("Failure " + response); });
+                    //   this.searchDocumentLibrary(this.hostWebUrl).then(response => { tempresponse = response; this.documentlibraries = tempresponse; console.log(tempresponse); }, response => { console.log("Failure " + response); });
                     this.searchSiteCollection(this.hostWebUrl).then(response => { tempresponse = response; this.siteCollection = tempresponse; console.log(tempresponse); }, response => { console.log("Failure " + response); });
                 }
                 clickedSC(i) {
@@ -73,7 +73,7 @@ System.register(['./documentlibrary', './sitecollection', 'angular2/core'], func
                         });
                     });
                 }
-                searchDocumentLibrary(siteURL) {
+                searchDocumentLibrary(siteURL, pathURL = this.webAppURL) {
                     var executor = new SP.RequestExecutor(this.appWebUrl);
                     let that = this;
                     this.documentlibraries = [];
@@ -81,7 +81,7 @@ System.register(['./documentlibrary', './sitecollection', 'angular2/core'], func
                         executor.executeAsync({
                             //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
                             //Leere Bibliotheken werden ignoriert , beheben?
-                            url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_list_documentlibrary'&trimduplicates=false",
+                            url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_list_documentlibrary+path:" + pathURL + "'&trimduplicates=false",
                             method: "GET",
                             headers: { "Accept": "application/json; odata=verbose" },
                             success: function (data) {
