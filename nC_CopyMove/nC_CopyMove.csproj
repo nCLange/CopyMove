@@ -58,7 +58,6 @@
     <Content Include="Pages\Elements.xml" />
     <Content Include="Pages\Default.aspx" />
     <None Include="Scripts\app.component.js.map" />
-    <None Include="Scripts\app.module.js.map" />
     <None Include="Scripts\boot.js.map" />
     <None Include="Scripts\dataservice.js.map" />
     <None Include="Scripts\documentlibrary.js.map" />
@@ -75,17 +74,16 @@
       <SharePointProjectItemId>{04618c1b-5ca0-45f9-a33a-493dff360daa}</SharePointProjectItemId>
     </None>
     <Content Include="Scripts\app.component.js" />
-    <Content Include="Scripts\app.module.js" />
     <Content Include="Scripts\boot.js" />
     <Content Include="Scripts\dataservice.js" />
+    <Content Include="Scripts\directory.js" />
     <Content Include="Scripts\documentlibrary.js" />
     <Content Include="Scripts\Elements.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Scripts\ItemExtract.js" />
     <Content Include="Scripts\SiteCollection.js" />
-    <Content Include="Scripts\targetsites.js" />
     <Content Include="Scripts\treeview.js" />
+    <Content Include="Scripts\treeviewdirectory.js" />
     <Content Include="Scripts\treeviewSite.js" />
     <Content Include="Scripts\_references.js" />
   </ItemGroup>
@@ -128,10 +126,9 @@
     <TypeScriptCompile Include="app\app.component.ts" />
     <TypeScriptCompile Include="app\boot.ts" />
     <TypeScriptCompile Include="app\dataservice.ts" />
+    <TypeScriptCompile Include="app\directory.ts" />
     <TypeScriptCompile Include="app\documentlibrary.ts" />
-    <TypeScriptCompile Include="app\ItemExtract.ts" />
     <TypeScriptCompile Include="app\sitecollection.ts" />
-    <TypeScriptCompile Include="app\targetsites.ts" />
     <TypeScriptCompile Include="app\treeview.ts" />
     <TypeScriptCompile Include="app\treeviewsite.ts" />
     <TypeScriptCompile Include="Scripts\typings\angularjs\angular-animate.d.ts" />
@@ -145,6 +142,7 @@
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\microsoft-ajax\microsoft.ajax.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\sharepoint\SharePoint.d.ts" />
+    <TypeScriptCompile Include="app\treeviewdirectory.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="node_modules\" />

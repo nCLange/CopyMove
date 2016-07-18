@@ -1,21 +1,20 @@
 ﻿import {Component, Input } from "angular2/core";
 import {SiteCollection} from './sitecollection';
 import {TreeViewDocLib} from './treeView';
-import {ItemExtract} from './ItemExtract';
-import {TargetSites} from './targetsites';
 import {DocumentLibrary} from './documentlibrary';
 
 
 @Component({
-    selector: 'treeviewsite',
+    selector: 'tree-view-site',
     templateUrl: './tree-view-site.html',
-    directives: [TreeViewDocLib,TargetSites]
+    directives: [TreeViewDocLib]
 })
-
-export class TreeViewSite  {
-   // @Input() sitecollection: Array<SiteCollection>;
-   // @Input() doclibs: Array<DocumentLibrary>
+export class TreeViewSite {
+    @Input() sitecollection: Array<SiteCollection>;
 
 
- 
+    clicked() {
+
+    }
+
 }

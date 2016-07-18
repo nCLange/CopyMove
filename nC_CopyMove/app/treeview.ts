@@ -1,31 +1,26 @@
 ﻿import {Component, Input} from 'angular2/core';
 import {DocumentLibrary} from './documentlibrary';
-import {TargetSites} from './targetsites';
+import {TreeViewDirectory} from './treeviewdirectory';
 
 
 @Component({
     selector: 'tree-view-doclib',
     template: `<ul >
-                <li [style.background-color]="getStyle()" (click)="select(library)" *ngFor="#library of documentlibrary">{{library.name}}</li>
-               </ul>`
+                <li [style.background-color]="library.getStyle()" *ngFor="let library of documentlibrary"><div (click)="select(library)">{{library.name}}-{{library.path}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
+               </ul>`,
+    directives: [TreeViewDirectory]
 })
 export class TreeViewDocLib {
     @Input() documentlibrary: Array<DocumentLibrary>;
-    selected: boolean;
-    targetSites: TargetSites;
+    //selected: boolean;
     constructor() {
-       this.targetSites = new TargetSites();
 
     }
     select(library: DocumentLibrary) {
-        this.selected = !this.selected;
-        if (this.selected) {
-            this.targetSites.searchDocumentLibrary;
-            //gotta subscribe
-            this.documentlibrary = this.targetSites.documentlibraries;
-        }
-        else this.documentlibrary = [];
+        //this.selected = !this.selected;
+        library.toggle();
     }
+    /*
     getStyle() {
         if (this.selected) {
             return "yellow";
@@ -33,5 +28,7 @@ export class TreeViewDocLib {
             return "white";
         }
     }
+    */
+    
 
 }

@@ -1,5 +1,5 @@
 ﻿import {DocumentLibrary} from './documentlibrary';
-import {TargetSites} from './targetsites';
+import {DataService} from './dataservice';
 
 export class SiteCollection {
     name: string;
@@ -7,24 +7,35 @@ export class SiteCollection {
     files: Array<string>;
     expanded: boolean;
     checked: boolean;
-    targetSites: TargetSites;
     path: string;
+    private dataService: DataService
 
-    constructor(name, path="", files=[""]) {
+    constructor(name, path) {
         this.name = name;
-        this.files = files;
-        this.documentLibraries = [];
         this.expanded = false;
         this.checked = false;
         this.path = path;
-   
+        this.dataService = new DataService();
     }
-   toggle() {
-           this.expanded = !this.expanded;
-           if (this.expanded) {
 
+ 
+    toggle() {
+        this.expanded = !this.expanded;
+        if (this.expanded) {
+            this.dataService.searchDocumentLibrary(this.path,this).then(
+                response => {
+                    var tempresponse;
+                    tempresponse = response;
+                    this.documentLibraries = tempresponse;
+                    console.log(tempresponse);
+                }, response => {
+                    console.log("Failure " + response);
+                });
         }
     }
+
+
+
     check() {
         let newState = !this.checked;
         this.checked = newState;

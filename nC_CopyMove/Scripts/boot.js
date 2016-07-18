@@ -14,6 +14,7 @@ System.register(["angular2/platform/browser", 'angular2/http', './app.component'
                 app_component_1 = app_component_1_1;
             }],
         execute: function() {
+            // import {DataService} from "./services/dataService";
             browser_1.bootstrap(app_component_1.AppComponent, [http_1.HTTP_PROVIDERS]);
         }
     }

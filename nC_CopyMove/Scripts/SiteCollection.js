@@ -1,22 +1,33 @@
-System.register([], function(exports_1, context_1) {
+System.register(['./dataservice'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
+    var dataservice_1;
     var SiteCollection;
     return {
-        setters:[],
+        setters:[
+            function (dataservice_1_1) {
+                dataservice_1 = dataservice_1_1;
+            }],
         execute: function() {
             class SiteCollection {
-                constructor(name, path = "", files = [""]) {
+                constructor(name, path) {
                     this.name = name;
-                    this.files = files;
-                    this.documentLibraries = [];
                     this.expanded = false;
                     this.checked = false;
                     this.path = path;
+                    this.dataService = new dataservice_1.DataService();
                 }
                 toggle() {
                     this.expanded = !this.expanded;
                     if (this.expanded) {
+                        this.dataService.searchDocumentLibrary(this.path, this).then(response => {
+                            var tempresponse;
+                            tempresponse = response;
+                            this.documentLibraries = tempresponse;
+                            console.log(tempresponse);
+                        }, response => {
+                            console.log("Failure " + response);
+                        });
                     }
                 }
                 check() {

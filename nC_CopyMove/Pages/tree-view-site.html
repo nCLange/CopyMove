@@ -1,16 +1,12 @@
 ﻿<div id="copymove">
-    
-    <curlist></curlist>
-    <p>Selected params</p>
-    
     <ul id="listIcon">
-        <sitecol></sitecol>
         <li *ngFor="let site of sitecollection" selection-model>
-            <!--<span><input type="checkbox" [checked]="dir.checked" (click)="dir.check()"    /></span>-->
+            <!--<span><input type="checkbox" [checked]="dir.checked" (click)="dir.check()"    /></span> -->
 
-            <span (click)="site.toggle()">{{ site.name }}</span>
+            <span (click)="site.toggle()">{{ site.name }}-{{site.path}}</span>
             <div *ngIf="site.expanded">
-                <tree-view-doclib [documentlibrary]="site.documentLibraries"></tree-view-doclib>
+                <tree-view-doclib [documentlibrary]="site.documentLibraries">
+                </tree-view-doclib>
             </div>
         </li>
     </ul>

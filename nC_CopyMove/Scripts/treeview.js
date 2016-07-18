@@ -1,4 +1,4 @@
-System.register(['angular2/core', './targetsites'], function(exports_1, context_1) {
+System.register(['angular2/core', './treeviewdirectory'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,38 +10,24 @@ System.register(['angular2/core', './targetsites'], function(exports_1, context_
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, targetsites_1;
+    var core_1, treeviewdirectory_1;
     var TreeViewDocLib;
     return {
         setters:[
             function (core_1_1) {
                 core_1 = core_1_1;
             },
-            function (targetsites_1_1) {
-                targetsites_1 = targetsites_1_1;
+            function (treeviewdirectory_1_1) {
+                treeviewdirectory_1 = treeviewdirectory_1_1;
             }],
         execute: function() {
             let TreeViewDocLib = class TreeViewDocLib {
+                //selected: boolean;
                 constructor() {
-                    this.targetSites = new targetsites_1.TargetSites();
                 }
                 select(library) {
-                    this.selected = !this.selected;
-                    if (this.selected) {
-                        this.targetSites.searchDocumentLibrary;
-                        //gotta subscribe
-                        this.documentlibrary = this.targetSites.documentlibraries;
-                    }
-                    else
-                        this.documentlibrary = [];
-                }
-                getStyle() {
-                    if (this.selected) {
-                        return "yellow";
-                    }
-                    else {
-                        return "white";
-                    }
+                    //this.selected = !this.selected;
+                    library.toggle();
                 }
             };
             __decorate([
@@ -52,8 +38,9 @@ System.register(['angular2/core', './targetsites'], function(exports_1, context_
                 core_1.Component({
                     selector: 'tree-view-doclib',
                     template: `<ul >
-                <li [style.background-color]="getStyle()" (click)="select(library)" *ngFor="#library of documentlibrary">{{library.name}}</li>
-               </ul>`
+                <li [style.background-color]="library.getStyle()" *ngFor="let library of documentlibrary"><div (click)="select(library)">{{library.name}}-{{library.path}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
+               </ul>`,
+                    directives: [treeviewdirectory_1.TreeViewDirectory]
                 }), 
                 __metadata('design:paramtypes', [])
             ], TreeViewDocLib);

@@ -2,8 +2,6 @@
 <ProjectItem Type="Microsoft.VisualStudio.SharePoint.Module" DefaultFile="Elements.xml" SupportedTrustLevels="All" SupportedDeploymentScopes="Web, Site" xmlns="http://schemas.microsoft.com/VisualStudio/2010/SharePointTools/SharePointProjectItemModel">
   <Files>
     <ProjectItemFile Source="Elements.xml" Target="Scripts\" Type="ElementManifest" />
-    <ProjectItemFile Source="app.module.js" Target="Scripts\" Type="ElementFile" />
-    <ProjectItemFile Source="app.module.js.map" Target="Scripts\" Type="ElementFile" />
     <ProjectItemFile Source="app.component.js" Target="Scripts\" Type="ElementFile" />
     <ProjectItemFile Source="app.component.js.map" Target="Scripts\" Type="ElementFile" />
     <ProjectItemFile Source="boot.js" Target="Scripts\" Type="ElementFile" />
@@ -18,8 +16,6 @@
     <ProjectItemFile Source="SiteCollection.js.map" Target="Scripts\" Type="ElementFile" />
     <ProjectItemFile Source="dataservice.js" Target="Scripts\" Type="ElementFile" />
     <ProjectItemFile Source="dataservice.js.map" Target="Scripts\" Type="ElementFile" />
-    <ProjectItemFile Source="ItemExtract.js" Target="Scripts\" Type="ElementFile" />
-    <ProjectItemFile Source="targetsites.js" Target="Scripts\" Type="ElementFile" />
     <ProjectItemFile Source="typings\angularjs\angular-animate.d.ts" Target="Scripts\typings\angularjs\" Type="ElementFile" />
     <ProjectItemFile Source="typings\angularjs\angular-component-router.d.ts" Target="Scripts\typings\angularjs\" Type="ElementFile" />
     <ProjectItemFile Source="typings\angularjs\angular-cookies.d.ts" Target="Scripts\typings\angularjs\" Type="ElementFile" />
@@ -31,5 +27,7 @@
     <ProjectItemFile Source="typings\jquery\jquery.d.ts" Target="Scripts\typings\jquery\" Type="ElementFile" />
     <ProjectItemFile Source="typings\sharepoint\SharePoint.d.ts" Target="Scripts\typings\sharepoint\" Type="ElementFile" />
     <ProjectItemFile Source="typings\microsoft-ajax\microsoft.ajax.d.ts" Target="Scripts\typings\microsoft-ajax\" Type="ElementFile" />
+    <ProjectItemFile Source="directory.js" Target="Scripts\" Type="ElementFile" />
+    <ProjectItemFile Source="treeviewdirectory.js" Target="Scripts\" Type="ElementFile" />
   </Files>
 </ProjectItem>
