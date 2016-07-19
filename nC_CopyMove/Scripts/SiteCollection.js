@@ -20,7 +20,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                 toggle() {
                     this.expanded = !this.expanded;
                     if (this.expanded) {
-                        this.dataService.searchDocumentLibrary(this.path, this).then(response => {
+                        this.dataService.searchDocumentLibrary2(this.path, this).then(response => {
                             var tempresponse;
                             tempresponse = response;
                             this.documentLibraries = tempresponse;

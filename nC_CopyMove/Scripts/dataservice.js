@@ -29,40 +29,40 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
         execute: function() {
             let DataService = class DataService {
                 constructor() {
-                    this.webAppURL = "http://win-iprrvsfootq";
                     this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
                 }
                 searchSiteCollection() {
-                    var executor = new SP.RequestExecutor(this.appWebUrl);
                     let that = this;
                     return new Promise(function (resolve, reject) {
-                        executor.executeAsync({
-                            //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
-                            //Leere Bibliotheken werden ignoriert , beheben?
-                            url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false",
-                            method: "GET",
-                            headers: { "Accept": "application/json; odata=verbose" },
-                            success: function (data) {
-                                var myoutput = JSON.parse((data.body.toString()));
-                                var sitecollection = [];
-                                var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                                console.log(siteResult);
-                                for (var x = 0; x < siteResult.length; x++) {
-                                    sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path")));
+                        $.getScript(that.appWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+                            var executor = new SP.RequestExecutor(that.appWebUrl);
+                            executor.executeAsync({
+                                //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
+                                //Leere Bibliotheken werden ignoriert , beheben?
+                                url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false",
+                                method: "GET",
+                                headers: { "Accept": "application/json; odata=verbose" },
+                                success: function (data) {
+                                    var myoutput = JSON.parse((data.body.toString()));
+                                    var sitecollection = [];
+                                    var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                                    console.log(siteResult);
+                                    for (var x = 0; x < siteResult.length; x++) {
+                                        sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path")));
+                                    }
+                                    resolve(sitecollection);
+                                },
+                                error: function (data) {
+                                    var sitecollection = [];
+                                    reject(sitecollection);
                                 }
-                                resolve(sitecollection);
-                            },
-                            error: function (data) {
-                                console.log(JSON.stringify(data));
-                                var sitecollection = [];
-                                reject(sitecollection);
-                            }
+                            });
                         });
                     });
                 }
                 searchDocumentLibrary(pathURL, parent) {
-                    var executor = new SP.RequestExecutor(this.appWebUrl);
                     let that = this;
+                    var executor = new SP.RequestExecutor(this.appWebUrl);
                     return new Promise(function (resolve, reject) {
                         executor.executeAsync({
                             //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
@@ -74,45 +74,76 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 var myoutput = JSON.parse((data.body.toString()));
                                 var documentlibraries = [];
                                 var dossierResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                                console.log(dossierResult);
                                 for (var x = 0; x < dossierResult.length; x++) {
                                     documentlibraries.push(new documentlibrary_1.DocumentLibrary(that.searchJSONForValue(dossierResult[x].Cells.results, "Title"), that.searchJSONForValue(dossierResult[x].Cells.results, "Path"), parent));
                                 }
                                 resolve(documentlibraries);
                             },
                             error: function (data) {
-                                console.log(JSON.stringify(data));
                                 var documentlibraries = [];
                                 reject(documentlibraries);
                             }
                         });
                     });
                 }
-                searchDirectories(pathUrl, relPath) {
+                searchDocumentLibrary2(pathURL, parent) {
+                    //var executor = new SP.RequestExecutor(this.appWebUrl);
+                    let that = this;
+                    return new Promise(function (resolve, reject) {
+                        $.getScript(pathURL + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+                            var executor = new SP.RequestExecutor(that.appWebUrl);
+                            executor.executeAsync({
+                                //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
+                                //Leere Bibliotheken werden ignoriert , beheben?
+                                url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/lists?@target='" + pathURL + "'",
+                                method: "GET",
+                                headers: { "Accept": "application/json; odata=verbose" },
+                                success: function (data) {
+                                    var myoutput = JSON.parse((data.body.toString()));
+                                    console.log(myoutput);
+                                    var documentlibraries = [];
+                                    var dossierResult = myoutput.d.results;
+                                    for (var x = 0; x < dossierResult.length; x++) {
+                                        if (dossierResult[x].DocumentTemplateUrl != null)
+                                            //documentlibraries.push(new DocumentLibrary(that.searchJSONForValue(dossierResult[x].Cells.results, "Title"), that.searchJSONForValue(dossierResult[x].Cells.results, "Path"), parent));
+                                            documentlibraries.push(new documentlibrary_1.DocumentLibrary(dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
+                                    }
+                                    resolve(documentlibraries);
+                                },
+                                error: function (data) {
+                                    var documentlibraries = [];
+                                    reject(documentlibraries);
+                                }
+                            });
+                        });
+                    });
+                }
+                searchDirectories(pathUrl, relPath, parent) {
                     var executor = new SP.RequestExecutor(this.appWebUrl);
+                    //var executor = new SP.RequestExecutor(pathUrl);
                     let that = this;
                     console.log(pathUrl + "/_api/web/GetFolderByServerRelativeUrl('" + relPath + "')");
                     return new Promise(function (resolve, reject) {
                         executor.executeAsync({
-                            //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
+                            url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFolderByServerRelativeUrl('" + relPath + "')/Folders?@target='" + pathUrl + "'",
                             //Leere Bibliotheken werden ignoriert , beheben?
-                            url: pathUrl + "/_api/web/GetFolderByServerRelativeUrl('" + relPath + "')",
+                            //url: (pathUrl+"/_api/web/GetFolderByServerRelativeUrl('"+relPath+"')"),
                             method: "GET",
                             headers: { "Accept": "application/json; odata=verbose" },
                             success: function (data) {
                                 var myoutput = JSON.parse((data.body.toString()));
                                 var directory = [];
-                                var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                                var siteResult = myoutput.d.results;
                                 console.log(siteResult);
                                 for (var x = 0; x < siteResult.length; x++) {
-                                    directory.push(new directory_1.Directory(that.searchJSONForValue(siteResult[x].Cells.results, "Name")));
+                                    console.log(siteResult[x]);
+                                    directory.push(new directory_1.Directory(that.searchJSONWebApi(siteResult[x], "Name"), parent));
                                 }
                                 resolve(directory);
                             },
                             error: function (data) {
-                                console.log(JSON.stringify(data));
-                                var sitecollection = [];
-                                reject(sitecollection);
+                                var directory = [];
+                                reject(directory);
                             }
                         });
                     });
@@ -121,6 +152,11 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     input = JSON.stringify(input);
                     input = input.match("Key\":\"" + key + ".*?}").toString();
                     input = input.match("(?=Value\":\").*?(?=\",)").toString().substring(8);
+                    return input.toString();
+                }
+                searchJSONWebApi(input, key) {
+                    input = JSON.stringify(input);
+                    input = input.match("(?=\"" + key + "\":\").*?(?=\",)").toString().substring(key.length + 4);
                     return input.toString();
                 }
                 getData() {

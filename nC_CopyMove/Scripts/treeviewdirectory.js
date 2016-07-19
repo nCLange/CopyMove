@@ -26,7 +26,6 @@ System.register(['angular2/core', './documentlibrary'], function(exports_1, cont
                 constructor() {
                 }
                 select(directory) {
-                    this.selected = !this.selected;
                     directory.toggle();
                 }
                 getStyle() {
@@ -46,7 +45,7 @@ System.register(['angular2/core', './documentlibrary'], function(exports_1, cont
                 core_1.Component({
                     selector: 'tree-view-directory',
                     template: `<ul>
-                <li [style.background-color]="directory.getStyle()"  *ngFor="let directory of folderLookUp.directories"><div (click)="select(directory)">{{directory.name}}</div><div *ngIf="directory.expanded"><tree-view-directory [folderLookUp]="directory"></tree-view-directory></div></li>
+                <li *ngFor="let directory of folderLookUp.directories"><div [style.background-color]="directory.getStyle()"(click)="select(directory)">{{directory.name}}</div><div *ngIf="directory.expanded"><tree-view-directory [folderLookUp]="directory"></tree-view-directory></div></li>
                </ul>`,
                     directives: [TreeViewDirectory]
                 }), 

@@ -15,8 +15,9 @@
     <Internal />
   </AppPrincipal>
   <AppPermissionRequests AllowAppOnlyPolicy="false">
-    <AppPermissionRequest Scope="http://sharepoint/content/sitecollection/web" Right="Read" />
     <AppPermissionRequest Scope="http://sharepoint/search" Right="QueryAsUserIgnoreAppPrincipal" />
     <AppPermissionRequest Scope="http://sharepoint/content/tenant" Right="Read" />
+    <AppPermissionRequest Scope="http://sharepoint/content/sitecollection/web" Right="Read" />
+    <AppPermissionRequest Scope="http://sharepoint/content/sitecollection" Right="Read" />
   </AppPermissionRequests>
 </App>

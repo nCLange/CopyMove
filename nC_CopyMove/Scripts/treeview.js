@@ -22,11 +22,9 @@ System.register(['angular2/core', './treeviewdirectory'], function(exports_1, co
             }],
         execute: function() {
             let TreeViewDocLib = class TreeViewDocLib {
-                //selected: boolean;
                 constructor() {
                 }
                 select(library) {
-                    //this.selected = !this.selected;
                     library.toggle();
                 }
             };
@@ -38,7 +36,7 @@ System.register(['angular2/core', './treeviewdirectory'], function(exports_1, co
                 core_1.Component({
                     selector: 'tree-view-doclib',
                     template: `<ul >
-                <li [style.background-color]="library.getStyle()" *ngFor="let library of documentlibrary"><div (click)="select(library)">{{library.name}}-{{library.path}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
+                <li *ngFor="let library of documentlibrary"><div [style.background-color]="library.getStyle()" (click)="select(library)">{{library.name}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
                </ul>`,
                     directives: [treeviewdirectory_1.TreeViewDirectory]
                 }), 

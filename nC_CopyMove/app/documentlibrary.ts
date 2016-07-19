@@ -16,23 +16,24 @@ export class DocumentLibrary {
         this.name = name;
         this.selected = false;
         this.parent = parent;
-        this.cutPath(path);
+        this.relpath = path;
+       // this.cutPath(path);
         this.expanded = false;
         this.dataService = new DataService();
       //  this.directories = [new Directory("thisname",[new Directory("thisbla",[new Directory("thisbla")])])];
         
     }
 
-    cutPath(path) {
+   /* cutPath(path) {
         this.relpath = path.match("(?=" + this.parent.path + ").*?(?=/Form)").toString();
         this.relpath = this.relpath.substring(this.relpath.lastIndexOf('/') + 1);
 
        
-    }
+    }*/
 
 
     getStyle() {
-        if (this.selected) {
+        if (this.expanded) {
             return "yellow";
         } else {
             return "white";
@@ -41,10 +42,11 @@ export class DocumentLibrary {
 
     toggle() {
         this.expanded = !this.expanded;
+        var tempresponse;
         if (this.expanded) {
-            this.dataService.searchDirectories(this.parent.path,this.relpath).then(
+            this.dataService.searchDirectories(this.parent.path,this.relpath,this).then(
                 response => {
-                    var tempresponse;
+                    
                     tempresponse = response;
                     this.directories = tempresponse;
                     console.log(tempresponse);

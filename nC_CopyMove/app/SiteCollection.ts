@@ -22,7 +22,7 @@ export class SiteCollection {
     toggle() {
         this.expanded = !this.expanded;
         if (this.expanded) {
-            this.dataService.searchDocumentLibrary(this.path,this).then(
+            this.dataService.searchDocumentLibrary2(this.path,this).then(
                 response => {
                     var tempresponse;
                     tempresponse = response;

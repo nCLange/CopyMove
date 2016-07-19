@@ -14,17 +14,20 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     this.name = name;
                     this.selected = false;
                     this.parent = parent;
-                    this.cutPath(path);
+                    this.relpath = path;
+                    // this.cutPath(path);
                     this.expanded = false;
                     this.dataService = new dataservice_1.DataService();
                     //  this.directories = [new Directory("thisname",[new Directory("thisbla",[new Directory("thisbla")])])];
                 }
-                cutPath(path) {
-                    this.relpath = path.match("(?=" + this.parent.path + ").*?(?=/Form)").toString();
-                    this.relpath = this.relpath.substring(this.relpath.lastIndexOf('/') + 1);
-                }
+                /* cutPath(path) {
+                     this.relpath = path.match("(?=" + this.parent.path + ").*?(?=/Form)").toString();
+                     this.relpath = this.relpath.substring(this.relpath.lastIndexOf('/') + 1);
+             
+                    
+                 }*/
                 getStyle() {
-                    if (this.selected) {
+                    if (this.expanded) {
                         return "yellow";
                     }
                     else {
@@ -33,9 +36,9 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                 }
                 toggle() {
                     this.expanded = !this.expanded;
+                    var tempresponse;
                     if (this.expanded) {
-                        this.dataService.searchDirectories(this.parent.path, this.relpath).then(response => {
-                            var tempresponse;
+                        this.dataService.searchDirectories(this.parent.path, this.relpath, this).then(response => {
                             tempresponse = response;
                             this.directories = tempresponse;
                             console.log(tempresponse);
