@@ -15,18 +15,9 @@
     <File Path="Scripts\SiteCollection.js.map" Url="Scripts/SiteCollection.js.map" ReplaceContent="TRUE" />
     <File Path="Scripts\dataservice.js" Url="Scripts/dataservice.js" ReplaceContent="TRUE" />
     <File Path="Scripts\dataservice.js.map" Url="Scripts/dataservice.js.map" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\angularjs\angular-animate.d.ts" Url="Scripts/typings/angularjs/angular-animate.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\angularjs\angular-component-router.d.ts" Url="Scripts/typings/angularjs/angular-component-router.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\angularjs\angular-cookies.d.ts" Url="Scripts/typings/angularjs/angular-cookies.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\angularjs\angular-mocks.d.ts" Url="Scripts/typings/angularjs/angular-mocks.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\angularjs\angular-resource.d.ts" Url="Scripts/typings/angularjs/angular-resource.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\angularjs\angular-route.d.ts" Url="Scripts/typings/angularjs/angular-route.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\angularjs\angular-sanitize.d.ts" Url="Scripts/typings/angularjs/angular-sanitize.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\angularjs\angular.d.ts" Url="Scripts/typings/angularjs/angular.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\jquery\jquery.d.ts" Url="Scripts/typings/jquery/jquery.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\sharepoint\SharePoint.d.ts" Url="Scripts/typings/sharepoint/SharePoint.d.ts" ReplaceContent="TRUE" />
-    <File Path="Scripts\typings\microsoft-ajax\microsoft.ajax.d.ts" Url="Scripts/typings/microsoft-ajax/microsoft.ajax.d.ts" ReplaceContent="TRUE" />
     <File Path="Scripts\directory.js" Url="Scripts/directory.js" ReplaceContent="TRUE" />
     <File Path="Scripts\treeviewdirectory.js" Url="Scripts/treeviewdirectory.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\copyroot.js" Url="Scripts/copyroot.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\itemdl.js" Url="Scripts/itemdl.js" ReplaceContent="TRUE" />
   </Module>
 </Elements>

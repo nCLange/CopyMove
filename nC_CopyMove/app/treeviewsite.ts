@@ -2,6 +2,7 @@
 import {SiteCollection} from './sitecollection';
 import {TreeViewDocLib} from './treeView';
 import {DocumentLibrary} from './documentlibrary';
+import {CopyRoot} from './copyroot';
 
 
 @Component({
@@ -12,9 +13,18 @@ import {DocumentLibrary} from './documentlibrary';
 export class TreeViewSite {
     @Input() sitecollection: Array<SiteCollection>;
 
+    screen: number;
 
-    clicked() {
+    constructor() {
+        this.screen = 0;
 
+    }
+
+
+    clicked(delafter) {
+        var copyroot = new CopyRoot(delafter);
+        this.screen = 1;
+        //console.log("aaa");
     }
 
 }

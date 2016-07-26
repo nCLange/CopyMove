@@ -1,4 +1,4 @@
-System.register(["angular2/core", './treeView'], function(exports_1, context_1) {
+System.register(["angular2/core", './treeView', './copyroot'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(["angular2/core", './treeView'], function(exports_1, context_1) 
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, treeView_1;
+    var core_1, treeView_1, copyroot_1;
     var TreeViewSite;
     return {
         setters:[
@@ -19,10 +19,19 @@ System.register(["angular2/core", './treeView'], function(exports_1, context_1) 
             },
             function (treeView_1_1) {
                 treeView_1 = treeView_1_1;
+            },
+            function (copyroot_1_1) {
+                copyroot_1 = copyroot_1_1;
             }],
         execute: function() {
             let TreeViewSite = class TreeViewSite {
-                clicked() {
+                constructor() {
+                    this.screen = 0;
+                }
+                clicked(delafter) {
+                    var copyroot = new copyroot_1.CopyRoot(delafter);
+                    this.screen = 1;
+                    //console.log("aaa");
                 }
             };
             __decorate([
