@@ -232,7 +232,7 @@ export class DataService {
         });
     }
 
-
+    /*
     getFileBuffer(file) {
         var deffered = $.Deferred();
 
@@ -267,9 +267,9 @@ export class DataService {
 
  
     }
-
+   
     copyFile5(caller) {
-/*
+
      
     // set up the src client
     var srcContext = new SP.ClientContext(caller.parent.srcUrl);
@@ -352,9 +352,9 @@ export class DataService {
         catch (Exception ex) {
             console.log("File Error = " + ex.ToString());
         }
-    }*/
+   
 }
-
+    
 
     copyFile2(caller) {
 
@@ -385,8 +385,8 @@ export class DataService {
 
     }
 
-
-    copyFile4(caller,filepath) {
+    */
+    downloadFile(caller: ItemDL) {
 
         let that = this;
      
@@ -479,19 +479,20 @@ export class DataService {
        // $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
             // executes cross domain request
         var executor = new SP.RequestExecutor(this.appWebUrl);
+        return new Promise(function (resolve, reject) {
             executor.executeAsync(
                 {
-                    url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + filepath +"')/$value?@target='" + caller.parent.srcUrl + "'",
+                    url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + caller.srcUrl +"')/$value?@target='" + caller.parent.srcUrl + "'",
                     method: "GET",
                     binaryStringResponseBody:true,
-                    success: function (data) { that.createFile(data.body, caller) },
+                    success: function (data) { caller.fileContent = data.body; resolve(); },
                     error: function (xhr) {
-                        alert(xhr.state + ": " + xhr.statusText)
+                        reject(xhr.state + ": " + xhr.statusText);
                     }
                 });
 
 
-      //  });
+        });
     }
 
    /* postFile(data, caller) {
@@ -508,7 +509,7 @@ export class DataService {
             });
 
     }
-    */
+    
 
     copyFile3(caller) {
 
@@ -545,8 +546,8 @@ export class DataService {
 
 
     }
-
-  copyFile(caller) {
+    */
+  readFileToCopy(caller: ItemDL) {
      var targetLib = caller.parent.targetTitle;
      let that = this;
 
@@ -564,39 +565,44 @@ export class DataService {
   
     ctx.load(hostweb);
 
-    var file = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(2).get_file();
-    ctx.load(file);
-   
+    var file = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id).get_file();
+    var listItem = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
 
+    ctx.load(file);
+    ctx.load(listItem);
 
     var counter = 1;
-    ctx.executeQueryAsync(function () {
-        
-        console.log(caller.parent.title);
+    return new Promise(function (resolve, reject) {
+        ctx.executeQueryAsync(
+            function () {
 
-        console.log(file);
+                //b console.log(caller.parent.title);
+           
+            // console.log(file);
+            caller.name = file.get_name();
+            caller.srcUrl = file.get_serverRelativeUrl();
+            caller.title = file.get_title();
+            caller.data1 = listItem.get_item("Data1");
+            console.log("1:");
+            console.log(caller.data1);
 
+            resolve();
 
-        that.copyFile4(caller, file.get_serverRelativeUrl());
-     /*   
-            //Folder throws error here: items[j].get_serverRelativeUrl()
-        that.getFileAsBufferArray("http://win-iprrvsfootq" + file.get_serverRelativeUrl(), caller.id).done(function (data, index) {
-                that.UploadFile("http://win-iprrvsfootq/sites/dev", targetLib, file.get_name(), data).done(function () {
-                    console.log("All done");
-                }, function (data) { console.error(data) });
-            }, function (data) { console.error(data) });     
-    }, function (sender, args) {
-        console.log("Failed :" + args.get_message() + "---" + args.get_stackTrace());
-        */
+           // that.downloadFile(caller, file.get_serverRelativeUrl());
+        },
+            function () {
+                reject(arguments[1].get_message());
+            });
     });
       
 }
 
-  createFile(data,caller) {
+  createFile(caller: ItemDL) {
 
       var targetList;
       var fileCreateInfo;
       var fileContent;
+      let that = this;
 
       var ctx = SP.ClientContext.get_current();
 
@@ -604,27 +610,119 @@ export class DataService {
       targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
 
       fileCreateInfo = new SP.FileCreationInformation();
-      fileCreateInfo.set_url("fileherp.pdf");
+      fileCreateInfo.set_url(caller.name);
       fileCreateInfo.set_overwrite(true);
       fileCreateInfo.set_content(new SP.Base64EncodedByteArray());
-      fileContent = data;
+      fileContent = caller.fileContent;
 
       for (var i = 0; i < fileContent.length; i++) {
           fileCreateInfo.get_content().append(fileContent.charCodeAt(i));
       }
 
-      var newFile = targetList.get_rootFolder().get_files().add(fileCreateInfo);
+      var newFile :SP.File = targetList.get_rootFolder().get_files().add(fileCreateInfo);
+      ctx.load(newFile, 'ListItemAllFields');
+/*
+      var targetField = newFile.get_listItemAllFields["Data1"] as SP.Taxonomy.TaxonomyField;
+      var listItem = newFile.get_listItemAllFields();
 
-      ctx.load(newFile);
-      ctx.executeQueryAsync(function (data) { console.log(data) }, function (xhr) { console.error(arguments[1].get_message())}
+      ctx.load(listItem);
+      ctx.load(targetField);*/
+
+      return new Promise(function (resolve, reject) {
+          ctx.executeQueryAsync(
+              //Success
+              function (data) {/*
+                  targetField.setFieldValueByValueCollection(listItem, caller.data1);
+                  listItem.update();
+                  */
+                  caller.targetId = newFile.get_listItemAllFields().get_id();
+
+                  that.fillListItem(caller);
+
+                  resolve();
+
+              },
+              //Fail
+              function (data) {
+                  reject(arguments[1].get_message());
+
+              }
 
 
-      );
+          );
+      });
 
 
 
   }
 
+  fillListItem(caller: ItemDL) {
+     // var targetListItem: SP.ListItem;
+
+      var termId = '<term guid>';
+      var termLabel = '<term label>';
+
+      var ctx = SP.ClientContext.get_current();
+      console.log(caller.parent.targetTitle + " / " + caller.targetId);
+      var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
+     // targetListItem = appContextSite.get_lists().getByTitle(caller.parent.targetTitle).getItemById(caller.targetId);
+      var targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
+      var targetItem = targetList.getItemById(caller.targetId);
+      ctx.load(targetList);
+      ctx.load(targetItem);
+      var targetFieldt = (targetList.get_fields().getByInternalNameOrTitle("Data1") as SP.Taxonomy.TaxonomyField);
+
+      // var targetFieldTax = ctx.castTo(targetField, SP.Taxonomy.TaxonomyField);
+      var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
+
+      console.log("2:");
+      console.log(caller.data1);
+     
+
+      ctx.load(targetField);
+
+      return new Promise(function (resolve, reject) {
+          ctx.executeQueryAsync(
+              //Success
+              function (data) {
+
+                  (targetField as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, caller.data1);
+                  targetItem.update();
+                  
+                  
+                 
+           
+             /*    
+                  var x: any;
+                  var taxVal = "";
+                  for (x in caller.data1)
+                  {
+                      taxVal += x.Label + "|" + x.TermGuid+ ";";
+                  }
+                  targetField.populateFromLabelGuidPairs(taxVal);
+                  targetListItem.update();*/
+               //   targetField.setFieldValueByValueCollection(targetListItem, caller.data1);
+                 // targetListItem.update();
+
+      //            var targetValue = new SP.Taxonomy.TaxonomyFieldValue();
+                
+
+                  resolve();
+
+              },
+              //Fail
+              function (data) {
+                  reject(arguments[1].get_message());
+
+              }
+
+
+          );
+      });
+
+
+  }
+/*
     UploadFile(webUrl, lib, filename, buffer) {
     var d = $.Deferred();
     jQuery.ajax({
@@ -667,7 +765,7 @@ export class DataService {
     });
 
     return d.promise();
-}
+}*/
 
     readFile(pathUrl: string) {
         var executor = new SP.RequestExecutor(this.appWebUrl);
@@ -706,27 +804,5 @@ export class DataService {
                 }
             )
         });
-    }
-
-
-
-    getData() {
-        return [{
-            "id": 1,
-            "name": "Pizza Vegetaria",
-            "price": 5.99
-        }, {
-                "id": 2,
-                "name": "Pizza Salami",
-                "price": 10.99
-            }, {
-                "id": 3,
-                "name": "Pizza Thunfisch",
-                "price": 7.99
-            }, {
-                "id": 4,
-                "name": "Aktueller Flyer",
-                "price": 0
-            }]
     }
 }

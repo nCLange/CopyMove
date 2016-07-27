@@ -187,18 +187,21 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 }
+                /*
                 getFileBuffer(file) {
                     var deffered = $.Deferred();
+            
                     var reader = new FileReader();
-                    reader.onload = function (e) {
+                    reader.onload = function (e: any) {
                         deffered.resolve(e.target.result);
-                    };
-                    reader.onerror = function (e) {
+                    }
+                    reader.onerror = function (e: any) {
                         deffered.reject(e.target.error);
-                    };
+                    }
                     reader.readAsArrayBuffer(file);
                     return deffered.promise();
                 }
+            
                 getFileAsBufferArray(url, index) {
                     let that = this;
                     var def = $.Deferred();
@@ -209,101 +212,108 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         that.getFileBuffer(x.response).done(function (buffer) {
                             def.resolve(buffer, index);
                         });
-                    };
+                    }
                     x.onerror = function (err) {
                         def.reject(err);
                         console.error(err);
-                    };
+                    }
                     x.send();
                     return def.promise();
+            
+             
                 }
+               
                 copyFile5(caller) {
-                    /*
-                         
-                        // set up the src client
-                        var srcContext = new SP.ClientContext(caller.parent.srcUrl);
-                    
-                        // set up the destination context (in your case there is no needs to create a new context, because it would be the same library!!!!)
-                        SP.ClientContext destContext = new SP.ClientContext(destUrl);
-                        destContext.AuthenticationMode = SP.ClientAuthenticationMode.FormsAuthentication;
-                        destContext.FormsAuthenticationLoginInfo = new SP.FormsAuthenticationLoginInfo(_login.UserName, _login.Password);
-                    
-                        // get the list and items
-                        SP.Web srcWeb = srcContext.Web;
-                        SP.List srcList = srcWeb.Lists.GetByTitle(srcLibrary);
-                        SP.ListItemCollection col = srcList.GetItems(new SP.CamlQuery());
-                        srcContext.Load(col);
-                        srcContext.ExecuteQuery();
-                    
-                        // get the new list
-                        SP.Web destWeb = destContext.Web;
-                        destContext.Load(destWeb);
-                        destContext.ExecuteQuery();
-                    
-                        foreach(var doc in col)
-                        {
-                            try {
-                                if (doc.FileSystemObjectType == SP.FileSystemObjectType.File) {
-                                    // get the file
-                                    SP.File f = doc.File;
-                                    srcContext.Load(f);
-                                    srcContext.ExecuteQuery();
-                    
-                                    // build new location url
-                                    string nLocation = destWeb.ServerRelativeUrl.TrimEnd('/') + "/" + destLibrary.Replace(" ", "") + "/" + f.Name;
-                    
-                                    // read the file, copy the content to new file at new location
-                                    SP.FileInformation fileInfo = SP.File.OpenBinaryDirect(srcContext, f.ServerRelativeUrl);
-                                    SP.File.SaveBinaryDirect(destContext, nLocation, fileInfo.Stream, true);
+            
+                 
+                // set up the src client
+                var srcContext = new SP.ClientContext(caller.parent.srcUrl);
+            
+                // set up the destination context (in your case there is no needs to create a new context, because it would be the same library!!!!)
+                SP.ClientContext destContext = new SP.ClientContext(destUrl);
+                destContext.AuthenticationMode = SP.ClientAuthenticationMode.FormsAuthentication;
+                destContext.FormsAuthenticationLoginInfo = new SP.FormsAuthenticationLoginInfo(_login.UserName, _login.Password);
+            
+                // get the list and items
+                SP.Web srcWeb = srcContext.Web;
+                SP.List srcList = srcWeb.Lists.GetByTitle(srcLibrary);
+                SP.ListItemCollection col = srcList.GetItems(new SP.CamlQuery());
+                srcContext.Load(col);
+                srcContext.ExecuteQuery();
+            
+                // get the new list
+                SP.Web destWeb = destContext.Web;
+                destContext.Load(destWeb);
+                destContext.ExecuteQuery();
+            
+                foreach(var doc in col)
+                {
+                    try {
+                        if (doc.FileSystemObjectType == SP.FileSystemObjectType.File) {
+                            // get the file
+                            SP.File f = doc.File;
+                            srcContext.Load(f);
+                            srcContext.ExecuteQuery();
+            
+                            // build new location url
+                            string nLocation = destWeb.ServerRelativeUrl.TrimEnd('/') + "/" + destLibrary.Replace(" ", "") + "/" + f.Name;
+            
+                            // read the file, copy the content to new file at new location
+                            SP.FileInformation fileInfo = SP.File.OpenBinaryDirect(srcContext, f.ServerRelativeUrl);
+                            SP.File.SaveBinaryDirect(destContext, nLocation, fileInfo.Stream, true);
+                        }
+            
+                        if (doc.FileSystemObjectType == SP.FileSystemObjectType.Folder) {
+                            // load the folder
+                            srcContext.Load(doc);
+                            srcContext.ExecuteQuery();
+            
+                            // get the folder data, get the file collection in the folder
+                            SP.Folder folder = srcWeb.GetFolderByServerRelativeUrl(doc.FieldValues["FileRef"].ToString());
+                            SP.FileCollection fileCol = folder.Files;
+            
+                            // load everyting so we can access it
+                            srcContext.Load(folder);
+                            srcContext.Load(fileCol);
+                            srcContext.ExecuteQuery();
+            
+                            foreach(SP.File f in fileCol)
+                            {
+                                // load the file
+                                srcContext.Load(f);
+                                srcContext.ExecuteQuery();
+            
+                                string[] parts = null;
+                                string id = null;
+            
+                                if (srcLibrary == "My Files") {
+                                    // these are doc sets
+                                    parts = f.ServerRelativeUrl.Split('/');
+                                    id = parts[parts.Length - 2];
                                 }
-                    
-                                if (doc.FileSystemObjectType == SP.FileSystemObjectType.Folder) {
-                                    // load the folder
-                                    srcContext.Load(doc);
-                                    srcContext.ExecuteQuery();
-                    
-                                    // get the folder data, get the file collection in the folder
-                                    SP.Folder folder = srcWeb.GetFolderByServerRelativeUrl(doc.FieldValues["FileRef"].ToString());
-                                    SP.FileCollection fileCol = folder.Files;
-                    
-                                    // load everyting so we can access it
-                                    srcContext.Load(folder);
-                                    srcContext.Load(fileCol);
-                                    srcContext.ExecuteQuery();
-                    
-                                    foreach(SP.File f in fileCol)
-                                    {
-                                        // load the file
-                                        srcContext.Load(f);
-                                        srcContext.ExecuteQuery();
-                    
-                                        string[] parts = null;
-                                        string id = null;
-                    
-                                        if (srcLibrary == "My Files") {
-                                            // these are doc sets
-                                            parts = f.ServerRelativeUrl.Split('/');
-                                            id = parts[parts.Length - 2];
-                                        }
-                                        else {
-                                            id = folder.Name;
-                                        }
-                    
-                                        // build new location url
-                                        string nLocation = destWeb.ServerRelativeUrl.TrimEnd('/') + "/" + destLibrary.Replace(" ", "") + "/" + id + "/" + f.Name;
-                    
-                                        // read the file, copy the content to new file at new location
-                                        SP.FileInformation fileInfo = SP.File.OpenBinaryDirect(srcContext, f.ServerRelativeUrl);
-                                        SP.File.SaveBinaryDirect(destContext, nLocation, fileInfo.Stream, true);
-                                    }
+                                else {
+                                    id = folder.Name;
                                 }
+            
+                                // build new location url
+                                string nLocation = destWeb.ServerRelativeUrl.TrimEnd('/') + "/" + destLibrary.Replace(" ", "") + "/" + id + "/" + f.Name;
+            
+                                // read the file, copy the content to new file at new location
+                                SP.FileInformation fileInfo = SP.File.OpenBinaryDirect(srcContext, f.ServerRelativeUrl);
+                                SP.File.SaveBinaryDirect(destContext, nLocation, fileInfo.Stream, true);
                             }
-                            catch (Exception ex) {
-                                console.log("File Error = " + ex.ToString());
-                            }
-                        }*/
-                }
+                        }
+                    }
+                    catch (Exception ex) {
+                        console.log("File Error = " + ex.ToString());
+                    }
+               
+            }
+                
+            
                 copyFile2(caller) {
+            
+            
                     return new Promise(function (resolve, reject) {
                         var def = $.Deferred();
                         var x = new XMLHttpRequest();
@@ -313,21 +323,25 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                             this.getFileBuffer(x.response).done(function (buffer) {
                                 this.UploadFile("http://win-iprrvsfootq/sites/dev", caller.parent.targetUrl, "Test.txt", buffer).done(function () {
                                     def.resolve();
-                                }, function (err) {
+                                },function(err){
                                     def.reject(err);
                                     console.error(err);
                                 });
                             });
-                        };
+                        }
                         x.onerror = function (err) {
                             def.reject(err);
                             console.error(err);
-                        };
+                        }
                         x.send();
                         return def.promise();
+                       
                     });
+            
                 }
-                copyFile4(caller, filepath) {
+            
+                */
+                downloadFile(caller) {
                     let that = this;
                     $.getScript(that.appWebUrl + "/_layouts/15/SP.RequestExecutor.js", function () {
                         SP.RequestExecutorInternalSharedUtility.BinaryDecode = function SP_RequestExecutorInternalSharedUtility$BinaryDecode(data) {
@@ -405,16 +419,17 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     // $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                     // executes cross domain request
                     var executor = new SP.RequestExecutor(this.appWebUrl);
-                    executor.executeAsync({
-                        url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + filepath + "')/$value?@target='" + caller.parent.srcUrl + "'",
-                        method: "GET",
-                        binaryStringResponseBody: true,
-                        success: function (data) { that.createFile(data.body, caller); },
-                        error: function (xhr) {
-                            alert(xhr.state + ": " + xhr.statusText);
-                        }
+                    return new Promise(function (resolve, reject) {
+                        executor.executeAsync({
+                            url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + caller.srcUrl + "')/$value?@target='" + caller.parent.srcUrl + "'",
+                            method: "GET",
+                            binaryStringResponseBody: true,
+                            success: function (data) { caller.fileContent = data.body; resolve(); },
+                            error: function (xhr) {
+                                reject(xhr.state + ": " + xhr.statusText);
+                            }
+                        });
                     });
-                    //  });
                 }
                 /* postFile(data, caller) {
                      let that = this;
@@ -430,33 +445,45 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                          });
              
                  }
+                 
+             
+                 copyFile3(caller) {
+             
+                     var clientContext;
+                     var oWebsite;
+                     var fileUrl;
+                     let that = this;
+             
+                     clientContext = SP.ClientContext.get_current();
+                     oWebsite = new SP.AppContextSite(clientContext, caller.parent.srcUrl).get_web();
+             
+                     var factory = new SP.ProxyWebRequestExecutorFactory(this.appWebUrl);
+                     clientContext.set_webRequestExecutorFactory(factory);
+             
+                     clientContext.load(oWebsite);
+                     clientContext.executeQueryAsync(function () {
+                         fileUrl = oWebsite.get_serverRelativeUrl() + "/" + caller.parent.title + "/" +"ProviderHostedApps%20-%20Infos.txt";
+                         $.ajax({
+                             url: fileUrl,
+                             type: "GET"
+                         })
+                             .done(function () { console.log("Success Ajax: " + arguments[2]); }, function () { console.error("Req failed: " + arguments[2]); });
+                     }, errorHandler);
+             
+                     function successHandler(data) {
+                         that.createFile(data, caller);
+                     }
+             
+                     function errorHandler() {
+                         console.error("Request failed: " + arguments[2]);
+                     }
+             
+             
+             
+             
+                 }
                  */
-                copyFile3(caller) {
-                    var clientContext;
-                    var oWebsite;
-                    var fileUrl;
-                    let that = this;
-                    clientContext = SP.ClientContext.get_current();
-                    oWebsite = new SP.AppContextSite(clientContext, caller.parent.srcUrl).get_web();
-                    var factory = new SP.ProxyWebRequestExecutorFactory(this.appWebUrl);
-                    clientContext.set_webRequestExecutorFactory(factory);
-                    clientContext.load(oWebsite);
-                    clientContext.executeQueryAsync(function () {
-                        fileUrl = oWebsite.get_serverRelativeUrl() + "/" + caller.parent.title + "/" + "ProviderHostedApps%20-%20Infos.txt";
-                        $.ajax({
-                            url: fileUrl,
-                            type: "GET"
-                        })
-                            .done(function () { console.log("Success Ajax: " + arguments[2]); }, function () { console.error("Req failed: " + arguments[2]); });
-                    }, errorHandler);
-                    function successHandler(data) {
-                        that.createFile(data, caller);
-                    }
-                    function errorHandler() {
-                        console.error("Request failed: " + arguments[2]);
-                    }
-                }
-                copyFile(caller) {
+                readFileToCopy(caller) {
                     var targetLib = caller.parent.targetTitle;
                     let that = this;
                     var i;
@@ -467,45 +494,112 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var hostweb = appContextSite.get_web();
                     var lists = hostweb.get_lists();
                     ctx.load(hostweb);
-                    var file = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(2).get_file();
+                    var file = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id).get_file();
+                    var listItem = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
                     ctx.load(file);
+                    ctx.load(listItem);
                     var counter = 1;
-                    ctx.executeQueryAsync(function () {
-                        console.log(caller.parent.title);
-                        console.log(file);
-                        that.copyFile4(caller, file.get_serverRelativeUrl());
-                        /*
-                               //Folder throws error here: items[j].get_serverRelativeUrl()
-                           that.getFileAsBufferArray("http://win-iprrvsfootq" + file.get_serverRelativeUrl(), caller.id).done(function (data, index) {
-                                   that.UploadFile("http://win-iprrvsfootq/sites/dev", targetLib, file.get_name(), data).done(function () {
-                                       console.log("All done");
-                                   }, function (data) { console.error(data) });
-                               }, function (data) { console.error(data) });
-                       }, function (sender, args) {
-                           console.log("Failed :" + args.get_message() + "---" + args.get_stackTrace());
-                           */
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(function () {
+                            //b console.log(caller.parent.title);
+                            // console.log(file);
+                            caller.name = file.get_name();
+                            caller.srcUrl = file.get_serverRelativeUrl();
+                            caller.title = file.get_title();
+                            caller.data1 = listItem.get_item("Data1");
+                            console.log("1:");
+                            console.log(caller.data1);
+                            resolve();
+                            // that.downloadFile(caller, file.get_serverRelativeUrl());
+                        }, function () {
+                            reject(arguments[1].get_message());
+                        });
                     });
                 }
-                createFile(data, caller) {
+                createFile(caller) {
                     var targetList;
                     var fileCreateInfo;
                     var fileContent;
+                    let that = this;
                     var ctx = SP.ClientContext.get_current();
                     var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
                     fileCreateInfo = new SP.FileCreationInformation();
-                    fileCreateInfo.set_url("fileherp.pdf");
+                    fileCreateInfo.set_url(caller.name);
                     fileCreateInfo.set_overwrite(true);
                     fileCreateInfo.set_content(new SP.Base64EncodedByteArray());
-                    fileContent = data;
+                    fileContent = caller.fileContent;
                     for (var i = 0; i < fileContent.length; i++) {
                         fileCreateInfo.get_content().append(fileContent.charCodeAt(i));
                     }
                     var newFile = targetList.get_rootFolder().get_files().add(fileCreateInfo);
-                    ctx.load(newFile);
-                    ctx.executeQueryAsync(function (data) { console.log(data); }, function (xhr) { console.error(arguments[1].get_message()); });
+                    ctx.load(newFile, 'ListItemAllFields');
+                    /*
+                          var targetField = newFile.get_listItemAllFields["Data1"] as SP.Taxonomy.TaxonomyField;
+                          var listItem = newFile.get_listItemAllFields();
+                    
+                          ctx.load(listItem);
+                          ctx.load(targetField);*/
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(
+                        //Success
+                        function (data) {
+                            caller.targetId = newFile.get_listItemAllFields().get_id();
+                            that.fillListItem(caller);
+                            resolve();
+                        }, 
+                        //Fail
+                        function (data) {
+                            reject(arguments[1].get_message());
+                        });
+                    });
                 }
-                UploadFile(webUrl, lib, filename, buffer) {
+                fillListItem(caller) {
+                    // var targetListItem: SP.ListItem;
+                    var termId = '<term guid>';
+                    var termLabel = '<term label>';
+                    var ctx = SP.ClientContext.get_current();
+                    console.log(caller.parent.targetTitle + " / " + caller.targetId);
+                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
+                    // targetListItem = appContextSite.get_lists().getByTitle(caller.parent.targetTitle).getItemById(caller.targetId);
+                    var targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
+                    var targetItem = targetList.getItemById(caller.targetId);
+                    ctx.load(targetList);
+                    ctx.load(targetItem);
+                    var targetFieldt = targetList.get_fields().getByInternalNameOrTitle("Data1");
+                    // var targetFieldTax = ctx.castTo(targetField, SP.Taxonomy.TaxonomyField);
+                    var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
+                    console.log("2:");
+                    console.log(caller.data1);
+                    ctx.load(targetField);
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(
+                        //Success
+                        function (data) {
+                            targetField.setFieldValueByValueCollection(targetItem, caller.data1);
+                            targetItem.update();
+                            /*
+                                 var x: any;
+                                 var taxVal = "";
+                                 for (x in caller.data1)
+                                 {
+                                     taxVal += x.Label + "|" + x.TermGuid+ ";";
+                                 }
+                                 targetField.populateFromLabelGuidPairs(taxVal);
+                                 targetListItem.update();*/
+                            //   targetField.setFieldValueByValueCollection(targetListItem, caller.data1);
+                            // targetListItem.update();
+                            //            var targetValue = new SP.Taxonomy.TaxonomyFieldValue();
+                            resolve();
+                        }, 
+                        //Fail
+                        function (data) {
+                            reject(arguments[1].get_message());
+                        });
+                    });
+                }
+                /*
+                    UploadFile(webUrl, lib, filename, buffer) {
                     var d = $.Deferred();
                     jQuery.ajax({
                         url: webUrl + "/_api/contextinfo",
@@ -536,12 +630,18 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                     console.log(err);
                                 }
                             });
+                
+                
+                
+                
+                
                         }, error: function (data) {
                             console.log(data);
                         }
                     });
+                
                     return d.promise();
-                }
+                }*/
                 readFile(pathUrl) {
                     var executor = new SP.RequestExecutor(this.appWebUrl);
                     //var executor = new SP.RequestExecutor(pathUrl);
@@ -570,25 +670,6 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                             }
                         });
                     });
-                }
-                getData() {
-                    return [{
-                            "id": 1,
-                            "name": "Pizza Vegetaria",
-                            "price": 5.99
-                        }, {
-                            "id": 2,
-                            "name": "Pizza Salami",
-                            "price": 10.99
-                        }, {
-                            "id": 3,
-                            "name": "Pizza Thunfisch",
-                            "price": 7.99
-                        }, {
-                            "id": 4,
-                            "name": "Aktueller Flyer",
-                            "price": 0
-                        }];
                 }
             };
             DataService = __decorate([

@@ -24,7 +24,6 @@ export class TreeViewSite {
     clicked(delafter) {
         var copyroot = new CopyRoot(delafter);
         this.screen = 1;
-        //console.log("aaa");
     }
 
 }

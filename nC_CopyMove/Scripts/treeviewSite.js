@@ -31,7 +31,6 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
                 clicked(delafter) {
                     var copyroot = new copyroot_1.CopyRoot(delafter);
                     this.screen = 1;
-                    //console.log("aaa");
                 }
             };
             __decorate([

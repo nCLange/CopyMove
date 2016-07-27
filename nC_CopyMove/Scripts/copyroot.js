@@ -12,14 +12,15 @@ System.register(['./itemdl'], function(exports_1, context_1) {
             class CopyRoot {
                 constructor(delafter) {
                     this.srcUrl = "http://win-iprrvsfootq/sites/dev";
-                    this.targetUrl = "http://win-iprrvsfootq/sites/devsite";
-                    this.selectedItemIds = [2];
+                    this.targetUrl = "http://win-iprrvsfootq/sites/dev";
+                    this.selectedItemIds = [1, 2];
                     this.title = "DocaDoca";
                     this.targetTitle = "DocumentTest1";
-                    this.itemIds = [];
+                    this.items = [];
                     this.deleteAfterwards = delafter;
-                    for (var id in this.selectedItemIds) {
-                        this.itemIds.push(new itemdl_1.ItemDL(id, this));
+                    for (var id = 0; id < this.selectedItemIds.length; id++) {
+                        // console.log(id);
+                        this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this));
                     }
                 }
             }
