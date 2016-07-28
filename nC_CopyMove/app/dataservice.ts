@@ -2,7 +2,7 @@
 import {SiteCollection} from './sitecollection';
 import {DocumentLibrary} from './documentlibrary';
 import {Directory} from './directory';
-import {ItemDL} from './itemdl';
+import {ItemDL,ContentType} from './itemdl';
 
 @Injectable()
 export class DataService {
@@ -119,7 +119,6 @@ export class DataService {
                         headers: { "Accept": "application/json; odata=verbose" },
                         success: function (data) {
                             var myoutput = JSON.parse((data.body.toString()));
-                            console.log(myoutput);
                             var documentlibraries = [];
                             var dossierResult = myoutput.d.results;
                             for (var x = 0; x < dossierResult.length; x++) {
@@ -144,7 +143,6 @@ export class DataService {
         var executor = new SP.RequestExecutor(this.appWebUrl);
         //var executor = new SP.RequestExecutor(pathUrl);
         let that = this;
-        console.log(pathUrl + "/_api/web/GetFolderByServerRelativeUrl('" + relPath + "')");
 
         return new Promise(function (resolve, reject) {
             executor.executeAsync(
@@ -161,9 +159,7 @@ export class DataService {
                         var directory = [];
 
                         var siteResult = myoutput.d.results;
-                        console.log(siteResult);
                         for (var x = 0; x < siteResult.length; x++) {
-                            console.log(siteResult[x]);
                             directory.push(
                                 new Directory(that.searchJSONWebApi(siteResult[x], "Name"), parent));
                         }
@@ -211,7 +207,6 @@ export class DataService {
                     success: function (data) {
                         var myoutput = JSON.parse((data.body.toString()));
                         var itemdl = [];
-                        console.log(myoutput);
                         var siteResult = myoutput.d;
 
                         for (var x = 0; x < siteResult.length; x++) {
@@ -547,31 +542,105 @@ export class DataService {
 
     }
     */
+
+  createGetDocSetQuery(docSetName) {
+    var query = new SP.CamlQuery();
+    var viewXml =
+        "<View>" +
+        "<Query>" +
+        "<Where>" +
+        "<And>" +
+        "<Eq>" +
+        "<FieldRef Name=\"FSObjType\"/>" +
+        "<Value Type=\"Integer\">1</Value>" +
+        "</Eq>" +
+        "<Eq>" +
+        "<FieldRef Name=\"FileLeafRef\" />" +
+        "<Value Type=\"Text\">" + docSetName + "</Value>" +
+        "</Eq>" +
+        "</And>" +
+        "</Where>" +
+        "</Query>" +
+        "<RowLimit>1</RowLimit>" +
+        "</View>";
+    query.set_viewXml(viewXml);
+    return query;
+}
+
+    getContent(caller : ItemDL) {
+        var targetLib = caller.parent.targetTitle;
+        let that = this;
+        var listItem: SP.ListItem;
+
+        var ctx = SP.ClientContext.get_current();
+        var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
+        listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+
+        ctx.load(listItem);
+
+
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                function () {
+                   
+
+                    if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder) {
+                        if (listItem.get_contentType().get_id().toString().startsWith("0x0120D520")) {
+                            console.log("Doc Set: " + listItem.get_id());
+                            caller.type = ContentType.DocSet;
+                        }
+                        else {
+                            console.log("Folder: " + listItem.get_id());
+                            caller.type = ContentType.Folder;
+                        }
+                    }
+                    else if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.file) {
+                        console.log("File: " + listItem.get_id());
+                        caller.type = ContentType.File;
+                    }
+                    else {
+                        reject("Unknown File format in" + listItem.get_id());
+                    }
+
+                    resolve();
+                },
+                function () {
+
+                    reject(arguments[1].get_message());
+                }
+
+            );
+        });
+    }
+
+
+    readFolderToCopy(caller: ItemDL) {
+
+
+
+    }
   readFileToCopy(caller: ItemDL) {
      var targetLib = caller.parent.targetTitle;
      let that = this;
 
-     var i;
-
-
      var ctx = SP.ClientContext.get_current();
-      
-  //  var factory = new SP.ProxyWebRequestExecutorFactory(this.appWebUrl);
-  //  ctx.set_webRequestExecutorFactory(factory);
-    
     var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
     var hostweb = appContextSite.get_web(); 
     var lists = hostweb.get_lists();
+    var listItem: SP.ListItem;
   
     ctx.load(hostweb);
 
-    var file = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id).get_file();
-    var listItem = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+   
+    listItem = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+ //   if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder) {
+     var file = listItem.get_file();
 
-    ctx.load(file);
+
     ctx.load(listItem);
+    ctx.load(file);
 
-    var counter = 1;
+
     return new Promise(function (resolve, reject) {
         ctx.executeQueryAsync(
             function () {
@@ -583,8 +652,7 @@ export class DataService {
             caller.srcUrl = file.get_serverRelativeUrl();
             caller.title = file.get_title();
             caller.data1 = listItem.get_item("Data1");
-            console.log("1:");
-            console.log(caller.data1);
+
 
             resolve();
 
@@ -599,7 +667,7 @@ export class DataService {
 
   createFile(caller: ItemDL) {
 
-      var targetList;
+      var targetList : SP.List;
       var fileCreateInfo;
       var fileContent;
       let that = this;
@@ -637,7 +705,7 @@ export class DataService {
                   */
                   caller.targetId = newFile.get_listItemAllFields().get_id();
 
-                  that.fillListItem(caller);
+                
 
                   resolve();
 
@@ -668,16 +736,16 @@ export class DataService {
      // targetListItem = appContextSite.get_lists().getByTitle(caller.parent.targetTitle).getItemById(caller.targetId);
       var targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
       var targetItem = targetList.getItemById(caller.targetId);
-      ctx.load(targetList);
+
+
+     // ctx.load(targetList);
       ctx.load(targetItem);
-      var targetFieldt = (targetList.get_fields().getByInternalNameOrTitle("Data1") as SP.Taxonomy.TaxonomyField);
+      var targetFieldt = targetList.get_fields().getByInternalNameOrTitle("Data1");
 
       // var targetFieldTax = ctx.castTo(targetField, SP.Taxonomy.TaxonomyField);
       var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
+    //  var targetFieldValCol: SP.Taxonomy.TaxonomyFieldValueCollection = new SP.Taxonomy.TaxonomyFieldValueCollection(targetField as SP.Taxonomy.TaxonomyField);
 
-      console.log("2:");
-      console.log(caller.data1);
-     
 
       ctx.load(targetField);
 
@@ -686,27 +754,35 @@ export class DataService {
               //Success
               function (data) {
 
-                  (targetField as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, caller.data1);
-                  targetItem.update();
-                  
-                  
-                 
-           
-             /*    
-                  var x: any;
-                  var taxVal = "";
-                  for (x in caller.data1)
-                  {
-                      taxVal += x.Label + "|" + x.TermGuid+ ";";
+                  if ((targetField as SP.Taxonomy.TaxonomyField).get_allowMultipleValues()) {
+                      var terms = new Array();
+                      var termValueString;
+                      var termValues;
+                      for (var i = 0; i < caller.data1.get_count(); i++) {
+                          terms.push("-1;#" + caller.data1.getItemAtIndex(i).get_label() + "|" + caller.data1.getItemAtIndex(i).get_termGuid());               
+                      }
+                          //Update
+
+                      termValueString = terms.join(";#");
+                     
+
+                      
+
                   }
-                  targetField.populateFromLabelGuidPairs(taxVal);
-                  targetListItem.update();*/
-               //   targetField.setFieldValueByValueCollection(targetListItem, caller.data1);
-                 // targetListItem.update();
 
-      //            var targetValue = new SP.Taxonomy.TaxonomyFieldValue();
-                
+                  termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, (targetField as SP.Taxonomy.TaxonomyField));
+                  console.log("Entered");
+                  console.log(termValueString);
+                  (targetField as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, termValues);
 
+                  console.log("Target Field: ");
+                  console.log(targetField);
+                  console.log("TargetItem: ");
+                  console.log(targetItem);
+                  console.log("Term Values: ");
+                  console.log(termValues);
+
+                  targetItem.update();
                   resolve();
 
               },
@@ -787,9 +863,9 @@ export class DataService {
                         var directory = [];
 
                         var siteResult = myoutput.d.results;
-                        console.log(siteResult);
+                       
                         for (var x = 0; x < siteResult.length; x++) {
-                            console.log(siteResult[x]);
+                            
                             directory.push(
                                 new Directory(that.searchJSONWebApi(siteResult[x], "Name"), parent));
                         }
