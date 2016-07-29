@@ -6,12 +6,11 @@ import {ItemDL} from './itemdl';
 export class CopyRoot{
     srcUrl = "http://win-iprrvsfootq/sites/dev";
     targetUrl ="http://win-iprrvsfootq/sites/dev";
-    private selectedItemIds = [1, 2];
+    private selectedItemIds = [1, 2,3,6];
     title = "DocaDoca";
     targetTitle = "DocumentTest1";
     private deleteAfterwards;
     dataService: DataService;
-    private 
 
     items : Array<ItemDL>;
 
@@ -25,6 +24,10 @@ export class CopyRoot{
             this.items.push(new ItemDL(this.selectedItemIds[id], this));
         }
 
+    }
+
+    addToArray(id) {
+        this.items.push(new ItemDL(id, this));
     }
 
 

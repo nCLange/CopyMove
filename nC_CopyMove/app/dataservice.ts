@@ -2,7 +2,7 @@
 import {SiteCollection} from './sitecollection';
 import {DocumentLibrary} from './documentlibrary';
 import {Directory} from './directory';
-import {ItemDL,ContentType} from './itemdl';
+import {ItemDL, ContentType} from './itemdl';
 
 @Injectable()
 export class DataService {
@@ -38,7 +38,7 @@ export class DataService {
                             var myoutput = JSON.parse((data.body.toString()));
                             var sitecollection = [];
                             var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                            console.log(siteResult);
+                            //console.log(siteResult);
                             for (var x = 0; x < siteResult.length; x++) {
 
                                 sitecollection.push(
@@ -384,7 +384,7 @@ export class DataService {
     downloadFile(caller: ItemDL) {
 
         let that = this;
-     
+
         $.getScript(that.appWebUrl + "/_layouts/15/SP.RequestExecutor.js", function () {
             (SP as any).RequestExecutorInternalSharedUtility.BinaryDecode = function SP_RequestExecutorInternalSharedUtility$BinaryDecode(data) {
                 var ret = '';
@@ -470,16 +470,16 @@ export class DataService {
                 }
             };
         });
-       
-       // $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
-            // executes cross domain request
+
+        // $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+        // executes cross domain request
         var executor = new SP.RequestExecutor(this.appWebUrl);
         return new Promise(function (resolve, reject) {
             executor.executeAsync(
                 {
-                    url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + caller.srcUrl +"')/$value?@target='" + caller.parent.srcUrl + "'",
+                    url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + caller.srcUrl + "')/$value?@target='" + caller.parent.srcUrl + "'",
                     method: "GET",
-                    binaryStringResponseBody:true,
+                    binaryStringResponseBody: true,
                     success: function (data) { caller.fileContent = data.body; resolve(); },
                     error: function (xhr) {
                         reject(xhr.state + ": " + xhr.statusText);
@@ -490,84 +490,60 @@ export class DataService {
         });
     }
 
-   /* postFile(data, caller) {
-        let that = this;
-        var executor = new SP.RequestExecutor(this.appWebUrl);
-        executor.executeAsync(
-            {
-                url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + filepath + "')/$value?@target='" + caller.parent.srcUrl + "'",
-                method: "POST",
-                success: function (data) { that.createFile(data, caller) },
-                error: function (xhr) {
-                    alert(xhr.state + ": " + xhr.statusText)
-                }
-            });
+    /* postFile(data, caller) {
+         let that = this;
+         var executor = new SP.RequestExecutor(this.appWebUrl);
+         executor.executeAsync(
+             {
+                 url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + filepath + "')/$value?@target='" + caller.parent.srcUrl + "'",
+                 method: "POST",
+                 success: function (data) { that.createFile(data, caller) },
+                 error: function (xhr) {
+                     alert(xhr.state + ": " + xhr.statusText)
+                 }
+             });
+ 
+     }
+     
+ 
+     copyFile3(caller) {
+ 
+         var clientContext;
+         var oWebsite;
+         var fileUrl;
+         let that = this;
+ 
+         clientContext = SP.ClientContext.get_current();
+         oWebsite = new SP.AppContextSite(clientContext, caller.parent.srcUrl).get_web();
+ 
+         var factory = new SP.ProxyWebRequestExecutorFactory(this.appWebUrl);
+         clientContext.set_webRequestExecutorFactory(factory);
+ 
+         clientContext.load(oWebsite);
+         clientContext.executeQueryAsync(function () {
+             fileUrl = oWebsite.get_serverRelativeUrl() + "/" + caller.parent.title + "/" +"ProviderHostedApps%20-%20Infos.txt";
+             $.ajax({
+                 url: fileUrl,
+                 type: "GET"
+             })
+                 .done(function () { console.log("Success Ajax: " + arguments[2]); }, function () { console.error("Req failed: " + arguments[2]); });
+         }, errorHandler);
+ 
+         function successHandler(data) {
+             that.createFile(data, caller);
+         }
+ 
+         function errorHandler() {
+             console.error("Request failed: " + arguments[2]);
+         }
+ 
+ 
+ 
+ 
+     }
+     */
 
-    }
-    
-
-    copyFile3(caller) {
-
-        var clientContext;
-        var oWebsite;
-        var fileUrl;
-        let that = this;
-
-        clientContext = SP.ClientContext.get_current();
-        oWebsite = new SP.AppContextSite(clientContext, caller.parent.srcUrl).get_web();
-
-        var factory = new SP.ProxyWebRequestExecutorFactory(this.appWebUrl);
-        clientContext.set_webRequestExecutorFactory(factory);
-
-        clientContext.load(oWebsite);
-        clientContext.executeQueryAsync(function () {
-            fileUrl = oWebsite.get_serverRelativeUrl() + "/" + caller.parent.title + "/" +"ProviderHostedApps%20-%20Infos.txt";
-            $.ajax({
-                url: fileUrl,
-                type: "GET"
-            })
-                .done(function () { console.log("Success Ajax: " + arguments[2]); }, function () { console.error("Req failed: " + arguments[2]); });
-        }, errorHandler);
-
-        function successHandler(data) {
-            that.createFile(data, caller);
-        }
-
-        function errorHandler() {
-            console.error("Request failed: " + arguments[2]);
-        }
-
-
-
-
-    }
-    */
-
-  createGetDocSetQuery(docSetName) {
-    var query = new SP.CamlQuery();
-    var viewXml =
-        "<View>" +
-        "<Query>" +
-        "<Where>" +
-        "<And>" +
-        "<Eq>" +
-        "<FieldRef Name=\"FSObjType\"/>" +
-        "<Value Type=\"Integer\">1</Value>" +
-        "</Eq>" +
-        "<Eq>" +
-        "<FieldRef Name=\"FileLeafRef\" />" +
-        "<Value Type=\"Text\">" + docSetName + "</Value>" +
-        "</Eq>" +
-        "</And>" +
-        "</Where>" +
-        "</Query>" +
-        "<RowLimit>1</RowLimit>" +
-        "</View>";
-    query.set_viewXml(viewXml);
-    return query;
-}
-
-    getContent(caller : ItemDL) {
+    getContent(caller: ItemDL) {
         var targetLib = caller.parent.targetTitle;
         let that = this;
         var listItem: SP.ListItem;
@@ -575,31 +551,34 @@ export class DataService {
         var ctx = SP.ClientContext.get_current();
         var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
         listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+        var cType = listItem.get_contentType();
+
 
         ctx.load(listItem);
-
+        ctx.load(cType);
 
         return new Promise(function (resolve, reject) {
             ctx.executeQueryAsync(
                 function () {
-                   
+
 
                     if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder) {
-                        if (listItem.get_contentType().get_id().toString().startsWith("0x0120D520")) {
-                            console.log("Doc Set: " + listItem.get_id());
+                        if (cType.get_id().toString().startsWith("0x0120D520")) {
+                            console.log("Doc Set: " + caller.id);
+
                             caller.type = ContentType.DocSet;
                         }
                         else {
-                            console.log("Folder: " + listItem.get_id());
+                            console.log("Folder: " + caller.id);
                             caller.type = ContentType.Folder;
                         }
                     }
                     else if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.file) {
-                        console.log("File: " + listItem.get_id());
+                        console.log("File: " + caller.id);
                         caller.type = ContentType.File;
                     }
                     else {
-                        reject("Unknown File format in" + listItem.get_id());
+                        reject("Unknown File format in" + caller.id);
                     }
 
                     resolve();
@@ -614,234 +593,331 @@ export class DataService {
     }
 
 
-    readFolderToCopy(caller: ItemDL) {
+    getFolder(caller: ItemDL) {
+        let that = this;
+     
+        var targetList: SP.List;
+        var listItem: SP.ListItem;
+        var ctx = SP.ClientContext.get_current();
+        var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
+
+        listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+        var files = listItem.get_folder().get_files();
+        var folders = listItem.get_folder().get_folders();
+
+
+
+        ctx.load(listItem);
+        ctx.load(files, 'Include(ListItemAllFields)');
+        ctx.load(folders, 'Include(ListItemAllFields)');
+      
+       
+
+
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                function () {
+
+                    caller.name = listItem.get_item('Title');
+                    //(listItem.get_item('Title') as SP.Folder).get_files();
+
+                    for (var i = 0; i < files.get_count(); i++) {
+                       // console.log(files.getItemAtIndex(i).get_listItemAllFields().get_id());
+
+                        caller.addToQueue(files.getItemAtIndex(i).get_listItemAllFields().get_id());
+                    }
+
+                    for (var i = 0; i < folders.get_count(); i++) {
+                        folders.getItemAtIndex(i).get_listItemAllFields().get_id();
+
+                    }
+
+                    resolve();
+
+                },
+                function () {
+                    reject(arguments[1].get_message());
+                }
+            );
+        });
+    }
+
+    // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
+    copyFolder(caller: ItemDL) {
+
+        var targetList: SP.List;
+        var listItem: SP.ListItem;
+
+        var ctx = SP.ClientContext.get_current();
+        var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+
+        var itemCreateInfo: SP.ListItemCreationInformation;
+
+        listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+        targetList = appContextSite.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+
+        itemCreateInfo = new SP.ListItemCreationInformation();
+        itemCreateInfo.set_underlyingObjectType(SP.FileSystemObjectType.folder);
+        itemCreateInfo.set_leafName(caller.name);
+       // itemCreateInfo.set_folderUrl(caller.parent.targetUrl+"/"+caller.parent.targetTitle + "/" + caller.name);
+      
+
+        var folderItem;
+        ctx.load(listItem);
+        ctx.load(targetList);
+
+
+     
+            // if (!targetList.get_rootFolder().get_folders().getByUrl(ctx.get_url() + "/" + listItem.get_item('Title')).isPropertyAvailable('Title')) {
+
+            folderItem = targetList.addItem(itemCreateInfo);
+
+            folderItem.update();
+
+      //  }
+
+       // listItem.
+
+        ctx.load(folderItem);
+
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                function () {
+
+
+                    caller.releaseQueue();
+                    resolve();
+
+                },
+                function (x, args) {
+                    if (args.get_errorTypeName() == "Microsoft.SharePoint.SPException" && args.get_message().includes("already exists")) {
+
+                        caller.releaseQueue();
+                        resolve();
+
+                    }
+                    reject(arguments[1].get_message());
+                }
+            );
+        });
+
+    }
+
+
+    readFileToCopy(caller: ItemDL) {
+        let that = this;
+
+        var ctx = SP.ClientContext.get_current();
+        var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
+        var hostweb = appContextSite.get_web();
+        var lists = hostweb.get_lists();
+        var listItem: SP.ListItem;
+
+        ctx.load(hostweb);
+
+
+        listItem = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+        //   if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder) {
+        var file = listItem.get_file();
+
+
+        ctx.load(listItem);
+        ctx.load(file);
+
+
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                function () {
+
+                    //b console.log(caller.parent.title);
+
+                    // console.log(file);
+                    caller.name = file.get_name();
+                    caller.srcUrl = file.get_serverRelativeUrl();
+                    caller.title = file.get_title();
+                    caller.data1 = listItem.get_item("Data1");
+
+
+                    resolve();
+
+                    // that.downloadFile(caller, file.get_serverRelativeUrl());
+                },
+                function () {
+                    reject(arguments[1].get_message());
+                });
+        });
+
+    }
+
+    createFile(caller: ItemDL) {
+
+        var targetList: SP.List;
+        var fileCreateInfo;
+        var fileContent;
+        let that = this;
+
+        var ctx = SP.ClientContext.get_current();
+
+        var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
+        targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
+
+        fileCreateInfo = new SP.FileCreationInformation();
+        fileCreateInfo.set_url(caller.name);
+        fileCreateInfo.set_overwrite(true);
+        fileCreateInfo.set_content(new SP.Base64EncodedByteArray());
+        fileContent = caller.fileContent;
+
+        for (var i = 0; i < fileContent.length; i++) {
+            fileCreateInfo.get_content().append(fileContent.charCodeAt(i));
+        }
+
+        var newFile: SP.File = targetList.get_rootFolder().get_files().add(fileCreateInfo);
+        ctx.load(newFile, 'ListItemAllFields');
+        /*
+              var targetField = newFile.get_listItemAllFields["Data1"] as SP.Taxonomy.TaxonomyField;
+              var listItem = newFile.get_listItemAllFields();
+        
+              ctx.load(listItem);
+              ctx.load(targetField);*/
+
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                //Success
+                function (data) {/*
+                  targetField.setFieldValueByValueCollection(listItem, caller.data1);
+                  listItem.update();
+                  */
+                    caller.targetId = newFile.get_listItemAllFields().get_id();
+
+
+
+                    resolve();
+
+                },
+                //Fail
+                function (data) {
+                    reject(arguments[1].get_message());
+
+                }
+
+
+            );
+        });
 
 
 
     }
-  readFileToCopy(caller: ItemDL) {
-     var targetLib = caller.parent.targetTitle;
-     let that = this;
 
-     var ctx = SP.ClientContext.get_current();
-    var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
-    var hostweb = appContextSite.get_web(); 
-    var lists = hostweb.get_lists();
-    var listItem: SP.ListItem;
-  
-    ctx.load(hostweb);
+    fillListItem(caller: ItemDL) {
+        // var targetListItem: SP.ListItem;
 
-   
-    listItem = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
- //   if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder) {
-     var file = listItem.get_file();
+        var termId = '<term guid>';
+        var termLabel = '<term label>';
+
+        var ctx = SP.ClientContext.get_current();
+       // console.log(caller.parent.targetTitle + " / " + caller.targetId);
+        var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
+        // targetListItem = appContextSite.get_lists().getByTitle(caller.parent.targetTitle).getItemById(caller.targetId);
+        var targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
+        var targetItem = targetList.getItemById(caller.targetId);
 
 
-    ctx.load(listItem);
-    ctx.load(file);
+        // ctx.load(targetList);
+        ctx.load(targetItem);
+        var targetFieldt = targetList.get_fields().getByInternalNameOrTitle("Data1");
+
+        // var targetFieldTax = ctx.castTo(targetField, SP.Taxonomy.TaxonomyField);
+        var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
+        //  var targetFieldValCol: SP.Taxonomy.TaxonomyFieldValueCollection = new SP.Taxonomy.TaxonomyFieldValueCollection(targetField as SP.Taxonomy.TaxonomyField);
 
 
-    return new Promise(function (resolve, reject) {
-        ctx.executeQueryAsync(
-            function () {
+        ctx.load(targetField);
 
-                //b console.log(caller.parent.title);
-           
-            // console.log(file);
-            caller.name = file.get_name();
-            caller.srcUrl = file.get_serverRelativeUrl();
-            caller.title = file.get_title();
-            caller.data1 = listItem.get_item("Data1");
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                //Success
+                function (data) {
 
+                    if ((targetField as SP.Taxonomy.TaxonomyField).get_allowMultipleValues()) {
+                        var terms = new Array();
+                        var termValueString;
+                        var termValues;
+                        for (var i = 0; i < caller.data1.get_count(); i++) {
+                            terms.push("-1;#" + caller.data1.getItemAtIndex(i).get_label() + "|" + caller.data1.getItemAtIndex(i).get_termGuid());
+                        }
+                        //Update
 
-            resolve();
-
-           // that.downloadFile(caller, file.get_serverRelativeUrl());
-        },
-            function () {
-                reject(arguments[1].get_message());
-            });
-    });
-      
-}
-
-  createFile(caller: ItemDL) {
-
-      var targetList : SP.List;
-      var fileCreateInfo;
-      var fileContent;
-      let that = this;
-
-      var ctx = SP.ClientContext.get_current();
-
-      var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
-      targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
-
-      fileCreateInfo = new SP.FileCreationInformation();
-      fileCreateInfo.set_url(caller.name);
-      fileCreateInfo.set_overwrite(true);
-      fileCreateInfo.set_content(new SP.Base64EncodedByteArray());
-      fileContent = caller.fileContent;
-
-      for (var i = 0; i < fileContent.length; i++) {
-          fileCreateInfo.get_content().append(fileContent.charCodeAt(i));
-      }
-
-      var newFile :SP.File = targetList.get_rootFolder().get_files().add(fileCreateInfo);
-      ctx.load(newFile, 'ListItemAllFields');
-/*
-      var targetField = newFile.get_listItemAllFields["Data1"] as SP.Taxonomy.TaxonomyField;
-      var listItem = newFile.get_listItemAllFields();
-
-      ctx.load(listItem);
-      ctx.load(targetField);*/
-
-      return new Promise(function (resolve, reject) {
-          ctx.executeQueryAsync(
-              //Success
-              function (data) {/*
-                  targetField.setFieldValueByValueCollection(listItem, caller.data1);
-                  listItem.update();
-                  */
-                  caller.targetId = newFile.get_listItemAllFields().get_id();
-
-                
-
-                  resolve();
-
-              },
-              //Fail
-              function (data) {
-                  reject(arguments[1].get_message());
-
-              }
-
-
-          );
-      });
+                        termValueString = terms.join(";#");
 
 
 
-  }
 
-  fillListItem(caller: ItemDL) {
-     // var targetListItem: SP.ListItem;
+                    }
 
-      var termId = '<term guid>';
-      var termLabel = '<term label>';
+                    termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, (targetField as SP.Taxonomy.TaxonomyField));
+                  
+                    (targetField as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, termValues);
 
-      var ctx = SP.ClientContext.get_current();
-      console.log(caller.parent.targetTitle + " / " + caller.targetId);
-      var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
-     // targetListItem = appContextSite.get_lists().getByTitle(caller.parent.targetTitle).getItemById(caller.targetId);
-      var targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
-      var targetItem = targetList.getItemById(caller.targetId);
+                    targetItem.update();
+                    resolve();
 
-
-     // ctx.load(targetList);
-      ctx.load(targetItem);
-      var targetFieldt = targetList.get_fields().getByInternalNameOrTitle("Data1");
-
-      // var targetFieldTax = ctx.castTo(targetField, SP.Taxonomy.TaxonomyField);
-      var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
-    //  var targetFieldValCol: SP.Taxonomy.TaxonomyFieldValueCollection = new SP.Taxonomy.TaxonomyFieldValueCollection(targetField as SP.Taxonomy.TaxonomyField);
-
-
-      ctx.load(targetField);
-
-      return new Promise(function (resolve, reject) {
-          ctx.executeQueryAsync(
-              //Success
-              function (data) {
-
-                  if ((targetField as SP.Taxonomy.TaxonomyField).get_allowMultipleValues()) {
-                      var terms = new Array();
-                      var termValueString;
-                      var termValues;
-                      for (var i = 0; i < caller.data1.get_count(); i++) {
-                          terms.push("-1;#" + caller.data1.getItemAtIndex(i).get_label() + "|" + caller.data1.getItemAtIndex(i).get_termGuid());               
-                      }
-                          //Update
-
-                      termValueString = terms.join(";#");
-                     
-
-                      
-
-                  }
-
-                  termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, (targetField as SP.Taxonomy.TaxonomyField));
-                  console.log("Entered");
-                  console.log(termValueString);
-                  (targetField as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, termValues);
-
-                  console.log("Target Field: ");
-                  console.log(targetField);
-                  console.log("TargetItem: ");
-                  console.log(targetItem);
-                  console.log("Term Values: ");
-                  console.log(termValues);
-
-                  targetItem.update();
-                  resolve();
-
-              },
-              //Fail
-              function (data) {
-                  reject(arguments[1].get_message());
-
-              }
-
-
-          );
-      });
-
-
-  }
-/*
-    UploadFile(webUrl, lib, filename, buffer) {
-    var d = $.Deferred();
-    jQuery.ajax({
-        url: webUrl + "/_api/contextinfo",
-        type: "POST",
-        headers: {
-            "Accept": "application/json; odata=verbose"
-        },
-        contentType: "application/json;odata=verbose",
-        success: function (data) {
-            var digest = data.d.GetContextWebInformation.FormDigestValue;
-            $.ajax({
-                //url: webUrl + "/_api/web/GetFolderByServerRelativeUrl('" + webUrl + '/' + lib + "')/Files" +
-                //    "/Add(url='" + filename + "', overwrite=true)",
-                url: webUrl + "/_api/web/lists/getbytitle('" + lib + "')/rootfolder/files/add(url='" + filename + "', overwrite=true)",
-                type: "POST",
-                data: buffer,
-                processData: false,
-                headers: {
-                    "accept": "application/json;odata=verbose",
-                    "X-RequestDigest": digest,
-                    "content-lengh": buffer.byteLength
                 },
-                success: function (data) {
-                    d.resolve();
-                },
-                error: function (err) {
-                    d.reject();
-                    console.log(err);
+                //Fail
+                function (data) {
+                    reject(arguments[1].get_message());
+
                 }
-            });
 
 
+            );
+        });
 
 
-
-        }, error: function (data) {
-            console.log(data);
-        }
-    });
-
-    return d.promise();
-}*/
+    }
+    /*
+        UploadFile(webUrl, lib, filename, buffer) {
+        var d = $.Deferred();
+        jQuery.ajax({
+            url: webUrl + "/_api/contextinfo",
+            type: "POST",
+            headers: {
+                "Accept": "application/json; odata=verbose"
+            },
+            contentType: "application/json;odata=verbose",
+            success: function (data) {
+                var digest = data.d.GetContextWebInformation.FormDigestValue;
+                $.ajax({
+                    //url: webUrl + "/_api/web/GetFolderByServerRelativeUrl('" + webUrl + '/' + lib + "')/Files" +
+                    //    "/Add(url='" + filename + "', overwrite=true)",
+                    url: webUrl + "/_api/web/lists/getbytitle('" + lib + "')/rootfolder/files/add(url='" + filename + "', overwrite=true)",
+                    type: "POST",
+                    data: buffer,
+                    processData: false,
+                    headers: {
+                        "accept": "application/json;odata=verbose",
+                        "X-RequestDigest": digest,
+                        "content-lengh": buffer.byteLength
+                    },
+                    success: function (data) {
+                        d.resolve();
+                    },
+                    error: function (err) {
+                        d.reject();
+                        console.log(err);
+                    }
+                });
+    
+    
+    
+    
+    
+            }, error: function (data) {
+                console.log(data);
+            }
+        });
+    
+        return d.promise();
+    }*/
 
     readFile(pathUrl: string) {
         var executor = new SP.RequestExecutor(this.appWebUrl);
@@ -863,9 +939,9 @@ export class DataService {
                         var directory = [];
 
                         var siteResult = myoutput.d.results;
-                       
+
                         for (var x = 0; x < siteResult.length; x++) {
-                            
+
                             directory.push(
                                 new Directory(that.searchJSONWebApi(siteResult[x], "Name"), parent));
                         }

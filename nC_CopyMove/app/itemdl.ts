@@ -15,12 +15,17 @@ export class ItemDL {
     fileContent;
     data1: SP.Taxonomy.TaxonomyFieldValueCollection;
     type: ContentType;
+    exists: boolean;
+    contentQueue: Array<number>;
+    relativePath: string;
     
 
     constructor(id,parent) {
         this.id = id;
         this.parent = parent;
         this.dataService = new DataService();
+        this.contentQueue = [];
+     
         
 
 
@@ -40,9 +45,9 @@ export class ItemDL {
 
                                         this.dataService.createFile(this).then(
                                             response => {
-
+                                                this.fileContent = null; // Delete Buffer
                                                 this.dataService.fillListItem(this).then(
-                                                    response => { /*this.dataService.fillListItem(this)*/ },
+                                                    response => { this.dataService.fillListItem(this) },
                                                     response => {
                                                         console.error("Fill Listitems Failure" + response);
                                                     });
@@ -59,8 +64,16 @@ export class ItemDL {
                             }, response => {
                                 console.log("readFileToCopy Failure " + response);
                             });
-
+                        break;
                     case ContentType.Folder:
+                        this.dataService.getFolder(this).then(
+                            response => {
+                                this.dataService.copyFolder(this).then(
+                                    response => { },
+                                    response => { console.log("copyFolder Failure " + response); })
+                            },
+                            response => { console.log("getFolder Failure " + response); });
+                        break;
                     default:
                         break;
               }
@@ -75,6 +88,21 @@ export class ItemDL {
                 console.log("Failure " + response);
             });
         */
+
+    }
+
+    addToQueue(input: number) {
+        this.contentQueue.push(input);
+    }
+
+    releaseQueue() {
+
+        for (var x = 0; x < this.contentQueue.length;x++) {
+            console.log("Queue Released: " + this.contentQueue[x]);
+            this.parent.addToArray(this.contentQueue[x]);
+        }
+
+        this.contentQueue = [];
 
     }
 

@@ -13,7 +13,7 @@ System.register(['./itemdl'], function(exports_1, context_1) {
                 constructor(delafter) {
                     this.srcUrl = "http://win-iprrvsfootq/sites/dev";
                     this.targetUrl = "http://win-iprrvsfootq/sites/dev";
-                    this.selectedItemIds = [1, 2];
+                    this.selectedItemIds = [1, 2, 3, 6];
                     this.title = "DocaDoca";
                     this.targetTitle = "DocumentTest1";
                     this.items = [];
@@ -22,6 +22,9 @@ System.register(['./itemdl'], function(exports_1, context_1) {
                         // console.log(id);
                         this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this));
                     }
+                }
+                addToArray(id) {
+                    this.items.push(new itemdl_1.ItemDL(id, this));
                 }
             }
             exports_1("CopyRoot", CopyRoot);

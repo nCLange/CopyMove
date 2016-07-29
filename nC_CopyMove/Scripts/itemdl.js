@@ -20,6 +20,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     this.id = id;
                     this.parent = parent;
                     this.dataService = new dataservice_1.DataService();
+                    this.contentQueue = [];
                     // this.dataService.getFileAsBufferArray(parent.srcUrl + parent.title, id);
                     this.dataService.getContent(this).then(response => {
                         switch (this.type) {
@@ -27,7 +28,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                 this.dataService.readFileToCopy(this).then(response => {
                                     this.dataService.downloadFile(this).then(response => {
                                         this.dataService.createFile(this).then(response => {
-                                            this.dataService.fillListItem(this).then(response => { }, response => {
+                                            this.dataService.fillListItem(this).then(response => { this.dataService.fillListItem(this); }, response => {
                                                 console.error("Fill Listitems Failure" + response);
                                             });
                                         }, response => {
@@ -39,7 +40,12 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                 }, response => {
                                     console.log("readFileToCopy Failure " + response);
                                 });
+                                break;
                             case ContentType.Folder:
+                                this.dataService.getFolder(this).then(response => {
+                                    this.dataService.copyFolder(this).then(response => { }, response => { console.log("copyFolder Failure " + response); });
+                                }, response => { console.log("getFolder Failure " + response); });
+                                break;
                             default:
                                 break;
                         }
@@ -53,6 +59,16 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                   console.log("Failure " + response);
                               });
                           */
+                }
+                addToQueue(input) {
+                    this.contentQueue.push(input);
+                }
+                releaseQueue() {
+                    for (var x = 0; x < this.contentQueue.length; x++) {
+                        console.log("Queue Released: " + this.contentQueue[x]);
+                        this.parent.addToArray(this.contentQueue[x]);
+                    }
+                    this.contentQueue = [];
                 }
             }
             exports_1("ItemDL", ItemDL);
