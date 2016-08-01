@@ -478,28 +478,6 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
              
                  }
                  */
-                createGetDocSetQuery(docSetName) {
-                    var query = new SP.CamlQuery();
-                    var viewXml = "<View>" +
-                        "<Query>" +
-                        "<Where>" +
-                        "<And>" +
-                        "<Eq>" +
-                        "<FieldRef Name=\"FSObjType\"/>" +
-                        "<Value Type=\"Integer\">1</Value>" +
-                        "</Eq>" +
-                        "<Eq>" +
-                        "<FieldRef Name=\"FileLeafRef\" />" +
-                        "<Value Type=\"Text\">" + docSetName + "</Value>" +
-                        "</Eq>" +
-                        "</And>" +
-                        "</Where>" +
-                        "</Query>" +
-                        "<RowLimit>1</RowLimit>" +
-                        "</View>";
-                    query.set_viewXml(viewXml);
-                    return query;
-                }
                 getContent(caller) {
                     var targetLib = caller.parent.targetTitle;
                     let that = this;
@@ -516,6 +494,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 if (cType.get_id().toString().startsWith("0x0120D520")) {
                                     console.log("Doc Set: " + caller.id);
                                     caller.type = itemdl_1.ContentType.DocSet;
+                                    caller.contentTypeId = cType.get_id();
                                 }
                                 else {
                                     console.log("Folder: " + caller.id);
@@ -527,6 +506,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 caller.type = itemdl_1.ContentType.File;
                             }
                             else {
+                                console.log("Unknown " + caller.id);
                                 reject("Unknown File format in" + caller.id);
                             }
                             resolve();
@@ -556,8 +536,9 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 caller.addToQueue(files.getItemAtIndex(i).get_listItemAllFields().get_id());
                             }
                             for (var i = 0; i < folders.get_count(); i++) {
-                                folders.getItemAtIndex(i).get_listItemAllFields().get_id();
+                                caller.addToQueue(folders.getItemAtIndex(i).get_listItemAllFields().get_id());
                             }
+                            caller.folderURL += caller.name + "/";
                             resolve();
                         }, function () {
                             reject(arguments[1].get_message());
@@ -566,35 +547,130 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                 }
                 // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
                 copyFolder(caller) {
+                    /*   let that = this;
+               
+                       var executor = new SP.RequestExecutor(this.appWebUrl);
+                       return new Promise(function (resolve, reject) {
+                           executor.executeAsync(
+                               {
+                                   url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/folders/add('"+caller.parent.title+"/"+caller.folderURL+"')",
+                                   method: "GET",
+                                   binaryStringResponseBody: true,
+                                   success: function (data) { caller.fileContent = data.body; resolve(); },
+                                   error: function (xhr) {
+                                       reject(xhr.state + ": " + xhr.statusText);
+                                   }
+                               });
+               
+               
+                       });*/
                     var targetList;
                     var listItem;
                     var ctx = SP.ClientContext.get_current();
                     var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
                     var itemCreateInfo;
-                    listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
                     targetList = appContextSite.get_web().get_lists().getByTitle(caller.parent.targetTitle);
-                    itemCreateInfo = new SP.ListItemCreationInformation();
-                    itemCreateInfo.set_underlyingObjectType(SP.FileSystemObjectType.folder);
-                    itemCreateInfo.set_leafName(caller.name);
-                    // itemCreateInfo.set_folderUrl(caller.parent.targetUrl+"/"+caller.parent.targetTitle + "/" + caller.name);
-                    var folderItem;
-                    ctx.load(listItem);
+                    // folderItem.
                     ctx.load(targetList);
-                    // if (!targetList.get_rootFolder().get_folders().getByUrl(ctx.get_url() + "/" + listItem.get_item('Title')).isPropertyAvailable('Title')) {
-                    folderItem = targetList.addItem(itemCreateInfo);
-                    folderItem.update();
-                    //  }
-                    // listItem.
-                    ctx.load(folderItem);
+                    if (caller.parentFolder == null) {
+                        /*
+                                    itemCreateInfo = new SP.ListItemCreationInformation();
+                                    itemCreateInfo.set_underlyingObjectType(SP.FileSystemObjectType.folder);
+                                    itemCreateInfo.set_leafName(caller.name);
+                        
+                        
+                        
+                                    var folderItem: SP.ListItem;
+                                    folderItem = targetList.addItem(itemCreateInfo);
+                        
+                        
+                                    folderItem.update();
+                                    var thisFolder: SP.Folder = folderItem.get_folder();
+                                    // thisFolder.get_folders().add
+                        
+                                    ctx.load(folderItem);
+                                    */
+                        var thisFolder = targetList.get_rootFolder().get_folders().add(caller.name);
+                    }
+                    else {
+                        var thisFolder = caller.parentFolder.get_folders().add(caller.name);
+                    }
+                    ctx.load(thisFolder);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
+                            caller.parentFolder = thisFolder;
                             caller.releaseQueue();
                             resolve();
                         }, function (x, args) {
-                            if (args.get_errorTypeName() == "Microsoft.SharePoint.SPException" && args.get_message().includes("already exists")) {
+                            /*    if (args.get_errorTypeName() == "Microsoft.SharePoint.SPException" && args.get_message().includes("already exists")) {
+            
+                                    console.log("Already exists " + caller.id);
+                                    caller.releaseQueue();
+                                    resolve();
+            
+                                }*/
+                            reject(arguments[1].get_message());
+                        });
+                    });
+                }
+                // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
+                copyDocSet(caller) {
+                    let that = this;
+                    var targetList;
+                    var listItem;
+                    var ctx = SP.ClientContext.get_current();
+                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+                    var itemCreateInfo;
+                    targetList = appContextSite.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+                    if (caller.parentFolder == null)
+                        var root = targetList.get_rootFolder();
+                    else
+                        var root = caller.parentFolder;
+                    ctx.load(targetList);
+                    var cTypeId = caller.contentTypeId.toString();
+                    var newCT = appContextSite.get_web().get_contentTypes().getById(cTypeId.substring(0, cTypeId.lastIndexOf("00")));
+                    // console.log("This CTypeId: "+cTypeId.substring(0,cTypeId.lastIndexOf("00")));
+                    //var docSetContentType = appContextSite.get_web().get_contentTypes().getById(caller.contentTypeId);
+                    ctx.load(root);
+                    ctx.load(newCT);
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(function () {
+                            // console.log(newCT);
+                            that.getFolderFromDocSet(root, caller).then(response => {
                                 caller.releaseQueue();
                                 resolve();
+                            }, response => {
+                                if (response == false) {
+                                    SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
+                                    resolve();
+                                }
+                                else
+                                    reject(response);
+                            });
+                        }, function (x, args) {
+                            reject(arguments[1].get_message());
+                        });
+                    });
+                }
+                getFolderFromDocSet(root, caller) {
+                    let that = this;
+                    var targetList;
+                    var listItem;
+                    var ctx = SP.ClientContext.get_current();
+                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+                    var folders = root.get_folders();
+                    ctx.load(folders);
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(function () {
+                            for (var i = 0; i < folders.get_count(); i++) {
+                                if (folders.getItemAtIndex(i).get_name() == caller.name) {
+                                    caller.parentFolder = folders.getItemAtIndex(i);
+                                    resolve();
+                                }
                             }
+                            //caller.parentFolder = responseFolders;
+                            reject(false);
+                        }, function () {
                             reject(arguments[1].get_message());
                         });
                     });
@@ -636,10 +712,12 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
                     fileCreateInfo = new SP.FileCreationInformation();
-                    fileCreateInfo.set_url(caller.name);
+                    fileCreateInfo.set_url(caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.folderURL + caller.name);
+                    // console.log("This Folder " + caller.folderURL + "/Item: " + caller.id);
                     fileCreateInfo.set_overwrite(true);
                     fileCreateInfo.set_content(new SP.Base64EncodedByteArray());
                     fileContent = caller.fileContent;
+                    //fileCreateInfo.set_folderUrl(caller.parent.targetUrl + "/" + caller.folderURL + caller.name);
                     for (var i = 0; i < fileContent.length; i++) {
                         fileCreateInfo.get_content().append(fileContent.charCodeAt(i));
                     }

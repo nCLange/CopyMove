@@ -18,13 +18,18 @@ export class ItemDL {
     exists: boolean;
     contentQueue: Array<number>;
     relativePath: string;
+    folderURL: string;
+    contentTypeId: SP.ContentTypeId;
+    parentFolder: SP.Folder;
     
 
-    constructor(id,parent) {
+    constructor(id,parent,folderURL="",parentFolder=null) {
         this.id = id;
         this.parent = parent;
         this.dataService = new DataService();
         this.contentQueue = [];
+        this.folderURL = folderURL;
+        this.parentFolder = parentFolder;
      
         
 
@@ -74,6 +79,17 @@ export class ItemDL {
                             },
                             response => { console.log("getFolder Failure " + response); });
                         break;
+                    case ContentType.DocSet:
+                       
+                        this.dataService.getFolder(this).then(
+                            response => {
+                                this.dataService.copyDocSet(this).then(
+                                    response => { },
+                                    response => { console.log("copyDocSet Failure " + response); })
+                            },
+                            response => { console.log("getFolderDocSet Failure " + response); });
+                        break;
+
                     default:
                         break;
               }
@@ -98,8 +114,8 @@ export class ItemDL {
     releaseQueue() {
 
         for (var x = 0; x < this.contentQueue.length;x++) {
-            console.log("Queue Released: " + this.contentQueue[x]);
-            this.parent.addToArray(this.contentQueue[x]);
+           // console.log("Queue Released: " + this.contentQueue[x]);
+            this.parent.addToArray(this.contentQueue[x], this.folderURL, this.parentFolder);
         }
 
         this.contentQueue = [];

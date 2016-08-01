@@ -9,6 +9,8 @@ export class SiteCollection {
     checked: boolean;
     path: string;
     private dataService: DataService
+    
+    
 
     constructor(name, path) {
         this.name = name;

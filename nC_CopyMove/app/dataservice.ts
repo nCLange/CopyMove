@@ -552,7 +552,7 @@ export class DataService {
         var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
         listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
         var cType = listItem.get_contentType();
-
+       
 
         ctx.load(listItem);
         ctx.load(cType);
@@ -567,6 +567,7 @@ export class DataService {
                             console.log("Doc Set: " + caller.id);
 
                             caller.type = ContentType.DocSet;
+                            caller.contentTypeId = cType.get_id();
                         }
                         else {
                             console.log("Folder: " + caller.id);
@@ -578,6 +579,7 @@ export class DataService {
                         caller.type = ContentType.File;
                     }
                     else {
+                        console.log("Unknown " + caller.id);
                         reject("Unknown File format in" + caller.id);
                     }
 
@@ -625,12 +627,16 @@ export class DataService {
                        // console.log(files.getItemAtIndex(i).get_listItemAllFields().get_id());
 
                         caller.addToQueue(files.getItemAtIndex(i).get_listItemAllFields().get_id());
+                       
                     }
 
                     for (var i = 0; i < folders.get_count(); i++) {
-                        folders.getItemAtIndex(i).get_listItemAllFields().get_id();
+                        caller.addToQueue(folders.getItemAtIndex(i).get_listItemAllFields().get_id());
+                        
 
                     }
+
+                    caller.folderURL += caller.name + "/";
 
                     resolve();
 
@@ -642,10 +648,29 @@ export class DataService {
         });
     }
 
+   
     // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
     copyFolder(caller: ItemDL) {
+     /*   let that = this;
 
-        var targetList: SP.List;
+        var executor = new SP.RequestExecutor(this.appWebUrl);
+        return new Promise(function (resolve, reject) {
+            executor.executeAsync(
+                {
+                    url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/folders/add('"+caller.parent.title+"/"+caller.folderURL+"')",
+                    method: "GET",
+                    binaryStringResponseBody: true,
+                    success: function (data) { caller.fileContent = data.body; resolve(); },
+                    error: function (xhr) {
+                        reject(xhr.state + ": " + xhr.statusText);
+                    }
+                });
+
+
+        });*/
+
+
+       var targetList: SP.List;
         var listItem: SP.ListItem;
 
         var ctx = SP.ClientContext.get_current();
@@ -653,56 +678,173 @@ export class DataService {
 
         var itemCreateInfo: SP.ListItemCreationInformation;
 
-        listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
         targetList = appContextSite.get_web().get_lists().getByTitle(caller.parent.targetTitle);
 
-        itemCreateInfo = new SP.ListItemCreationInformation();
-        itemCreateInfo.set_underlyingObjectType(SP.FileSystemObjectType.folder);
-        itemCreateInfo.set_leafName(caller.name);
-       // itemCreateInfo.set_folderUrl(caller.parent.targetUrl+"/"+caller.parent.targetTitle + "/" + caller.name);
-      
 
-        var folderItem;
-        ctx.load(listItem);
+       // folderItem.
         ctx.load(targetList);
 
+        if (caller.parentFolder == null) {
 
-     
-            // if (!targetList.get_rootFolder().get_folders().getByUrl(ctx.get_url() + "/" + listItem.get_item('Title')).isPropertyAvailable('Title')) {
+/*
+            itemCreateInfo = new SP.ListItemCreationInformation();
+            itemCreateInfo.set_underlyingObjectType(SP.FileSystemObjectType.folder);
+            itemCreateInfo.set_leafName(caller.name);
 
+
+
+            var folderItem: SP.ListItem;
             folderItem = targetList.addItem(itemCreateInfo);
 
+
             folderItem.update();
+            var thisFolder: SP.Folder = folderItem.get_folder();
+            // thisFolder.get_folders().add
 
-      //  }
+            ctx.load(folderItem);
+            */
 
-       // listItem.
+            var thisFolder: SP.Folder = targetList.get_rootFolder().get_folders().add(caller.name);
+        }
+        else {
+            var thisFolder: SP.Folder = caller.parentFolder.get_folders().add(caller.name);
 
-        ctx.load(folderItem);
+        }
+
+        ctx.load(thisFolder);
 
         return new Promise(function (resolve, reject) {
             ctx.executeQueryAsync(
                 function () {
 
-
+                    caller.parentFolder= thisFolder;
                     caller.releaseQueue();
                     resolve();
 
                 },
                 function (x, args) {
-                    if (args.get_errorTypeName() == "Microsoft.SharePoint.SPException" && args.get_message().includes("already exists")) {
+                /*    if (args.get_errorTypeName() == "Microsoft.SharePoint.SPException" && args.get_message().includes("already exists")) {
 
+                        console.log("Already exists " + caller.id);
                         caller.releaseQueue();
                         resolve();
 
-                    }
+                    }*/
                     reject(arguments[1].get_message());
+                   
                 }
             );
         });
 
     }
 
+
+    // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
+    copyDocSet(caller: ItemDL) {
+
+        let that = this;
+
+         var targetList: SP.List;
+         var listItem: SP.ListItem;
+ 
+         var ctx = SP.ClientContext.get_current();
+         var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+ 
+         var itemCreateInfo: SP.ListItemCreationInformation;
+ 
+         targetList = appContextSite.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+
+         if (caller.parentFolder == null)
+             var root = targetList.get_rootFolder();
+         else
+             var root = caller.parentFolder;
+         ctx.load(targetList);
+
+         var cTypeId = caller.contentTypeId.toString();
+
+         var newCT: SP.ContentType = appContextSite.get_web().get_contentTypes().getById(cTypeId.substring(0,cTypeId.lastIndexOf("00")));
+        // console.log("This CTypeId: "+cTypeId.substring(0,cTypeId.lastIndexOf("00")));
+       
+ 
+       
+
+         //var docSetContentType = appContextSite.get_web().get_contentTypes().getById(caller.contentTypeId);
+         ctx.load(root);
+         ctx.load(newCT);
+
+
+ 
+         return new Promise(function (resolve, reject) {
+             ctx.executeQueryAsync(
+                 function () {
+                    // console.log(newCT);
+                    
+
+                     that.getFolderFromDocSet(root, caller).then(
+                         response => {
+                             caller.releaseQueue();
+                             resolve();
+                         },
+                         response => {
+                             if (response == false) {
+                                 SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
+                                 resolve();
+                             }
+                             else
+                             reject(response);
+                         }
+                     );
+                   
+ 
+                 },
+                 function (x, args) {
+
+
+                        reject(arguments[1].get_message());
+                 }
+             );
+         });
+
+    }
+
+    getFolderFromDocSet(root: SP.Folder, caller: ItemDL) {
+
+        let that = this;
+
+        var targetList: SP.List;
+        var listItem: SP.ListItem;
+
+        var ctx = SP.ClientContext.get_current();
+        var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+
+        var folders = root.get_folders();
+
+        ctx.load(folders);
+
+        return new Promise(function (resolve,reject){
+            ctx.executeQueryAsync(
+                function () {
+
+                    for (var i = 0; i < folders.get_count(); i++) {
+                        if (folders.getItemAtIndex(i).get_name() == caller.name) {
+                            caller.parentFolder = folders.getItemAtIndex(i);
+                            resolve();
+                        }
+                    }
+
+                    //caller.parentFolder = responseFolders;
+                    reject(false);
+
+                },
+                function () {
+       
+                    reject(arguments[1].get_message());}
+                
+
+            );
+
+        });
+    }
 
     readFileToCopy(caller: ItemDL) {
         let that = this;
@@ -762,10 +904,12 @@ export class DataService {
         targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
 
         fileCreateInfo = new SP.FileCreationInformation();
-        fileCreateInfo.set_url(caller.name);
+        fileCreateInfo.set_url(caller.parent.targetUrl + "/" + caller.parent.targetTitle+"/"+caller.folderURL+caller.name);
+       // console.log("This Folder " + caller.folderURL + "/Item: " + caller.id);
         fileCreateInfo.set_overwrite(true);
         fileCreateInfo.set_content(new SP.Base64EncodedByteArray());
         fileContent = caller.fileContent;
+        //fileCreateInfo.set_folderUrl(caller.parent.targetUrl + "/" + caller.folderURL + caller.name);
 
         for (var i = 0; i < fileContent.length; i++) {
             fileCreateInfo.get_content().append(fileContent.charCodeAt(i));
