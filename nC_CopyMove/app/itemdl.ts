@@ -45,10 +45,10 @@ export class ItemDL {
                         this.dataService.readFileToCopy(this).then(
                             response => {
 
-                                this.dataService.downloadFile(this).then(
+                               this.dataService.downloadFile(this).then(
                                     response => {
 
-                                        this.dataService.createFile(this).then(
+                                        this.dataService.createFile2(this).then(
                                             response => {
                                                 this.fileContent = null; // Delete Buffer
                                                 this.dataService.fillListItem(this).then(
@@ -65,6 +65,8 @@ export class ItemDL {
                                     }, response => {
                                         console.error("DownloadFile Failure " + response);
                                     });
+
+                               // this.dataService.soapAjax(this);
 
                             }, response => {
                                 console.log("readFileToCopy Failure " + response);

@@ -20,9 +20,10 @@ System.register(['./dataservice', './documentlibrary'], function(exports_1, cont
                     this.dataService = new dataservice_1.DataService();
                     this.relpath = this.getRelUrl();
                     this.absolutePath = this.getAbsolutePath();
+                    this.directories = [];
                 }
                 getStyle() {
-                    if (this.expanded) {
+                    if (this.selected) {
                         return "yellow";
                     }
                     else {
@@ -54,6 +55,11 @@ System.register(['./dataservice', './documentlibrary'], function(exports_1, cont
                             console.log("Failure " + response);
                         });
                     }
+                }
+                select() {
+                    //   this.parent.unsetAll();
+                    this.parent.select(this.selected);
+                    this.selected = true;
                 }
             }
             exports_1("Directory", Directory);

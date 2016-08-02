@@ -10,12 +10,14 @@ System.register(['./dataservice'], function(exports_1, context_1) {
             }],
         execute: function() {
             class SiteCollection {
-                constructor(name, path) {
+                constructor(name, path, parent) {
                     this.name = name;
                     this.expanded = false;
                     this.checked = false;
                     this.path = path;
                     this.dataService = new dataservice_1.DataService();
+                    this.parent = parent;
+                    this.documentLibraries = [];
                 }
                 toggle() {
                     this.expanded = !this.expanded;
@@ -34,6 +36,9 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     let newState = !this.checked;
                     this.checked = newState;
                     //      this.checkRecursive(newState);
+                }
+                unsetAll() {
+                    this.parent.unsetAll();
                 }
             }
             exports_1("SiteCollection", SiteCollection);

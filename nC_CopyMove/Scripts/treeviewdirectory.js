@@ -26,15 +26,16 @@ System.register(['angular2/core', './documentlibrary'], function(exports_1, cont
                 constructor() {
                 }
                 select(directory) {
-                    directory.toggle();
+                    let that = this;
+                    this.dblclick = false;
+                    setTimeout(function () {
+                        if (that.dblclick == false)
+                            directory.toggle();
+                    }, 400);
                 }
-                getStyle() {
-                    if (this.selected) {
-                        return "yellow";
-                    }
-                    else {
-                        return "white";
-                    }
+                mark(directory) {
+                    this.dblclick = true;
+                    directory.select();
                 }
             };
             __decorate([
@@ -45,7 +46,7 @@ System.register(['angular2/core', './documentlibrary'], function(exports_1, cont
                 core_1.Component({
                     selector: 'tree-view-directory',
                     template: `<ul>
-                <li *ngFor="let directory of folderLookUp.directories"><div [style.background-color]="directory.getStyle()"(click)="select(directory)">{{directory.name}}</div><div *ngIf="directory.expanded"><tree-view-directory [folderLookUp]="directory"></tree-view-directory></div></li>
+                <li *ngFor="let directory of folderLookUp.directories"><div [style.background-color]="directory.getStyle()"(dblclick)="mark(directory)" (click)="select(directory)">{{directory.name}}</div><div *ngIf="directory.expanded"><tree-view-directory [folderLookUp]="directory"></tree-view-directory></div></li>
                </ul>`,
                     directives: [TreeViewDirectory]
                 }), 

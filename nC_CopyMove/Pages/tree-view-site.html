@@ -15,9 +15,11 @@
         <button id="cm-button" onclick="return false" (click)="clicked(0)">Move</button>
     </div>
     <div *ngIf="screen==1">
+       
 
-
-        <button id="cm-button" onclick="return false" (click)="clicked(1)">Copy</button>
-        <button id="cm-button" onclick="return false" (click)="clicked(0)">Move</button>
+        <button id="cm-button" onclick="return false" (click)="clicked(0)">Cancel</button>
+    </div>
+    <div *ngIf="screen==2">
+        <button id="cm-button" onclick="return false" (click)="clicked(0)">Done</button>
     </div>
 </div>

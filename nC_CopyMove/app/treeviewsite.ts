@@ -22,8 +22,9 @@ export class TreeViewSite {
 
 
     clicked(delafter) {
-       
-        var copyroot = new CopyRoot(delafter, this.sitecollection);
+
+        var copyroot: CopyRoot = new CopyRoot(delafter, this.sitecollection);
+        var filesToCopy = copyroot.items;
         this.screen = 1;
     }
 

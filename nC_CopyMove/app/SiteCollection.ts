@@ -1,5 +1,6 @@
 ﻿import {DocumentLibrary} from './documentlibrary';
 import {DataService} from './dataservice';
+import {AppComponent} from './app.component';
 
 export class SiteCollection {
     name: string;
@@ -9,15 +10,18 @@ export class SiteCollection {
     checked: boolean;
     path: string;
     private dataService: DataService
+    parent: AppComponent;
     
     
 
-    constructor(name, path) {
+    constructor(name, path, parent) {
         this.name = name;
         this.expanded = false;
         this.checked = false;
         this.path = path;
         this.dataService = new DataService();
+        this.parent = parent;
+        this.documentLibraries = [];
     }
 
  
@@ -42,6 +46,12 @@ export class SiteCollection {
         let newState = !this.checked;
         this.checked = newState;
         //      this.checkRecursive(newState);
+    }
+
+    unsetAll() {
+        this.parent.unsetAll();
+
+
     }
 
 }

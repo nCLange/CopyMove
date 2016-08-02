@@ -18,6 +18,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     // this.cutPath(path);
                     this.expanded = false;
                     this.dataService = new dataservice_1.DataService();
+                    this.directories = [];
                     //  this.directories = [new Directory("thisname",[new Directory("thisbla",[new Directory("thisbla")])])];
                 }
                 /* cutPath(path) {
@@ -27,7 +28,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     
                  }*/
                 getStyle() {
-                    if (this.expanded) {
+                    if (this.selected) {
                         return "yellow";
                     }
                     else {
@@ -46,6 +47,13 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                             console.log("Failure " + response);
                         });
                     }
+                }
+                select() {
+                    this.parent.unsetAll();
+                    this.selected = true;
+                }
+                unsetAll() {
+                    this.parent.unsetAll();
                 }
             }
             exports_1("DocumentLibrary", DocumentLibrary);

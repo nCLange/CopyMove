@@ -29,7 +29,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                             case ContentType.File:
                                 this.dataService.readFileToCopy(this).then(response => {
                                     this.dataService.downloadFile(this).then(response => {
-                                        this.dataService.createFile(this).then(response => {
+                                        this.dataService.createFile2(this).then(response => {
                                             this.fileContent = null; // Delete Buffer
                                             this.dataService.fillListItem(this).then(response => { this.dataService.fillListItem(this); }, response => {
                                                 console.error("Fill Listitems Failure" + response);
@@ -40,6 +40,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                     }, response => {
                                         console.error("DownloadFile Failure " + response);
                                     });
+                                    // this.dataService.soapAjax(this);
                                 }, response => {
                                     console.log("readFileToCopy Failure " + response);
                                 });

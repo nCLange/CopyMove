@@ -20,6 +20,7 @@ export class DocumentLibrary {
        // this.cutPath(path);
         this.expanded = false;
         this.dataService = new DataService();
+        this.directories = [];
       //  this.directories = [new Directory("thisname",[new Directory("thisbla",[new Directory("thisbla")])])];
         
     }
@@ -33,7 +34,7 @@ export class DocumentLibrary {
 
 
     getStyle() {
-        if (this.expanded) {
+        if (this.selected) {
             return "yellow";
         } else {
             return "white";
@@ -54,5 +55,15 @@ export class DocumentLibrary {
                     console.log("Failure " + response);
                 });
         }
+    }
+
+    select() {
+        this.parent.unsetAll();
+        this.selected = true;
+
+    }
+
+    unsetAll() {
+        this.parent.unsetAll();
     }
 }

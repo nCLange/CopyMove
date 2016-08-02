@@ -25,7 +25,17 @@ System.register(['angular2/core', './treeviewdirectory'], function(exports_1, co
                 constructor() {
                 }
                 select(library) {
-                    library.toggle();
+                    let that = this;
+                    this.dblclick = false;
+                    setTimeout(function () {
+                        // console.log(this.dblclick);
+                        if (that.dblclick == false)
+                            library.toggle();
+                    }, 400);
+                }
+                mark(library) {
+                    this.dblclick = true;
+                    library.select();
                 }
             };
             __decorate([
@@ -36,7 +46,7 @@ System.register(['angular2/core', './treeviewdirectory'], function(exports_1, co
                 core_1.Component({
                     selector: 'tree-view-doclib',
                     template: `<ul >
-                <li *ngFor="let library of documentlibrary"><div [style.background-color]="library.getStyle()" (click)="select(library)">{{library.name}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
+                <li *ngFor="let library of documentlibrary"><div [style.background-color]="library.getStyle()" (dblclick)="mark(library)" (click)="select(library)">{{library.name}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
                </ul>`,
                     directives: [treeviewdirectory_1.TreeViewDirectory]
                 }), 

@@ -19,11 +19,12 @@ export class Directory {
         this.dataService = new DataService();
         this.relpath = this.getRelUrl();
         this.absolutePath = this.getAbsolutePath();
+        this.directories = [];
        
         
     }
     getStyle() {
-        if (this.expanded) {
+        if (this.selected) {
             return "yellow";
         } else {
             return "";
@@ -63,5 +64,14 @@ export class Directory {
         }
             
     }
+
+    select() {
+     //   this.parent.unsetAll();
+   
+        this.parent.select(this.selected);
+        this.selected = true;
+
+    }
+    
 
 }

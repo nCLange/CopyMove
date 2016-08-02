@@ -29,7 +29,8 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
                     this.screen = 0;
                 }
                 clicked(delafter) {
-                    var copyroot = new copyroot_1.CopyRoot(delafter);
+                    var copyroot = new copyroot_1.CopyRoot(delafter, this.sitecollection);
+                    var filesToCopy = copyroot.items;
                     this.screen = 1;
                 }
             };

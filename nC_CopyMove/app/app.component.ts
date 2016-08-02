@@ -28,7 +28,7 @@ export class AppComponent {
         this.sitecollection = [ZRR2012, ZRR2013, ZRR2014, ZRR2015, ZRR2016];
         */
         this.sitecollection = [];
-        dataService.searchSiteCollection().then(
+        dataService.searchSiteCollection(this).then(
             response => {
                 var tempresponse;
                 tempresponse = response;
@@ -37,5 +37,17 @@ export class AppComponent {
             }, response => {
                 console.log("Failure " + response);
             });
+    }
+
+    unsetAll() {
+        for (var i = 0; i < this.sitecollection.length; i++) {
+            for (var j = 0; j < this.sitecollection[i].documentLibraries.length; j++) {
+                this.sitecollection[i].documentLibraries[j].selected = false;
+                for (var k = 0; k < this.sitecollection[i].documentLibraries[j].directories.length; k++) {
+                    this.sitecollection[i].documentLibraries[j].directories[k].selected = false;
+                    //loop for all directories
+                }
+            }
+        }
     }
 }
