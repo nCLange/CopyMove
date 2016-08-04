@@ -33,7 +33,7 @@ export class TreeViewDirectory {
     mark(directory: Directory) {
         
         this.dblclick = true;
-        directory.select();
+        directory.select("--1");
     }
 
 }

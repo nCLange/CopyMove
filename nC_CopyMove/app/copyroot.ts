@@ -2,29 +2,66 @@
 import {ItemDL} from './itemdl';
 import {SiteCollection} from './sitecollection';
 import {DocumentLibrary} from './documentlibrary';
+import {Directory} from './directory';
 
 
 
 export class CopyRoot{
     srcUrl = "http://win-iprrvsfootq/sites/dev";
-   // targetUrl ="http://win-iprrvsfootq/sites/dev";
     targetUrl: string;
-    private selectedItemIds = [1,2, 23];
+    private selectedItemIds = [23];
     title = "DocaDoca";
+   
     targetTitle: string;
-   // targetTitle = "DocumentTest1";
-    private deleteAfterwards;
+    rootpath: string;
+    rootFolder: SP.Folder;
+    maxCalls: number;
+    currentCalls: number;
+    private deleteAfterwards: boolean;
     dataService: DataService;
     folderString: string;
 
     items : Array<ItemDL>;
     static targetUrlArray: Array<String>;
+    
 
 
-    constructor(delafter, sitecollections: Array<SiteCollection>) {
+    constructor(delafter: boolean, sitecollections: Array<SiteCollection>) {
+
+        this.targetUrl = SiteCollection.targetPath;
+        this.targetTitle = DocumentLibrary.targetTitle;
+        this.rootpath = "";
+        this.rootFolder = null;
+        this.dataService = new DataService();
+        this.maxCalls = 1;
+        this.currentCalls = 0;
+        
+
+        if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
+            this.rootpath = Directory.selectedPath;
+            this.dataService.getFolderFromUrl(this).then(
+                response => {
+                    this.items = [];
+                    this.deleteAfterwards = delafter;
+                    for (var id = 0; id < this.selectedItemIds.length; id++) {
+                        this.items.push(new ItemDL(this.selectedItemIds[id], this, this.rootpath, this.rootFolder));
+                    }
+                },
+                response => { console.log("getFolderFromUrl Error " + response); });
+
+        }
+        else {
+            this.items = [];
+            this.deleteAfterwards = delafter;
+            for (var id = 0; id < this.selectedItemIds.length; id++) {
+                this.items.push(new ItemDL(this.selectedItemIds[id], this));
+            }
+        }
+
+
       //  this.targetUrlArray = null;
-        this.folderString = "";
-
+       // this.folderString = "";
+        /*
         for (var i = 0; i < sitecollections.length; i++) {
             var url;
             if (sitecollections[i].expanded) {
@@ -49,23 +86,19 @@ export class CopyRoot{
 
                 }
             }
-        }
+        }*/
 
-        console.log("FolderString " +this.folderString);
+       // console.log("FolderString " +this.folderString);
      
 
 
 
-        this.items = [];
-        this.deleteAfterwards = delafter;
-        for (var id = 0; id < this.selectedItemIds.length; id++) {
-            this.items.push(new ItemDL(this.selectedItemIds[id], this));
-        }
+
 
     }
 
-    addToArray(id,folderURL,parentFolder) {
-        this.items.push(new ItemDL(id, this, folderURL,parentFolder));
+    addToArray(id,folderURL,parentFolderId) {
+        this.items.push(new ItemDL(id, this, folderURL,parentFolderId));
        
       //  console.log("ID:" + id + " folderURL: " + folderURL);
         //console.log(folderURL);

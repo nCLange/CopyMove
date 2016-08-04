@@ -34,6 +34,20 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                 constructor() {
                     this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
                 }
+                getFolderFromUrl(caller) {
+                    var ctx = new SP.ClientContext(caller.targetUrl);
+                    //  var appContextSite = new SP.AppContextSite(ctx, caller.targetUrl);
+                    var currentFolder = ctx.get_web().getFolderByServerRelativeUrl(caller.targetTitle + "/" + caller.rootpath);
+                    ctx.load(currentFolder);
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(function () {
+                            caller.rootFolder = currentFolder;
+                            resolve();
+                        }, function () {
+                            reject(arguments[1].get_message());
+                        });
+                    });
+                }
                 searchSiteCollection(caller) {
                     let that = this;
                     return new Promise(function (resolve, reject) {
@@ -63,32 +77,48 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 }
-                searchDocumentLibrary(pathURL, parent) {
-                    let that = this;
-                    var executor = new SP.RequestExecutor(this.appWebUrl);
-                    return new Promise(function (resolve, reject) {
-                        executor.executeAsync({
-                            //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
-                            //Leere Bibliotheken werden ignoriert , beheben?
-                            url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_list_documentlibrary+path:" + pathURL + "'&trimduplicates=false",
-                            method: "GET",
-                            headers: { "Accept": "application/json; odata=verbose" },
-                            success: function (data) {
-                                var myoutput = JSON.parse((data.body.toString()));
-                                var documentlibraries = [];
-                                var dossierResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                                for (var x = 0; x < dossierResult.length; x++) {
-                                    documentlibraries.push(new documentlibrary_1.DocumentLibrary(that.searchJSONForValue(dossierResult[x].Cells.results, "Title"), that.searchJSONForValue(dossierResult[x].Cells.results, "Path"), parent));
-                                }
-                                resolve(documentlibraries);
-                            },
-                            error: function (data) {
-                                var documentlibraries = [];
-                                reject(documentlibraries);
-                            }
-                        });
-                    });
-                }
+                /*  searchDocumentLibrary(pathURL, parent) {
+              
+                      let that = this;
+              
+              
+              
+                      var executor = new SP.RequestExecutor(this.appWebUrl);
+              
+                      return new Promise(function (resolve, reject) {
+              
+              
+              
+                          executor.executeAsync(
+                              {
+                                  //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'",
+                                  //Leere Bibliotheken werden ignoriert , beheben?
+                                  url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_list_documentlibrary+path:" + pathURL + "'&trimduplicates=false",
+              
+                                  method: "GET",
+                                  headers: { "Accept": "application/json; odata=verbose" },
+                                  success: function (data) {
+                                      var myoutput = JSON.parse((data.body.toString()));
+                                      var documentlibraries = [];
+                                      var dossierResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                                      for (var x = 0; x < dossierResult.length; x++) {
+              
+                                          documentlibraries.push(new DocumentLibrary(that.searchJSONForValue(dossierResult[x].Cells.results, "Title"), that.searchJSONForValue(dossierResult[x].Cells.results, "Path"), parent));
+                                      }
+              
+                                      resolve(documentlibraries);
+                                  },
+                                  error: function (data) {
+                                      var documentlibraries = [];
+                                      reject(documentlibraries);
+                                  }
+              
+                              }
+                          )
+                      });
+              
+                  }
+                  */
                 searchDocumentLibrary2(pathURL, parent) {
                     //var executor = new SP.RequestExecutor(this.appWebUrl);
                     let that = this;
@@ -98,7 +128,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                             executor.executeAsync({
                                 //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
                                 //Leere Bibliotheken werden ignoriert , beheben?
-                                url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/lists?@target='" + pathURL + "'",
+                                url: pathURL + "/_api/web/lists",
                                 method: "GET",
                                 headers: { "Accept": "application/json; odata=verbose" },
                                 success: function (data) {
@@ -106,8 +136,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                     var documentlibraries = [];
                                     var dossierResult = myoutput.d.results;
                                     for (var x = 0; x < dossierResult.length; x++) {
-                                        if (dossierResult[x].DocumentTemplateUrl != null)
-                                            //documentlibraries.push(new DocumentLibrary(that.searchJSONForValue(dossierResult[x].Cells.results, "Title"), that.searchJSONForValue(dossierResult[x].Cells.results, "Path"), parent));
+                                        if (dossierResult[x].DocumentTemplateUrl != null && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Documents" && dossierResult[x].Title != "Site Assets")
                                             documentlibraries.push(new documentlibrary_1.DocumentLibrary(dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
                                     }
                                     resolve(documentlibraries);
@@ -126,7 +155,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     let that = this;
                     return new Promise(function (resolve, reject) {
                         executor.executeAsync({
-                            url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFolderByServerRelativeUrl('" + relPath + "')/Folders?@target='" + pathUrl + "'",
+                            url: pathUrl + "/_api/web/GetFolderByServerRelativeUrl('" + relPath + "')/Folders?$expand=ListItemAllFields",
                             //Leere Bibliotheken werden ignoriert , beheben?
                             //url: (pathUrl+"/_api/web/GetFolderByServerRelativeUrl('"+relPath+"')"),
                             method: "GET",
@@ -136,7 +165,8 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 var directory = [];
                                 var siteResult = myoutput.d.results;
                                 for (var x = 0; x < siteResult.length; x++) {
-                                    directory.push(new directory_1.Directory(that.searchJSONWebApi(siteResult[x], "Name"), parent));
+                                    if (siteResult[x].Name != "Forms" && !siteResult[x].ListItemAllFields.ContentTypeId.startsWith("0x0120D520"))
+                                        directory.push(new directory_1.Directory(siteResult[x].Name, parent));
                                 }
                                 resolve(directory);
                             },
@@ -163,7 +193,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     let that = this;
                     return new Promise(function (resolve, reject) {
                         executor.executeAsync({
-                            url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/lists/GetByTitle('" + listTitle + "')/items(" + id + ")?@target='" + pathUrl + "'",
+                            url: pathUrl + "/_api/web/lists/GetByTitle('" + listTitle + "')/items(" + id + ")",
                             method: "GET",
                             headers: { "Accept": "application/json; odata=verbose" },
                             success: function (data) {
@@ -387,123 +417,147 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var xmlstring = this.buildSoapEnvelope(caller);
                     return new Promise(function (resolve, reject) {
                         jQuery.ajax({
-                            url: that.appWebUrl + "/_vti_bin/copy.asmx",
+                            url: caller.parent.srcUrl + "/_vti_bin/copy.asmx",
                             type: "POST",
                             dataType: "xml",
                             data: xmlstring,
-                            complete: function (xData, status) {
-                                console.log(xData);
-                                that.getListIDFromFile(caller);
-                                resolve();
+                            success: function (xData, status) {
+                                that.getListIDFromFile(caller).then(response => { resolve(); }, response => { reject(response); });
+                            },
+                            error: function (xData, status) {
+                                reject(xData + " " + status);
                             },
                             contentType: "application/soap+xml; charset=utf-8"
                         });
                     });
                 }
                 getListIDFromFile(caller) {
-                    var ctx = SP.ClientContext.get_current();
-                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
-                    var file = appContextSite.get_web().getFileByServerRelativeUrl(caller.parent.targetTitle + "/" + caller.folderURL + caller.name);
+                    var ctx = new SP.ClientContext(caller.parent.targetUrl);
+                    //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+                    var file = ctx.get_web().getFileByServerRelativeUrl("/" + caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "") + "/" + caller.parent.targetTitle + "/" + caller.folderURL + caller.name);
                     ctx.load(file, 'ListItemAllFields');
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
                             caller.targetId = file.get_listItemAllFields().get_id();
                             resolve();
                         }, function () {
-                            reject();
+                            reject(arguments[1].get_message());
                         });
                     });
                 }
-                downloadFile(caller) {
-                    let that = this;
-                    $.getScript(that.appWebUrl + "/_layouts/15/SP.RequestExecutor.js", function () {
-                        SP.RequestExecutorInternalSharedUtility.BinaryDecode = function SP_RequestExecutorInternalSharedUtility$BinaryDecode(data) {
-                            var ret = '';
-                            if (data) {
-                                var byteArray = new Uint8Array(data);
-                                for (var i = 0; i < data.byteLength; i++) {
-                                    ret = ret + String.fromCharCode(byteArray[i]);
-                                }
-                            }
-                            ;
-                            return ret;
-                        };
-                        SP.RequestExecutorUtility.IsDefined = function SP_RequestExecutorUtility$$1(data) {
-                            var nullValue = null;
-                            return data === nullValue || typeof data === 'undefined' || !data.length;
-                        };
-                        SP.RequestExecutor.ParseHeaders = function SP_RequestExecutor$ParseHeaders(headers) {
-                            if (SP.RequestExecutorUtility.IsDefined(headers)) {
-                                return null;
-                            }
-                            var result = {};
-                            var reSplit = new RegExp('\r?\n');
-                            var headerArray = headers.split(reSplit);
-                            for (var i = 0; i < headerArray.length; i++) {
-                                var currentHeader = headerArray[i];
-                                if (!SP.RequestExecutorUtility.IsDefined(currentHeader)) {
-                                    var splitPos = currentHeader.indexOf(':');
-                                    if (splitPos > 0) {
-                                        var key = currentHeader.substr(0, splitPos);
-                                        var value = currentHeader.substr(splitPos + 1);
-                                        key = SP.RequestExecutorNative.trim(key);
-                                        value = SP.RequestExecutorNative.trim(value);
-                                        result[key.toUpperCase()] = value;
+                /*
+                    downloadFile(caller: ItemDL) {
+                
+                        let that = this;
+                
+                        $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js", function () {
+                            (SP as any).RequestExecutorInternalSharedUtility.BinaryDecode = function SP_RequestExecutorInternalSharedUtility$BinaryDecode(data) {
+                                var ret = '';
+                
+                                if (data) {
+                                    var byteArray = new Uint8Array(data);
+                
+                                    for (var i = 0; i < data.byteLength; i++) {
+                                        ret = ret + String.fromCharCode(byteArray[i]);
                                     }
                                 }
-                            }
-                            return result;
-                        };
-                        SP.RequestExecutor.internalProcessXMLHttpRequestOnreadystatechange = function SP_RequestExecutor$internalProcessXMLHttpRequestOnreadystatechange(xhr, requestInfo, timeoutId) {
-                            if (xhr.readyState === 4) {
-                                if (timeoutId) {
-                                    window.clearTimeout(timeoutId);
+                                ;
+                                return ret;
+                            };
+                
+                            (SP as any).RequestExecutorUtility.IsDefined = function SP_RequestExecutorUtility$$1(data) {
+                                var nullValue = null;
+                
+                                return data === nullValue || typeof data === 'undefined' || !data.length;
+                            };
+                
+                            (SP as any).RequestExecutor.ParseHeaders = function SP_RequestExecutor$ParseHeaders(headers) {
+                                if ((SP as any).RequestExecutorUtility.IsDefined(headers)) {
+                                    return null;
                                 }
-                                xhr.onreadystatechange = SP.RequestExecutorNative.emptyCallback;
-                                var responseInfo = new SP.ResponseInfo();
-                                responseInfo.state = requestInfo.state;
-                                responseInfo.responseAvailable = true;
-                                if (requestInfo.binaryStringResponseBody) {
-                                    responseInfo.body = SP.RequestExecutorInternalSharedUtility.BinaryDecode(xhr.response);
-                                }
-                                else {
-                                    responseInfo.body = xhr.responseText;
-                                }
-                                responseInfo.statusCode = xhr.status;
-                                responseInfo.statusText = xhr.statusText;
-                                responseInfo.contentType = xhr.getResponseHeader('content-type');
-                                responseInfo.allResponseHeaders = xhr.getAllResponseHeaders();
-                                responseInfo.headers = SP.RequestExecutor.ParseHeaders(responseInfo.allResponseHeaders);
-                                if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 1223) {
-                                    if (requestInfo.success) {
-                                        requestInfo.success(responseInfo);
+                                var result = {};
+                                var reSplit = new RegExp('\r?\n');
+                                var headerArray = headers.split(reSplit);
+                
+                                for (var i = 0; i < headerArray.length; i++) {
+                                    var currentHeader = headerArray[i];
+                
+                                    if (!(SP as any).RequestExecutorUtility.IsDefined(currentHeader)) {
+                                        var splitPos = currentHeader.indexOf(':');
+                
+                                        if (splitPos > 0) {
+                                            var key = currentHeader.substr(0, splitPos);
+                                            var value = currentHeader.substr(splitPos + 1);
+                
+                                            key = (SP as any).RequestExecutorNative.trim(key);
+                                            value = (SP as any).RequestExecutorNative.trim(value);
+                                            result[key.toUpperCase()] = value;
+                                        }
                                     }
                                 }
-                                else {
-                                    var error = SP.RequestExecutorErrors.httpError;
-                                    var statusText = xhr.statusText;
-                                    if (requestInfo.error) {
-                                        requestInfo.error(responseInfo, error, statusText);
+                                return result;
+                            };
+                
+                            (SP as any).RequestExecutor.internalProcessXMLHttpRequestOnreadystatechange = function SP_RequestExecutor$internalProcessXMLHttpRequestOnreadystatechange(xhr, requestInfo, timeoutId) {
+                                if (xhr.readyState === 4) {
+                                    if (timeoutId) {
+                                        window.clearTimeout(timeoutId);
+                                    }
+                                    xhr.onreadystatechange = (SP as any).RequestExecutorNative.emptyCallback;
+                                    var responseInfo = new (SP as any).ResponseInfo();
+                
+                                    responseInfo.state = requestInfo.state;
+                                    responseInfo.responseAvailable = true;
+                                    if (requestInfo.binaryStringResponseBody) {
+                                        responseInfo.body = (SP as any).RequestExecutorInternalSharedUtility.BinaryDecode(xhr.response);
+                                    }
+                                    else {
+                                        responseInfo.body = xhr.responseText;
+                                    }
+                                    responseInfo.statusCode = xhr.status;
+                                    responseInfo.statusText = xhr.statusText;
+                                    responseInfo.contentType = xhr.getResponseHeader('content-type');
+                                    responseInfo.allResponseHeaders = xhr.getAllResponseHeaders();
+                                    responseInfo.headers = (SP as any).RequestExecutor.ParseHeaders(responseInfo.allResponseHeaders);
+                                    if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 1223) {
+                                        if (requestInfo.success) {
+                                            requestInfo.success(responseInfo);
+                                        }
+                                    }
+                                    else {
+                                        var error = SP.RequestExecutorErrors.httpError;
+                                        var statusText = xhr.statusText;
+                
+                                        if (requestInfo.error) {
+                                            requestInfo.error(responseInfo, error, statusText);
+                                        }
                                     }
                                 }
-                            }
-                        };
-                    });
-                    // $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
-                    // executes cross domain request
-                    var executor = new SP.RequestExecutor(this.appWebUrl);
-                    return new Promise(function (resolve, reject) {
-                        executor.executeAsync({
-                            url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + caller.srcUrl + "')/$value?@target='" + caller.parent.srcUrl + "'",
-                            method: "GET",
-                            binaryStringResponseBody: true,
-                            success: function (data) { console.log("Download of " + caller.name + " complete"); caller.fileContent = data.body; resolve(); },
-                            error: function (xhr) {
-                                reject(xhr.state + ": " + xhr.statusText);
-                            }
+                            };
                         });
-                    });
-                }
+                
+                        // $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+                        // executes cross domain request
+                        var executor = new SP.RequestExecutor(this.appWebUrl);
+                        return new Promise(function (resolve, reject) {
+                            executor.executeAsync(
+                                {
+                                    url: caller.parent.srcUrl + "/_api/web/GetFileByServerRelativeUrl('" + caller.srcUrl + "')/$value",
+                                    method: "GET",
+                                    binaryStringResponseBody: true,
+                                    success: function (data) {
+                                        caller.fileContent = data.body;
+                                        resolve();
+                                    },
+                                    error: function (xhr) {
+                                        reject(xhr.state + ": " + xhr.statusText);
+                                    }
+                                });
+                
+                
+                        });
+                    }
+                */
                 /* postFile(data, caller) {
                      let that = this;
                      var executor = new SP.RequestExecutor(this.appWebUrl);
@@ -560,9 +614,9 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var targetLib = caller.parent.targetTitle;
                     let that = this;
                     var listItem;
-                    var ctx = SP.ClientContext.get_current();
-                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
-                    listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+                    var ctx = new SP.ClientContext(caller.parent.srcUrl);
+                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
+                    listItem = ctx.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
                     var cType = listItem.get_contentType();
                     ctx.load(listItem);
                     ctx.load(cType);
@@ -572,7 +626,10 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 if (cType.get_id().toString().startsWith("0x0120D520")) {
                                     console.log("Doc Set: " + caller.id);
                                     caller.type = itemdl_1.ContentType.DocSet;
-                                    caller.contentTypeId = cType.get_id();
+                                    //cTypeId.substring(0,cTypeId.lastIndexOf("00"))
+                                    caller.contentTypeId = cType.get_id().toString().substring(0, cType.get_id().toString().lastIndexOf("00"));
+                                    caller.contentTypeName = cType.get_name();
+                                    console.log(caller.contentTypeName);
                                 }
                                 else {
                                     console.log("Folder: " + caller.id);
@@ -597,9 +654,9 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     let that = this;
                     var targetList;
                     var listItem;
-                    var ctx = SP.ClientContext.get_current();
-                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
-                    listItem = appContextSite.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+                    var ctx = new SP.ClientContext(caller.parent.srcUrl);
+                    //var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
+                    listItem = ctx.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
                     var files = listItem.get_folder().get_files();
                     var folders = listItem.get_folder().get_folders();
                     ctx.load(listItem);
@@ -644,39 +701,26 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                        });*/
                     var targetList;
                     var listItem;
-                    var ctx = SP.ClientContext.get_current();
-                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+                    var ctx = new SP.ClientContext(caller.parent.targetUrl);
+                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
                     var itemCreateInfo;
-                    targetList = appContextSite.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+                    targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+                    var thisFolder;
                     // folderItem.
                     ctx.load(targetList);
-                    if (caller.parentFolder == null) {
-                        /*
-                                    itemCreateInfo = new SP.ListItemCreationInformation();
-                                    itemCreateInfo.set_underlyingObjectType(SP.FileSystemObjectType.folder);
-                                    itemCreateInfo.set_leafName(caller.name);
-                        
-                        
-                        
-                                    var folderItem: SP.ListItem;
-                                    folderItem = targetList.addItem(itemCreateInfo);
-                        
-                        
-                                    folderItem.update();
-                                    var thisFolder: SP.Folder = folderItem.get_folder();
-                                    // thisFolder.get_folders().add
-                        
-                                    ctx.load(folderItem);
-                                    */
-                        var thisFolder = targetList.get_rootFolder().get_folders().add(caller.name);
+                    if (caller.parentFolderId == null) {
+                        thisFolder = targetList.get_rootFolder().get_folders().add(caller.name);
                     }
                     else {
-                        var thisFolder = caller.parentFolder.get_folders().add(caller.name);
-                    }
+                        thisFolder = targetList.getItemById(caller.parentFolderId).get_folder().get_folders().add(caller.name);
+                    } // Überarbeiten
+                    //   console.log(caller.parentFolder.get_folders());
+                    ctx.load(thisFolder, "ListItemAllFields");
                     ctx.load(thisFolder);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
-                            caller.parentFolder = thisFolder;
+                            // caller.parentFolder= thisFolder;
+                            caller.parentFolderId = thisFolder.get_listItemAllFields().get_id();
                             caller.releaseQueue();
                             resolve();
                         }, function (x, args) {
@@ -696,59 +740,79 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     let that = this;
                     var targetList;
                     var listItem;
-                    var ctx = SP.ClientContext.get_current();
-                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
-                    var itemCreateInfo;
-                    targetList = appContextSite.get_web().get_lists().getByTitle(caller.parent.targetTitle);
-                    if (caller.parentFolder == null)
-                        var root = targetList.get_rootFolder();
-                    else
-                        var root = caller.parentFolder;
+                    var root;
+                    var ctx = new SP.ClientContext(caller.parent.targetUrl);
+                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+                    targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+                    if (caller.parentFolderId == null)
+                        root = targetList.get_rootFolder();
+                    //else
+                    //  root = targetList.getItemById(caller.parentFolderId).get_folder();
                     ctx.load(targetList);
-                    var cTypeId = caller.contentTypeId.toString();
-                    var newCT = appContextSite.get_web().get_contentTypes().getById(cTypeId.substring(0, cTypeId.lastIndexOf("00")));
-                    // console.log("This CTypeId: "+cTypeId.substring(0,cTypeId.lastIndexOf("00")));
-                    //var docSetContentType = appContextSite.get_web().get_contentTypes().getById(caller.contentTypeId);
+                    var cTypeId = caller.contentTypeId;
+                    var newCT = ctx.get_web().get_contentTypes().getById(cTypeId);
                     ctx.load(root);
                     ctx.load(newCT);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
-                            // console.log(newCT);
-                            that.getFolderFromDocSet(root, caller).then(response => {
-                                caller.releaseQueue();
-                                resolve();
-                            }, response => {
-                                if (response == false) {
-                                    SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
-                                    that.getFolderFromDocSet(root, caller).then(response => {
+                            /*  SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
+                              ctx.executeQueryAsync(
+                                function(){
+                                    that.getFolderFromDocSet(caller).then(
+                                    response => {
                                         caller.releaseQueue();
                                         resolve();
-                                    }, response => {
-                                        reject(response);
+                                    },
+                                    response =>{
+        
+                                            reject("0:"+response)
                                     });
-                                    resolve();
-                                }
-                                else
-                                    reject(response);
-                            });
+                                  },
+                                  function(){
+                                     if(arguments[1].get_message().includes("already exists"))
+                                     {
+                                        that.getFolderFromDocSet(caller).then(
+                                            response => {
+                                                caller.releaseQueue();
+                                                resolve();
+                                            },
+                                            response =>{
+                                                reject("2:"+response)
+                                        });
+                                     }
+                                     else
+                                        reject("1:"+arguments[1].get_message());
+                                  });*/
                         }, function (x, args) {
-                            reject(arguments[1].get_message());
+                            reject("3:" + arguments[1].get_message());
                         });
                     });
                 }
-                getFolderFromDocSet(root, caller) {
+                getFolderFromDocSet(caller) {
                     let that = this;
                     var targetList;
                     var listItem;
-                    var ctx = SP.ClientContext.get_current();
-                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
-                    var folders = root.get_folders();
+                    var folders;
+                    var ctx = new SP.ClientContext(caller.parent.targetUrl);
+                    //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+                    targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+                    if (caller.parentFolderId == null)
+                        folders = targetList.get_rootFolder().get_folders();
+                    else
+                        folders = targetList.getItemById(caller.parentFolderId).get_folder().get_folders();
+                    ctx.load(targetList);
+                    ctx.load(folders, 'Include(ListItemAllFields)');
                     ctx.load(folders);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
+                            // console.log(folders);
                             for (var i = 0; i < folders.get_count(); i++) {
+                                //    console.log(folders.getItemAtIndex(i)); 
                                 if (folders.getItemAtIndex(i).get_name() == caller.name) {
-                                    caller.parentFolder = folders.getItemAtIndex(i);
+                                    //  console.log(folders.getItemAtIndex(i).get_name());
+                                    // caller.parentFolder = folders.getItemAtIndex(i);
+                                    caller.parentFolderId = folders.getItemAtIndex(i).get_listItemAllFields().get_id();
+                                    caller.targetId = folders.getItemAtIndex(i).get_listItemAllFields().get_id();
                                     resolve();
                                 }
                             }
@@ -759,72 +823,97 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 }
-                createFile(caller) {
-                    var targetList;
+                /*
+            
+                createFile(caller: ItemDL) {
+                 
+            
+                    var targetList: SP.List;
                     var fileCreateInfo;
                     var fileContent;
                     let that = this;
+            
                     var ctx = SP.ClientContext.get_current();
+            
                     var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
+            
                     fileCreateInfo = new SP.FileCreationInformation();
-                    fileCreateInfo.set_url(caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.folderURL + caller.name);
-                    // console.log("This Folder " + caller.folderURL + "/Item: " + caller.id);
+                    fileCreateInfo.set_url(caller.parent.targetUrl + "/" + caller.parent.targetTitle+"/"+caller.folderURL+caller.name);
+                   // console.log("This Folder " + caller.folderURL + "/Item: " + caller.id);
                     fileCreateInfo.set_overwrite(true);
                     fileCreateInfo.set_content(new SP.Base64EncodedByteArray());
                     fileContent = caller.fileContent;
                     //fileCreateInfo.set_folderUrl(caller.parent.targetUrl + "/" + caller.folderURL + caller.name);
+            
                     for (var i = 0; i < fileContent.length; i++) {
                         fileCreateInfo.get_content().append(fileContent.charCodeAt(i));
                     }
-                    var newFile = targetList.get_rootFolder().get_files().add(fileCreateInfo);
+                    var newFile: SP.File = targetList.get_rootFolder().get_files().add(fileCreateInfo);
                     ctx.load(newFile, 'ListItemAllFields');
+            
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(
-                        //Success
-                        function (data) {
-                            caller.targetId = newFile.get_listItemAllFields().get_id();
-                            resolve();
-                        }, 
-                        //Fail
-                        function (data) {
-                            reject(arguments[1].get_message());
-                        });
-                    });
-                }
-                createFile2(caller) {
-                    let that = this;
-                    var executor = new SP.RequestExecutor(this.appWebUrl);
-                    var urlstring;
-                    if (caller.folderURL != "") {
-                        urlstring = that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFolderByServerRelativeUrl(@TargetFolderName)/Files/Add(url='" + caller.name + "', overwrite=true)?$expand=ListItemAllFields&@target='" + caller.parent.targetUrl + "'&@TargetFolderName='" + caller.parent.targetTitle + "/" + caller.folderURL + "'";
-                    }
-                    else
-                        urlstring = that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/lists/getByTitle('" + caller.parent.targetTitle + "')/RootFolder/Files/Add(url='" + caller.name + "', overwrite=true)?$expand=ListItemAllFields&@target='" + caller.parent.targetUrl + "'";
-                    return new Promise(function (resolve, reject) {
-                        executor.executeAsync({
-                            url: urlstring,
-                            method: "POST",
-                            binaryStringRequestBody: true,
-                            body: caller.fileContent,
-                            headers: {
-                                "Accept": "application/json; odata=verbose"
-                            },
-                            success: function (data) {
-                                caller.targetId = (JSON.parse(data.body)).d.ListItemAllFields.ID;
+                            //Success
+                            function (data) {
+                            
+                                caller.targetId = newFile.get_listItemAllFields().get_id();
                                 resolve();
+            
                             },
-                            error: function (xhr) {
-                                reject(xhr.state + ": " + xhr.statusText);
+                            //Fail
+                            function (data) {
+                                reject(arguments[1].get_message());
+            
                             }
-                        });
+                        );
                     });
+            
+            
+            
                 }
-                readFileToCopy(caller) {
+                */
+                /*
+                    createFile2(caller: ItemDL) {
+                        let that = this;
+                        var executor = new SP.RequestExecutor(this.appWebUrl);
+                        var urlstring;
+                        if (caller.folderURL != "") {
+                            urlstring = caller.parent.targetUrl + "/_api/web/GetFolderByServerRelativeUrl(@TargetFolderName)/Files/Add(url='" + caller.name + "', overwrite=true)?$expand=ListItemAllFields&@TargetFolderName='" + caller.parent.targetTitle + "/" + caller.folderURL+"'";
+                        }
+                        else
+                            urlstring = caller.parent.targetUrl + "/_api/web/lists/getByTitle('" + caller.parent.targetTitle + "')/RootFolder/Files/Add(url='" + caller.name + "', overwrite=true)?$expand=ListItemAllFields";
+                        return new Promise(function (resolve, reject) {
+                            executor.executeAsync(
+                                {
+                                    url: urlstring,
+                                    method: "POST",
+                                    binaryStringRequestBody: true,
+                                    body: caller.fileContent,
+                                    headers: {
+                                        "Accept": "application/json; odata=verbose"
+                                    },
+                                    success: function (data) {
+                                     
+                                        caller.targetId = (JSON.parse(data.body as string)).d.ListItemAllFields.ID;
+                                        resolve();
+                                    },
+                                    error: function (xhr) {
+                               
+                                        reject(xhr.state + ": " + xhr.statusText);
+                                    }
+                                  //  ,state: "Update"
+                                });
+                        });
+                    }
+                
+                   
+                */
+                readListItem(caller) {
                     let that = this;
-                    var ctx = SP.ClientContext.get_current();
-                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
-                    var hostweb = appContextSite.get_web();
+                    var ctx = new SP.ClientContext(caller.parent.srcUrl);
+                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
+                    var hostweb = ctx.get_web();
                     var lists = hostweb.get_lists();
                     var listItem;
                     ctx.load(hostweb);
@@ -837,10 +926,20 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         ctx.executeQueryAsync(function () {
                             //b console.log(caller.parent.title);
                             // console.log(file);
-                            caller.name = file.get_name();
-                            caller.srcUrl = file.get_serverRelativeUrl();
-                            caller.title = file.get_title();
-                            caller.data1 = listItem.get_item("Data1");
+                            switch (caller.contentTypeId) {
+                                case null:
+                                    caller.name = file.get_name();
+                                    caller.srcUrl = file.get_serverRelativeUrl();
+                                    caller.title = file.get_title();
+                                    caller.data1 = listItem.get_item("Data1");
+                                    break;
+                                case "0x0120D52000306CDC31A1E61F4B8249EAADB1F512DA":
+                                    console.log(listItem.get_item("BASF2"));
+                                    caller.data2 = listItem.get_item("BASF2");
+                                    break;
+                                default:
+                                    console.log("Error: Content Type ID doesn't exist");
+                            }
                             resolve();
                             // that.downloadFile(caller, file.get_serverRelativeUrl());
                         }, function () {
@@ -850,36 +949,58 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                 }
                 fillListItem(caller) {
                     // var targetListItem: SP.ListItem;
-                    var ctx = SP.ClientContext.get_current();
-                    // console.log(caller.parent.targetTitle + " / " + caller.targetId);
-                    var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
-                    // targetListItem = appContextSite.get_lists().getByTitle(caller.parent.targetTitle).getItemById(caller.targetId);
-                    var targetList = appContextSite.get_lists().getByTitle(caller.parent.targetTitle);
+                    console.log(caller.targetId);
+                    var ctx = new SP.ClientContext(caller.parent.targetUrl);
+                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
+                    var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
                     var targetItem = targetList.getItemById(caller.targetId);
-                    // ctx.load(targetList);
-                    ctx.load(targetItem);
                     var targetFieldt = targetList.get_fields().getByInternalNameOrTitle("Data1");
-                    // var targetFieldTax = ctx.castTo(targetField, SP.Taxonomy.TaxonomyField);
+                    var targetFieldt2 = targetList.get_fields().getByInternalNameOrTitle("BASF2");
                     var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
-                    //  var targetFieldValCol: SP.Taxonomy.TaxonomyFieldValueCollection = new SP.Taxonomy.TaxonomyFieldValueCollection(targetField as SP.Taxonomy.TaxonomyField);
+                    var targetField2 = ctx.castTo(targetFieldt2, SP.Taxonomy.TaxonomyField);
+                    ctx.load(targetItem);
                     ctx.load(targetField);
+                    ctx.load(targetField2);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(
                         //Success
                         function (data) {
-                            if (targetField.get_allowMultipleValues()) {
-                                var terms = new Array();
-                                var termValueString;
-                                var termValues;
-                                for (var i = 0; i < caller.data1.get_count(); i++) {
-                                    terms.push("-1;#" + caller.data1.getItemAtIndex(i).get_label() + "|" + caller.data1.getItemAtIndex(i).get_termGuid());
-                                }
-                                //Update
-                                termValueString = terms.join(";#");
+                            switch (caller.contentTypeId) {
+                                case null:
+                                    if (targetField.get_allowMultipleValues()) {
+                                        var terms = new Array();
+                                        var termValueString;
+                                        var termValues;
+                                        for (var i = 0; i < caller.data1.get_count(); i++) {
+                                            terms.push("-1;#" + caller.data1.getItemAtIndex(i).get_label() + "|" + caller.data1.getItemAtIndex(i).get_termGuid());
+                                        }
+                                        //Update
+                                        termValueString = terms.join(";#");
+                                    }
+                                    termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, targetField);
+                                    targetField.setFieldValueByValueCollection(targetItem, termValues);
+                                    break;
+                                case "0x0120D52000306CDC31A1E61F4B8249EAADB1F512DA":
+                                    if (targetField2.get_allowMultipleValues()) {
+                                        var terms = new Array();
+                                        var termValueString;
+                                        var termValues;
+                                        for (var i = 0; i < caller.data2.get_count(); i++) {
+                                            terms.push("-1;#" + caller.data2.getItemAtIndex(i).get_label() + "|" + caller.data2.getItemAtIndex(i).get_termGuid());
+                                        }
+                                        //Update
+                                        termValueString = terms.join(";#");
+                                    }
+                                    termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, targetField2);
+                                    console.log(targetField2);
+                                    targetField2.setFieldValueByValueCollection(targetItem, termValues);
+                                    break;
+                                default:
+                                    console.log("Error, Content Type ID Input doesn't exist");
                             }
-                            termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, targetField);
-                            targetField.setFieldValueByValueCollection(targetItem, termValues);
                             targetItem.update();
+                            ctx.executeQueryAsync(function () { }, function () { });
+                            console.log(targetItem);
                             resolve();
                         }, 
                         //Fail
@@ -938,7 +1059,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     let that = this;
                     return new Promise(function (resolve, reject) {
                         executor.executeAsync({
-                            url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + pathUrl + "')/Folders?@target='" + pathUrl + "'",
+                            url: pathUrl + "/_api/web/GetFileByServerRelativeUrl('" + pathUrl + "')/Folders",
                             //Leere Bibliotheken werden ignoriert , beheben?
                             //url: (pathUrl+"/_api/web/GetFolderByServerRelativeUrl('"+relPath+"')"),
                             method: "GET",

@@ -11,6 +11,7 @@ export class SiteCollection {
     path: string;
     private dataService: DataService
     parent: AppComponent;
+    static targetPath: string;
     
     
 
@@ -46,9 +47,12 @@ export class SiteCollection {
         let newState = !this.checked;
         this.checked = newState;
         //      this.checkRecursive(newState);
+  
+
     }
 
     unsetAll() {
+        SiteCollection.targetPath = this.path;
         this.parent.unsetAll();
 
 

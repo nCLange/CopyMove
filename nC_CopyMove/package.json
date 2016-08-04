@@ -1,6 +1,11 @@
 {
   "name": "angular2-quickstart",
   "version": "1.0.0",
+  "scripts":{
+    "tsc":"tsc",
+    "tsc:w":"tsc -w",
+    "typings": "scripts/typings"
+  },
   "license": "ISC",
   "dependencies": {
     "@angular/common": "2.0.0-rc.3",

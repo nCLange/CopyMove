@@ -35,7 +35,7 @@ System.register(['angular2/core', './treeviewdirectory'], function(exports_1, co
                 }
                 mark(library) {
                     this.dblclick = true;
-                    library.select();
+                    library.select("--1");
                 }
             };
             __decorate([

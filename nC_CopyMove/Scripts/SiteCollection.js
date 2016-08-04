@@ -38,6 +38,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     //      this.checkRecursive(newState);
                 }
                 unsetAll() {
+                    SiteCollection.targetPath = this.path;
                     this.parent.unsetAll();
                 }
             }

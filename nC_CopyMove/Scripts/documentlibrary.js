@@ -1,10 +1,13 @@
-System.register(['./dataservice'], function(exports_1, context_1) {
+System.register(['./directory', './dataservice'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var dataservice_1;
+    var directory_1, dataservice_1;
     var DocumentLibrary;
     return {
         setters:[
+            function (directory_1_1) {
+                directory_1 = directory_1_1;
+            },
             function (dataservice_1_1) {
                 dataservice_1 = dataservice_1_1;
             }],
@@ -48,9 +51,13 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                         });
                     }
                 }
-                select() {
+                select(input = null) {
+                    if (input == "--1") {
+                        directory_1.Directory.selectedPath = "";
+                    }
                     this.parent.unsetAll();
                     this.selected = true;
+                    DocumentLibrary.targetTitle = this.name;
                 }
                 unsetAll() {
                     this.parent.unsetAll();

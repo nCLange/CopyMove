@@ -3,6 +3,7 @@ import {SiteCollection} from './sitecollection';
 import {TreeViewDocLib} from './treeView';
 import {DocumentLibrary} from './documentlibrary';
 import {CopyRoot} from './copyroot';
+import {ItemDL} from './itemdl';
 
 
 @Component({
@@ -14,18 +15,26 @@ export class TreeViewSite {
     @Input() sitecollection: Array<SiteCollection>;
 
     screen: number;
+    @Input() filesToCopy: Array<ItemDL>;
+
+    copyroot: CopyRoot;
 
     constructor() {
         this.screen = 0;
 
     }
 
+    canceled() {
+        this.screen = 0;
+        this.copyroot = null;
+
+    }
 
     clicked(delafter) {
-
-        var copyroot: CopyRoot = new CopyRoot(delafter, this.sitecollection);
-        var filesToCopy = copyroot.items;
         this.screen = 1;
+        this.copyroot  = new CopyRoot(delafter, this.sitecollection);
+        this.filesToCopy = this.copyroot.items;
+        
     }
 
 }

@@ -11,6 +11,7 @@ export class Directory {
     dataService: DataService;
     relpath: string;
     absolutePath: string;
+    static selectedPath: string;
 
     constructor(name,parent) {
         this.name = name;
@@ -65,11 +66,14 @@ export class Directory {
             
     }
 
-    select() {
+    select(name) {
      //   this.parent.unsetAll();
-   
+
+        if (name == "--1") { Directory.selectedPath = ""; }
         this.parent.select(this.selected);
         this.selected = true;
+        Directory.selectedPath = this.name + "/" +Directory.selectedPath;
+
 
     }
     

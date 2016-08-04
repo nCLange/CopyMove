@@ -11,6 +11,7 @@ export class DocumentLibrary {
     relpath: string;
     dataService: DataService;
     parent: SiteCollection;
+    static targetTitle: string;
 
     constructor(name, path, parent) {
         this.name = name;
@@ -57,9 +58,13 @@ export class DocumentLibrary {
         }
     }
 
-    select() {
+    select(input=null) {
+        if (input == "--1") {
+            Directory.selectedPath = "";
+        }
         this.parent.unsetAll();
         this.selected = true;
+        DocumentLibrary.targetTitle = this.name;
 
     }
 

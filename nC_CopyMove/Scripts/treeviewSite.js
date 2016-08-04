@@ -28,16 +28,24 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
                 constructor() {
                     this.screen = 0;
                 }
+                canceled() {
+                    this.screen = 0;
+                    this.copyroot = null;
+                }
                 clicked(delafter) {
-                    var copyroot = new copyroot_1.CopyRoot(delafter, this.sitecollection);
-                    var filesToCopy = copyroot.items;
                     this.screen = 1;
+                    this.copyroot = new copyroot_1.CopyRoot(delafter, this.sitecollection);
+                    this.filesToCopy = this.copyroot.items;
                 }
             };
             __decorate([
                 core_1.Input(), 
                 __metadata('design:type', Array)
             ], TreeViewSite.prototype, "sitecollection", void 0);
+            __decorate([
+                core_1.Input(), 
+                __metadata('design:type', Array)
+            ], TreeViewSite.prototype, "filesToCopy", void 0);
             TreeViewSite = __decorate([
                 core_1.Component({
                     selector: 'tree-view-site',

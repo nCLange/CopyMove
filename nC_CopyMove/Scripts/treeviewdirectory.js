@@ -35,7 +35,7 @@ System.register(['angular2/core', './documentlibrary'], function(exports_1, cont
                 }
                 mark(directory) {
                     this.dblclick = true;
-                    directory.select();
+                    directory.select("--1");
                 }
             };
             __decorate([

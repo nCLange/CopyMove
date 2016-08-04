@@ -56,10 +56,14 @@ System.register(['./dataservice', './documentlibrary'], function(exports_1, cont
                         });
                     }
                 }
-                select() {
+                select(name) {
                     //   this.parent.unsetAll();
+                    if (name == "--1") {
+                        Directory.selectedPath = "";
+                    }
                     this.parent.select(this.selected);
                     this.selected = true;
+                    Directory.selectedPath = this.name + "/" + Directory.selectedPath;
                 }
             }
             exports_1("Directory", Directory);

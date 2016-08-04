@@ -29,7 +29,7 @@ export class TreeViewDocLib {
 
     mark(library: DocumentLibrary) {
         this.dblclick = true;
-        library.select();
+        library.select("--1");
     }
     /*
     getStyle() {
