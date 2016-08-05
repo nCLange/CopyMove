@@ -23,7 +23,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
         execute: function() {
             class CopyRoot {
                 constructor(delafter, sitecollections) {
-                    this.selectedItemIds = [23];
+                    this.selectedItemIds = [23, 32, 3];
                     this.title = "DocaDoca";
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
                     this.targetTitle = documentlibrary_1.DocumentLibrary.targetTitle;

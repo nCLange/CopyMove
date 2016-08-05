@@ -9,7 +9,7 @@ import {Directory} from './directory';
 export class CopyRoot{
     srcUrl :string;
     targetUrl: string;
-    private selectedItemIds = [23];
+    private selectedItemIds = [23,32, 3];
     title = "DocaDoca";
    
     targetTitle: string;

@@ -868,8 +868,8 @@ export class DataService {
 
          if (caller.parentFolderId == null)
              root = targetList.get_rootFolder();
-         //else
-          //  root = targetList.getItemById(caller.parentFolderId).get_folder();
+         else
+             root = targetList.getItemById(caller.parentFolderId).get_folder();
 
          ctx.load(targetList);
          var cTypeId = caller.contentTypeId;
@@ -931,10 +931,10 @@ export class DataService {
         var ctx = new SP.ClientContext(caller.parent.targetUrl);
         //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
          targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
-         if (caller.parentFolderId == null)
+      //   if (caller.parentFolderId == null)
             folders = targetList.get_rootFolder().get_folders();
-         else
-            folders = targetList.getItemById(caller.parentFolderId).get_folder().get_folders();
+      //   else
+       //     folders = targetList.getItemById(caller.parentFolderId).get_folder().get_folders();
 
         ctx.load(targetList);
         ctx.load(folders, 'Include(ListItemAllFields)');
