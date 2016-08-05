@@ -23,7 +23,6 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
         execute: function() {
             class CopyRoot {
                 constructor(delafter, sitecollections) {
-                    this.srcUrl = "http://win-iprrvsfootq/sites/dev";
                     this.selectedItemIds = [23];
                     this.title = "DocaDoca";
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
@@ -33,6 +32,8 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.dataService = new dataservice_1.DataService();
                     this.maxCalls = 1;
                     this.currentCalls = 0;
+                    this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
+                    console.log(_spPageContextInfo.webAbsoluteUrl);
                     if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
                         this.rootpath = directory_1.Directory.selectedPath;
                         this.dataService.getFolderFromUrl(this).then(response => {

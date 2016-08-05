@@ -7,7 +7,7 @@ import {Directory} from './directory';
 
 
 export class CopyRoot{
-    srcUrl = "http://win-iprrvsfootq/sites/dev";
+    srcUrl :string;
     targetUrl: string;
     private selectedItemIds = [23];
     title = "DocaDoca";
@@ -35,6 +35,8 @@ export class CopyRoot{
         this.dataService = new DataService();
         this.maxCalls = 1;
         this.currentCalls = 0;
+        this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
+        console.log(_spPageContextInfo.webAbsoluteUrl);
         
 
         if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
