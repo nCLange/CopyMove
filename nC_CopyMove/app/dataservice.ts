@@ -17,6 +17,23 @@ export class DataService {
 
     }
 
+    getListTitleFromId(caller: CopyRoot){
+    var ctx = new SP.ClientContext(caller.srcUrl);
+       // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
+        var targetList = ctx.get_web().get_lists().getById(caller.srcListId);
+        ctx.load(targetList);
+        return new Promise(function (resolve, reject) {
+                ctx.executeQueryAsync(
+                    function(){
+                    caller.title =  targetList.get_title();
+                    resolve();
+                    },
+                    function(){
+                    reject(arguments[1].get_message());
+                    });
+        });
+    }
+
     getFolderFromUrl(caller: CopyRoot) {
 
         var ctx = new SP.ClientContext(caller.targetUrl);
@@ -1115,7 +1132,7 @@ export class DataService {
     fillListItem(caller: ItemDL) {
         // var targetListItem: SP.ListItem;
 
-    console.log(caller.targetId);
+  //  console.log(caller.targetId);
 
         var ctx = new SP.ClientContext(caller.parent.targetUrl);
        // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();

@@ -23,8 +23,6 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
         execute: function() {
             class CopyRoot {
                 constructor(delafter, sitecollections) {
-                    this.selectedItemIds = [23, 32, 3];
-                    this.title = "DocaDoca";
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
                     this.targetTitle = documentlibrary_1.DocumentLibrary.targetTitle;
                     this.rootpath = "";
@@ -33,24 +31,31 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.maxCalls = 1;
                     this.currentCalls = 0;
                     this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
-                    console.log(_spPageContextInfo.webAbsoluteUrl);
-                    if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
-                        this.rootpath = directory_1.Directory.selectedPath;
-                        this.dataService.getFolderFromUrl(this).then(response => {
+                    this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
+                    console.log(this.srcListId);
+                    var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
+                    this.selectedItemIds = tempItemIds[1].split(",").map(Number);
+                    this.dataService.getListTitleFromId(this).then(response => {
+                        if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
+                            this.rootpath = directory_1.Directory.selectedPath;
+                            this.dataService.getFolderFromUrl(this).then(response => {
+                                this.items = [];
+                                this.deleteAfterwards = delafter;
+                                for (var id = 0; id < this.selectedItemIds.length; id++) {
+                                    this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this, this.rootpath, this.rootFolder));
+                                }
+                            }, response => { console.log("getFolderFromUrl Error " + response); });
+                        }
+                        else {
                             this.items = [];
                             this.deleteAfterwards = delafter;
                             for (var id = 0; id < this.selectedItemIds.length; id++) {
-                                this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this, this.rootpath, this.rootFolder));
+                                this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this));
                             }
-                        }, response => { console.log("getFolderFromUrl Error " + response); });
-                    }
-                    else {
-                        this.items = [];
-                        this.deleteAfterwards = delafter;
-                        for (var id = 0; id < this.selectedItemIds.length; id++) {
-                            this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this));
                         }
-                    }
+                    }, response => {
+                        console.log("getListTitleFromIdError " + response);
+                    });
                     //  this.targetUrlArray = null;
                     // this.folderString = "";
                     /*

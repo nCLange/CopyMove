@@ -9,8 +9,9 @@ import {Directory} from './directory';
 export class CopyRoot{
     srcUrl :string;
     targetUrl: string;
-    private selectedItemIds = [23,32, 3];
-    title = "DocaDoca";
+   // private selectedItemIds = [23,32, 3];
+    private selectedItemIds: Array<number>;
+    title : string;
    
     targetTitle: string;
     rootpath: string;
@@ -23,10 +24,11 @@ export class CopyRoot{
 
     items : Array<ItemDL>;
     static targetUrlArray: Array<String>;
+    srcListId:string;
     
 
-
     constructor(delafter: boolean, sitecollections: Array<SiteCollection>) {
+
 
         this.targetUrl = SiteCollection.targetPath;
         this.targetTitle = DocumentLibrary.targetTitle;
@@ -36,30 +38,42 @@ export class CopyRoot{
         this.maxCalls = 1;
         this.currentCalls = 0;
         this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
-        console.log(_spPageContextInfo.webAbsoluteUrl);
-        
 
-        if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
-            this.rootpath = Directory.selectedPath;
-            this.dataService.getFolderFromUrl(this).then(
-                response => {
-                    this.items = [];
-                    this.deleteAfterwards = delafter;
-                    for (var id = 0; id < this.selectedItemIds.length; id++) {
-                        this.items.push(new ItemDL(this.selectedItemIds[id], this, this.rootpath, this.rootFolder));
+        this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
+        console.log(this.srcListId);
+        var tempItemIds= new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
+        this.selectedItemIds = tempItemIds[1].split(",").map(Number);
+
+        this.dataService.getListTitleFromId(this).then(
+            response => {
+                if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
+                        this.rootpath = Directory.selectedPath;
+                        this.dataService.getFolderFromUrl(this).then(
+                            response => {
+                                this.items = [];
+                                this.deleteAfterwards = delafter;
+                                for (var id = 0; id < this.selectedItemIds.length; id++) {
+                                    this.items.push(new ItemDL(this.selectedItemIds[id], this, this.rootpath, this.rootFolder));
+                                }
+                            },
+                            response => { console.log("getFolderFromUrl Error " + response); });
+
                     }
-                },
-                response => { console.log("getFolderFromUrl Error " + response); });
+                    else {
+                        this.items = [];
+                        this.deleteAfterwards = delafter;
+                        for (var id = 0; id < this.selectedItemIds.length; id++) {
+                            this.items.push(new ItemDL(this.selectedItemIds[id], this));
+                        }
+                    }
+            },
+            response =>{ 
+                console.log("getListTitleFromIdError "+response)
 
-        }
-        else {
-            this.items = [];
-            this.deleteAfterwards = delafter;
-            for (var id = 0; id < this.selectedItemIds.length; id++) {
-                this.items.push(new ItemDL(this.selectedItemIds[id], this));
             }
-        }
 
+        );
+  
 
       //  this.targetUrlArray = null;
        // this.folderString = "";
