@@ -755,34 +755,26 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     ctx.load(newCT);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
-                            /*  SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
-                              ctx.executeQueryAsync(
-                                function(){
-                                    that.getFolderFromDocSet(caller).then(
-                                    response => {
+                            SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
+                            ctx.executeQueryAsync(function () {
+                                that.getFolderFromDocSet(caller).then(response => {
+                                    caller.releaseQueue();
+                                    resolve();
+                                }, response => {
+                                    reject("0:" + response);
+                                });
+                            }, function () {
+                                if (arguments[1].get_message().includes("already exists")) {
+                                    that.getFolderFromDocSet(caller).then(response => {
                                         caller.releaseQueue();
                                         resolve();
-                                    },
-                                    response =>{
-        
-                                            reject("0:"+response)
+                                    }, response => {
+                                        reject("2:" + response);
                                     });
-                                  },
-                                  function(){
-                                     if(arguments[1].get_message().includes("already exists"))
-                                     {
-                                        that.getFolderFromDocSet(caller).then(
-                                            response => {
-                                                caller.releaseQueue();
-                                                resolve();
-                                            },
-                                            response =>{
-                                                reject("2:"+response)
-                                        });
-                                     }
-                                     else
-                                        reject("1:"+arguments[1].get_message());
-                                  });*/
+                                }
+                                else
+                                    reject("1:" + arguments[1].get_message());
+                            });
                         }, function (x, args) {
                             reject("3:" + arguments[1].get_message());
                         });

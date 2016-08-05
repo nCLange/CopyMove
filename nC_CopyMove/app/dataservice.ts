@@ -882,7 +882,7 @@ export class DataService {
          return new Promise(function (resolve, reject) {
              ctx.executeQueryAsync(
                  function () {
-                    /*  SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
+                      SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
                       ctx.executeQueryAsync(
                         function(){
                             that.getFolderFromDocSet(caller).then(
@@ -909,9 +909,7 @@ export class DataService {
                              }
                              else
                                 reject("1:"+arguments[1].get_message());
-                          });*/
-
- 
+                          });
                  },
                  function (x, args) {
 
