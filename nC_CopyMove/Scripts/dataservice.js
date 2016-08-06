@@ -1,4 +1,4 @@
-System.register(['angular2/core', './sitecollection', './documentlibrary', './directory', './itemdl'], function(exports_1, context_1) {
+System.register(['angular2/core', './sitecollection', './documentlibrary', './directory', './itemdl', './listFields'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, sitecollection_1, documentlibrary_1, directory_1, itemdl_1;
+    var core_1, sitecollection_1, documentlibrary_1, directory_1, itemdl_1, listFields_1;
     var DataService;
     return {
         setters:[
@@ -28,20 +28,30 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
             },
             function (itemdl_1_1) {
                 itemdl_1 = itemdl_1_1;
+            },
+            function (listFields_1_1) {
+                listFields_1 = listFields_1_1;
             }],
         execute: function() {
             let DataService = class DataService {
                 constructor() {
                     this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
                 }
-                getListTitleFromId(caller) {
+                getListInfoFromId(caller) {
                     var ctx = new SP.ClientContext(caller.srcUrl);
                     // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     var targetList = ctx.get_web().get_lists().getById(caller.srcListId);
+                    var fieldcollection = targetList.get_fields();
                     ctx.load(targetList);
+                    ctx.load(fieldcollection);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
                             caller.title = targetList.get_title();
+                            for (var i = 0; i < fieldcollection.get_count(); i++) {
+                                if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden() && fieldcollection.itemAt(i).get_internalName() != "Title") {
+                                    caller.fields.push(new listFields_1.ListField(fieldcollection.itemAt(i).get_internalName(), fieldcollection.itemAt(i).get_typeAsString()));
+                                }
+                            }
                             resolve();
                         }, function () {
                             reject(arguments[1].get_message());

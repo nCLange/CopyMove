@@ -31,11 +31,12 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.maxCalls = 1;
                     this.currentCalls = 0;
                     this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
+                    this.fields = [];
                     this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
                     console.log(this.srcListId);
                     var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
                     this.selectedItemIds = tempItemIds[1].split(",").map(Number);
-                    this.dataService.getListTitleFromId(this).then(response => {
+                    this.dataService.getListInfoFromId(this).then(response => {
                         if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
                             this.rootpath = directory_1.Directory.selectedPath;
                             this.dataService.getFolderFromUrl(this).then(response => {

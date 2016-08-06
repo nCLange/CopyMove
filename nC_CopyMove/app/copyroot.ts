@@ -3,6 +3,7 @@ import {ItemDL} from './itemdl';
 import {SiteCollection} from './sitecollection';
 import {DocumentLibrary} from './documentlibrary';
 import {Directory} from './directory';
+import {ListField} from './listfields';
 
 
 
@@ -12,7 +13,7 @@ export class CopyRoot{
    // private selectedItemIds = [23,32, 3];
     private selectedItemIds: Array<number>;
     title : string;
-   
+    fields: Array<ListField>;
     targetTitle: string;
     rootpath: string;
     rootFolder: SP.Folder;
@@ -38,13 +39,14 @@ export class CopyRoot{
         this.maxCalls = 1;
         this.currentCalls = 0;
         this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
+        this.fields=[];
 
         this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
         console.log(this.srcListId);
         var tempItemIds= new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
         this.selectedItemIds = tempItemIds[1].split(",").map(Number);
 
-        this.dataService.getListTitleFromId(this).then(
+        this.dataService.getListInfoFromId(this).then(
             response => {
                 if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
                         this.rootpath = Directory.selectedPath;

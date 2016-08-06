@@ -4,6 +4,7 @@ import {DocumentLibrary} from './documentlibrary';
 import {Directory} from './directory';
 import {ItemDL, ContentType} from './itemdl';
 import {CopyRoot} from './copyroot';
+import {ListField} from './listFields';
 
 @Injectable()
 export class DataService {
@@ -17,16 +18,26 @@ export class DataService {
 
     }
 
-    getListTitleFromId(caller: CopyRoot){
+    getListInfoFromId(caller: CopyRoot){
     var ctx = new SP.ClientContext(caller.srcUrl);
        // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
         var targetList = ctx.get_web().get_lists().getById(caller.srcListId);
+        var fieldcollection = targetList.get_fields();
         ctx.load(targetList);
+        ctx.load(fieldcollection);
+
         return new Promise(function (resolve, reject) {
                 ctx.executeQueryAsync(
                     function(){
-                    caller.title =  targetList.get_title();
-                    resolve();
+                        caller.title =  targetList.get_title();
+                        
+                            for (var i = 0; i < fieldcollection.get_count(); i++) {
+                                if(!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden() && fieldcollection.itemAt(i).get_internalName()!="Title"){
+                                    caller.fields.push(new ListField(fieldcollection.itemAt(i).get_internalName(),fieldcollection.itemAt(i).get_typeAsString()));
+                                //  console.log(fieldcollection.itemAt(i).get_internalName()+"//"+fieldcollection.itemAt(i).get_typeAsString());              
+                                }         
+                            }
+                        resolve();
                     },
                     function(){
                     reject(arguments[1].get_message());
