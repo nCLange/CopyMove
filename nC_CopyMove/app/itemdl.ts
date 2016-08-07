@@ -1,5 +1,6 @@
 ﻿import {DataService} from './dataservice';
 import {CopyRoot} from './copyroot';
+import {FieldContent} from './fieldcontent';
 
 export enum ContentType { File, Folder, DocSet }
 
@@ -25,6 +26,7 @@ export class ItemDL {
     data2: SP.Taxonomy.TaxonomyFieldValueCollection;
     parentFolderId: number;
     contentTypeName:string;
+    contents : Array<FieldContent>;
 
 
     constructor(id, parent: CopyRoot, folderURL = "", parentFolderId = null) {
@@ -36,6 +38,7 @@ export class ItemDL {
         //this.parentFolder = parentFolder;
         this.contentTypeId = null;
         this.parentFolderId = parentFolderId;
+        this.contents = [];
 
         // this.dataService.getFileAsBufferArray(parent.srcUrl + parent.title, id);
 

@@ -45,7 +45,6 @@ export class CopyRoot{
         console.log(this.srcListId);
         var tempItemIds= new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
         this.selectedItemIds = tempItemIds[1].split(",").map(Number);
-
         this.dataService.getListInfoFromId(this).then(
             response => {
                 if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {

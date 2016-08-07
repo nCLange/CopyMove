@@ -1,4 +1,4 @@
-System.register(['angular2/core', './sitecollection', './documentlibrary', './directory', './itemdl', './listFields'], function(exports_1, context_1) {
+System.register(['angular2/core', './sitecollection', './documentlibrary', './directory', './itemdl', './listFields', './fieldcontent'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, sitecollection_1, documentlibrary_1, directory_1, itemdl_1, listFields_1;
+    var core_1, sitecollection_1, documentlibrary_1, directory_1, itemdl_1, listFields_1, fieldcontent_1;
     var DataService;
     return {
         setters:[
@@ -31,6 +31,9 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
             },
             function (listFields_1_1) {
                 listFields_1 = listFields_1_1;
+            },
+            function (fieldcontent_1_1) {
+                fieldcontent_1 = fieldcontent_1_1;
             }],
         execute: function() {
             let DataService = class DataService {
@@ -48,7 +51,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         ctx.executeQueryAsync(function () {
                             caller.title = targetList.get_title();
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
-                                if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden() && fieldcollection.itemAt(i).get_internalName() != "Title") {
+                                if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()) {
                                     caller.fields.push(new listFields_1.ListField(fieldcollection.itemAt(i).get_internalName(), fieldcollection.itemAt(i).get_typeAsString()));
                                 }
                             }
@@ -940,22 +943,31 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     ctx.load(file);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
-                            //b console.log(caller.parent.title);
-                            // console.log(file);
-                            switch (caller.contentTypeId) {
-                                case null:
-                                    caller.name = file.get_name();
-                                    caller.srcUrl = file.get_serverRelativeUrl();
-                                    caller.title = file.get_title();
-                                    caller.data1 = listItem.get_item("Data1");
-                                    break;
-                                case "0x0120D52000306CDC31A1E61F4B8249EAADB1F512DA":
-                                    console.log(listItem.get_item("BASF2"));
-                                    caller.data2 = listItem.get_item("BASF2");
-                                    break;
-                                default:
-                                    console.log("Error: Content Type ID doesn't exist");
+                            for (var i = 0; i < caller.parent.fields.length; i++) {
+                                caller.name = file.get_name();
+                                caller.srcUrl = file.get_serverRelativeUrl();
+                                caller.title = file.get_title();
+                                caller.contents.push(new fieldcontent_1.FieldContent(listItem.get_item(caller.parent.fields[i].name), caller.parent.fields[i]));
                             }
+                            /*
+                                                // console.log(file);
+                                                switch (caller.contentTypeId) {
+                            
+                                                    case null:
+                                                        caller.name = file.get_name();
+                                                        caller.srcUrl = file.get_serverRelativeUrl();
+                                                        caller.title = file.get_title();
+                                                        caller.data1 = listItem.get_item("Data1");
+                                                        break;
+                                                    case "0x0120D52000306CDC31A1E61F4B8249EAADB1F512DA":
+                                                        console.log(listItem.get_item("BASF2"));
+                                                        caller.data2 = listItem.get_item("BASF2");
+                                                        break;
+                                                    default:
+                                                        console.log("Error: Content Type ID doesn't exist");
+                            
+                            
+                                                 }*/
                             resolve();
                             // that.downloadFile(caller, file.get_serverRelativeUrl());
                         }, function () {
@@ -971,49 +983,80 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
                     var targetItem = targetList.getItemById(caller.targetId);
                     var targetFieldt = targetList.get_fields().getByInternalNameOrTitle("Data1");
-                    var targetFieldt2 = targetList.get_fields().getByInternalNameOrTitle("BASF2");
-                    var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
-                    var targetField2 = ctx.castTo(targetFieldt2, SP.Taxonomy.TaxonomyField);
+                    //  var targetFieldt2 = targetList.get_fields().getByInternalNameOrTitle("BASF2");
+                    //  var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
+                    //   var targetField2 = ctx.castTo(targetFieldt2, SP.Taxonomy.TaxonomyField);
+                    var targets = new Array();
+                    for (var i = 0; i < caller.contents.length; i++) {
+                        if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti")
+                            targets.push(ctx.castTo(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name), SP.Taxonomy.TaxonomyField));
+                        else
+                            targets.push(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name));
+                        ctx.load(targets[i]);
+                    }
                     ctx.load(targetItem);
-                    ctx.load(targetField);
-                    ctx.load(targetField2);
+                    //    ctx.load(targetField);
+                    //   ctx.load(targetField2);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(
                         //Success
                         function (data) {
-                            switch (caller.contentTypeId) {
-                                case null:
-                                    if (targetField.get_allowMultipleValues()) {
-                                        var terms = new Array();
-                                        var termValueString;
-                                        var termValues;
-                                        for (var i = 0; i < caller.data1.get_count(); i++) {
-                                            terms.push("-1;#" + caller.data1.getItemAtIndex(i).get_label() + "|" + caller.data1.getItemAtIndex(i).get_termGuid());
-                                        }
-                                        //Update
-                                        termValueString = terms.join(";#");
-                                    }
-                                    termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, targetField);
-                                    targetField.setFieldValueByValueCollection(targetItem, termValues);
-                                    break;
-                                case "0x0120D52000306CDC31A1E61F4B8249EAADB1F512DA":
-                                    if (targetField2.get_allowMultipleValues()) {
-                                        var terms = new Array();
-                                        var termValueString;
-                                        var termValues;
-                                        for (var i = 0; i < caller.data2.get_count(); i++) {
-                                            terms.push("-1;#" + caller.data2.getItemAtIndex(i).get_label() + "|" + caller.data2.getItemAtIndex(i).get_termGuid());
-                                        }
-                                        //Update
-                                        termValueString = terms.join(";#");
-                                    }
-                                    termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, targetField2);
-                                    console.log(targetField2);
-                                    targetField2.setFieldValueByValueCollection(targetItem, termValues);
-                                    break;
-                                default:
-                                    console.log("Error, Content Type ID Input doesn't exist");
+                            for (var i = 0; i < caller.contents.length; i++) {
+                                if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti") {
+                                    var termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, caller.contents[i].value, targets[i]);
+                                    targets[i].setFieldValueByValueCollection(targetItem, termValues);
+                                }
+                                else {
+                                    targetItem.parseAndSetFieldValue(caller.contents[i].field.name, caller.contents[i].value);
+                                }
                             }
+                            /*
+                            
+                                                switch (caller.contentTypeId) {
+                            
+                                                    case null:
+                                                        if ((targetField as SP.Taxonomy.TaxonomyField).get_allowMultipleValues()) {
+                                                            var terms = new Array();
+                                                            var termValueString;
+                                                            var termValues;
+                                                            for (var i = 0; i < caller.data1.get_count(); i++) {
+                                                                terms.push("-1;#" + caller.data1.getItemAtIndex(i).get_label() + "|" + caller.data1.getItemAtIndex(i).get_termGuid());
+                                                            }
+                                                            //Update
+                            
+                                                            termValueString = terms.join(";#");
+                                                        }
+                            
+                                                        termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, (targetField as SP.Taxonomy.TaxonomyField));
+                            
+                                                        (targetField as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, termValues);
+                                                        break;
+                            
+                                                    case "0x0120D52000306CDC31A1E61F4B8249EAADB1F512DA":
+                                                        if ((targetField2 as SP.Taxonomy.TaxonomyField).get_allowMultipleValues()) {
+                                                            var terms = new Array();
+                                                            var termValueString;
+                                                            var termValues;
+                                                            for (var i = 0; i < caller.data2.get_count(); i++) {
+                                                                terms.push("-1;#" + caller.data2.getItemAtIndex(i).get_label() + "|" + caller.data2.getItemAtIndex(i).get_termGuid());
+                                                            }
+                                                            //Update
+                            
+                                                            termValueString = terms.join(";#");
+                                                            
+                                                        }
+                                                        termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, termValueString, (targetField2 as SP.Taxonomy.TaxonomyField));
+                                                        console.log(targetField2);
+                                                       
+                                                        
+                                                        (targetField2 as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, termValues);
+                                                        break;
+                            
+                                                    default:
+                                                        console.log("Error, Content Type ID Input doesn't exist");
+                            
+                                            }
+                                              */
                             targetItem.update();
                             ctx.executeQueryAsync(function () { }, function () { });
                             console.log(targetItem);

@@ -5,6 +5,7 @@ import {Directory} from './directory';
 import {ItemDL, ContentType} from './itemdl';
 import {CopyRoot} from './copyroot';
 import {ListField} from './listFields';
+import {FieldContent} from './fieldcontent';
 
 @Injectable()
 export class DataService {
@@ -32,7 +33,7 @@ export class DataService {
                         caller.title =  targetList.get_title();
                         
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
-                                if(!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden() && fieldcollection.itemAt(i).get_internalName()!="Title"){
+                                if(!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()){
                                     caller.fields.push(new ListField(fieldcollection.itemAt(i).get_internalName(),fieldcollection.itemAt(i).get_typeAsString()));
                                 //  console.log(fieldcollection.itemAt(i).get_internalName()+"//"+fieldcollection.itemAt(i).get_typeAsString());              
                                 }         
@@ -1109,8 +1110,15 @@ export class DataService {
             ctx.executeQueryAsync(
                 function () {
 
-                    //b console.log(caller.parent.title);
 
+                   for(var i=0; i<caller.parent.fields.length; i++)
+                   {
+                        caller.name = file.get_name();
+                        caller.srcUrl = file.get_serverRelativeUrl();
+                        caller.title = file.get_title();
+                        caller.contents.push(new FieldContent(listItem.get_item(caller.parent.fields[i].name),caller.parent.fields[i]));
+                   }
+/*
                     // console.log(file);
                     switch (caller.contentTypeId) {
 
@@ -1128,7 +1136,7 @@ export class DataService {
                             console.log("Error: Content Type ID doesn't exist");
 
 
-                }
+                     }*/
                     resolve();
 
                     // that.downloadFile(caller, file.get_serverRelativeUrl());
@@ -1150,18 +1158,47 @@ export class DataService {
         var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
         var targetItem = targetList.getItemById(caller.targetId);       
         var targetFieldt = targetList.get_fields().getByInternalNameOrTitle("Data1");
-        var targetFieldt2 = targetList.get_fields().getByInternalNameOrTitle("BASF2");
-        var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
-        var targetField2 = ctx.castTo(targetFieldt2, SP.Taxonomy.TaxonomyField);
-         
+      //  var targetFieldt2 = targetList.get_fields().getByInternalNameOrTitle("BASF2");
+     //  var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
+     //   var targetField2 = ctx.castTo(targetFieldt2, SP.Taxonomy.TaxonomyField);
+
+        var targets = new Array();
+
+for(var i = 0; i<caller.contents.length;i++){
+    if(caller.contents[i].field.type=="TaxonomyFieldTypeMulti")
+        targets.push(ctx.castTo(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name),SP.Taxonomy.TaxonomyField));
+    else
+        targets.push(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name));
+
+        ctx.load(targets[i]);
+        
+}
         ctx.load(targetItem);
-        ctx.load(targetField);
-        ctx.load(targetField2);
+    //    ctx.load(targetField);
+     //   ctx.load(targetField2);
        
         return new Promise(function (resolve, reject) {
             ctx.executeQueryAsync(
                 //Success
                 function (data) {
+
+                    for(var i = 0; i<caller.contents.length;i++){
+                         if(caller.contents[i].field.type=="TaxonomyFieldTypeMulti")
+                         {
+                            var termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, caller.contents[i].value , (targets[i] as SP.Taxonomy.TaxonomyField));
+
+                            (targets[i] as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, termValues);
+                         }
+                         else
+                         {
+                             
+                             targetItem.parseAndSetFieldValue(caller.contents[i].field.name,caller.contents[i].value);
+                         }
+                    }
+
+                   
+
+/*
 
                     switch (caller.contentTypeId) {
 
@@ -1207,7 +1244,7 @@ export class DataService {
                             console.log("Error, Content Type ID Input doesn't exist");
 
                 }
-                  
+                  */
                     targetItem.update();
                     ctx.executeQueryAsync(
                         function(){},
