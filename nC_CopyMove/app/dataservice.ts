@@ -24,14 +24,25 @@ export class DataService {
        // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
         var srcList = ctx.get_web().get_lists().getById(caller.srcListId);
         var fieldcollection = srcList.get_fields();
+        var folder : any;
+
+        var listItem = srcList.getItemById(caller.selectedItemIds[0]);
+                
         ctx.load(srcList);
         ctx.load(fieldcollection);
+        ctx.load(listItem);
+ 
 
+      
         return new Promise(function (resolve, reject) {
                 ctx.executeQueryAsync(
                     function(){
+
+
+
                         caller.title =  srcList.get_title();
                         
+                       
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
                                 if(!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()){
                                     var listField = new ListField(fieldcollection.itemAt(i).get_internalName(),fieldcollection.itemAt(i).get_typeAsString());
@@ -39,7 +50,28 @@ export class DataService {
                                         caller.fields.push(listField);
                                 }         
                             }
-                        resolve();
+
+                        var file = !(listItem.get_fileSystemObjectType()==SP.FileSystemObjectType.folder);
+                        if(!file)
+                        {
+                            folder = listItem.get_folder().get_parentFolder();
+                        }
+                        else
+                            folder = listItem.get_file();
+                        
+                        ctx.load(folder);
+                        ctx.executeQueryAsync(
+                            function(){
+                                if(!file)
+                                    caller.srcRootPath = folder.get_serverRelativeUrl();
+                                else
+                                    caller.srcRootPath = (folder.get_serverRelativeUrl() as string).substr(0,folder.get_serverRelativeUrl().lastIndexOf("/"));
+                                 resolve();
+                            },
+                            function(){
+                                 reject(arguments[1].get_message());
+                            }
+                        )
                     },
                     function(){
                     reject(arguments[1].get_message());
@@ -53,9 +85,10 @@ export class DataService {
       //  var appContextSite = new SP.AppContextSite(ctx, caller.targetUrl);
 
 
-        var currentFolder = ctx.get_web().getFolderByServerRelativeUrl(caller.targetTitle + "/" + caller.rootpath);
-        
+        var currentFolder = ctx.get_web().getFolderByServerRelativeUrl(caller.targetTitle + "/" + caller.targetRootPath);
+        console.log(caller.targetTitle+"/"+caller.targetRootPath);
         ctx.load(currentFolder);
+        ctx.load(currentFolder, "ListItemAllFields");
         return new Promise(function (resolve, reject) {
             ctx.executeQueryAsync(
                 function () {
@@ -288,11 +321,11 @@ export class DataService {
         line += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
         line += "<soap12:Body>";
         line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
-        line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.folderURL + caller.name + "</SourceUrl>";
+        line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
        // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
         line += "<DestinationUrls>";
      //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
-        line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.folderURL + caller.name+ "</string>";
+        line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name+ "</string>";
         line += "</DestinationUrls>";
         line += "</CopyIntoItemsLocal>";
         line += "</soap12:Body>";
@@ -303,6 +336,8 @@ export class DataService {
     }
 
     soapAjax(caller: ItemDL) {
+        console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
+        console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
         let that = this;
         var xmlstring = this.buildSoapEnvelope(caller);
         return new Promise(function (resolve, reject) {
@@ -333,9 +368,9 @@ export class DataService {
        var ctx = new SP.ClientContext(caller.parent.targetUrl);
         //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
        
-        var file = ctx.get_web().getFileByServerRelativeUrl("/"+caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "")+"/"+caller.parent.targetTitle + "/" + caller.folderURL + caller.name);
-        console.log(file);
-        console.log("/"+caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "")+"/"+caller.parent.targetTitle + "/" + caller.folderURL + caller.name);
+        var file = ctx.get_web().getFileByServerRelativeUrl("/"+caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "")+"/"+caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name);
+       // console.log(file);
+      //  console.log("/"+caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "")+"/"+caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name);
 
         ctx.load(file, 'ListItemAllFields');
         ctx.load(file);
@@ -352,171 +387,6 @@ export class DataService {
         });
 
     }
-/*
-    downloadFile(caller: ItemDL) {
-
-        let that = this;
-
-        $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js", function () {
-            (SP as any).RequestExecutorInternalSharedUtility.BinaryDecode = function SP_RequestExecutorInternalSharedUtility$BinaryDecode(data) {
-                var ret = '';
-
-                if (data) {
-                    var byteArray = new Uint8Array(data);
-
-                    for (var i = 0; i < data.byteLength; i++) {
-                        ret = ret + String.fromCharCode(byteArray[i]);
-                    }
-                }
-                ;
-                return ret;
-            };
-
-            (SP as any).RequestExecutorUtility.IsDefined = function SP_RequestExecutorUtility$$1(data) {
-                var nullValue = null;
-
-                return data === nullValue || typeof data === 'undefined' || !data.length;
-            };
-
-            (SP as any).RequestExecutor.ParseHeaders = function SP_RequestExecutor$ParseHeaders(headers) {
-                if ((SP as any).RequestExecutorUtility.IsDefined(headers)) {
-                    return null;
-                }
-                var result = {};
-                var reSplit = new RegExp('\r?\n');
-                var headerArray = headers.split(reSplit);
-
-                for (var i = 0; i < headerArray.length; i++) {
-                    var currentHeader = headerArray[i];
-
-                    if (!(SP as any).RequestExecutorUtility.IsDefined(currentHeader)) {
-                        var splitPos = currentHeader.indexOf(':');
-
-                        if (splitPos > 0) {
-                            var key = currentHeader.substr(0, splitPos);
-                            var value = currentHeader.substr(splitPos + 1);
-
-                            key = (SP as any).RequestExecutorNative.trim(key);
-                            value = (SP as any).RequestExecutorNative.trim(value);
-                            result[key.toUpperCase()] = value;
-                        }
-                    }
-                }
-                return result;
-            };
-
-            (SP as any).RequestExecutor.internalProcessXMLHttpRequestOnreadystatechange = function SP_RequestExecutor$internalProcessXMLHttpRequestOnreadystatechange(xhr, requestInfo, timeoutId) {
-                if (xhr.readyState === 4) {
-                    if (timeoutId) {
-                        window.clearTimeout(timeoutId);
-                    }
-                    xhr.onreadystatechange = (SP as any).RequestExecutorNative.emptyCallback;
-                    var responseInfo = new (SP as any).ResponseInfo();
-
-                    responseInfo.state = requestInfo.state;
-                    responseInfo.responseAvailable = true;
-                    if (requestInfo.binaryStringResponseBody) {
-                        responseInfo.body = (SP as any).RequestExecutorInternalSharedUtility.BinaryDecode(xhr.response);
-                    }
-                    else {
-                        responseInfo.body = xhr.responseText;
-                    }
-                    responseInfo.statusCode = xhr.status;
-                    responseInfo.statusText = xhr.statusText;
-                    responseInfo.contentType = xhr.getResponseHeader('content-type');
-                    responseInfo.allResponseHeaders = xhr.getAllResponseHeaders();
-                    responseInfo.headers = (SP as any).RequestExecutor.ParseHeaders(responseInfo.allResponseHeaders);
-                    if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 1223) {
-                        if (requestInfo.success) {
-                            requestInfo.success(responseInfo);
-                        }
-                    }
-                    else {
-                        var error = SP.RequestExecutorErrors.httpError;
-                        var statusText = xhr.statusText;
-
-                        if (requestInfo.error) {
-                            requestInfo.error(responseInfo, error, statusText);
-                        }
-                    }
-                }
-            };
-        });
-
-        // $.getScript(caller.parent.srcUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
-        // executes cross domain request
-        var executor = new SP.RequestExecutor(this.appWebUrl);
-        return new Promise(function (resolve, reject) {
-            executor.executeAsync(
-                {
-                    url: caller.parent.srcUrl + "/_api/web/GetFileByServerRelativeUrl('" + caller.srcUrl + "')/$value",
-                    method: "GET",
-                    binaryStringResponseBody: true,
-                    success: function (data) {
-                        caller.fileContent = data.body;
-                        resolve();
-                    },
-                    error: function (xhr) {
-                        reject(xhr.state + ": " + xhr.statusText);
-                    }
-                });
-
-
-        });
-    }
-*/
-    /* postFile(data, caller) {
-         let that = this;
-         var executor = new SP.RequestExecutor(this.appWebUrl);
-         executor.executeAsync(
-             {
-                 url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/GetFileByServerRelativeUrl('" + filepath + "')/$value?@target='" + caller.parent.srcUrl + "'",
-                 method: "POST",
-                 success: function (data) { that.createFile(data, caller) },
-                 error: function (xhr) {
-                     alert(xhr.state + ": " + xhr.statusText)
-                 }
-             });
- 
-     }
-     
- 
-     copyFile3(caller) {
- 
-         var clientContext;
-         var oWebsite;
-         var fileUrl;
-         let that = this;
- 
-         clientContext = SP.ClientContext.get_current();
-         oWebsite = new SP.AppContextSite(clientContext, caller.parent.srcUrl).get_web();
- 
-         var factory = new SP.ProxyWebRequestExecutorFactory(this.appWebUrl);
-         clientContext.set_webRequestExecutorFactory(factory);
- 
-         clientContext.load(oWebsite);
-         clientContext.executeQueryAsync(function () {
-             fileUrl = oWebsite.get_serverRelativeUrl() + "/" + caller.parent.title + "/" +"ProviderHostedApps%20-%20Infos.txt";
-             $.ajax({
-                 url: fileUrl,
-                 type: "GET"
-             })
-                 .done(function () { console.log("Success Ajax: " + arguments[2]); }, function () { console.error("Req failed: " + arguments[2]); });
-         }, errorHandler);
- 
-         function successHandler(data) {
-             that.createFile(data, caller);
-         }
- 
-         function errorHandler() {
-             console.error("Request failed: " + arguments[2]);
-         }
- 
- 
- 
- 
-     }
-     */
 
     getContent(caller: ItemDL) {
         var targetLib = caller.parent.targetTitle;
@@ -542,10 +412,8 @@ export class DataService {
                            // console.log("Doc Set: " + caller.id);
 
                             caller.type = ContentType.DocSet;
-                            //cTypeId.substring(0,cTypeId.lastIndexOf("00"))
                             caller.contentTypeId = cType.get_id().toString().substring(0,cType.get_id().toString().lastIndexOf("00"));
                             caller.contentTypeName = cType.get_name();
-                           // console.log(caller.contentTypeName);
                         }
                         else {
                            // console.log("Folder: " + caller.id);
@@ -558,7 +426,7 @@ export class DataService {
                     }
                     else {
                         //console.log("Unknown " + caller.id);
-                        reject("Unknown File format in" + caller.id);
+                        reject("Unknown Format in" + caller.id);
                     }
 
                     resolve();
@@ -599,22 +467,17 @@ export class DataService {
                 function () {
 
                     caller.name = listItem.get_item('Title');
-                    //(listItem.get_item('Title') as SP.Folder).get_files();
 
                     for (var i = 0; i < files.get_count(); i++) {
-                       // console.log(files.getItemAtIndex(i).get_listItemAllFields().get_id());
-
-                        caller.addToQueue(files.getItemAtIndex(i).get_listItemAllFields().get_id());
-                       
+                        caller.addToQueue(files.getItemAtIndex(i).get_listItemAllFields().get_id());             
                     }
 
                     for (var i = 0; i < folders.get_count(); i++) {
                         caller.addToQueue(folders.getItemAtIndex(i).get_listItemAllFields().get_id());
-                        
-
                     }
 
-                    caller.folderURL += caller.name + "/";
+                    caller.targetFolderURL += caller.name + "/";
+                    caller.srcFolderURL += caller.name + "/";
 
                     resolve();
 
@@ -629,24 +492,6 @@ export class DataService {
    
     // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
     copyFolder(caller: ItemDL) {
-     /*   let that = this;
-
-        var executor = new SP.RequestExecutor(this.appWebUrl);
-        return new Promise(function (resolve, reject) {
-            executor.executeAsync(
-                {
-                    url: that.appWebUrl + "/_api/SP.AppContextSite(@target)/web/folders/add('"+caller.parent.title+"/"+caller.folderURL+"')",
-                    method: "GET",
-                    binaryStringResponseBody: true,
-                    success: function (data) { caller.fileContent = data.body; resolve(); },
-                    error: function (xhr) {
-                        reject(xhr.state + ": " + xhr.statusText);
-                    }
-                });
-
-
-        });*/
-
 
        var targetList: SP.List;
         var listItem: SP.ListItem;
@@ -712,7 +557,6 @@ export class DataService {
         // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
  
          targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
-
          if (caller.parentFolderId == null)
              root = targetList.get_rootFolder();
          else
@@ -778,10 +622,10 @@ export class DataService {
         var ctx = new SP.ClientContext(caller.parent.targetUrl);
         //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
          targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
-      //   if (caller.parentFolderId == null)
+         if (caller.parentFolderId == null)
             folders = targetList.get_rootFolder().get_folders();
-      //   else
-       //     folders = targetList.getItemById(caller.parentFolderId).get_folder().get_folders();
+         else
+            folders = targetList.getItemById(caller.parentFolderId).get_folder().get_folders();
 
         ctx.load(targetList);
         ctx.load(folders, 'Include(ListItemAllFields)');
@@ -796,15 +640,12 @@ export class DataService {
                     for (var i = 0; i < folders.get_count(); i++) {
                     //    console.log(folders.getItemAtIndex(i)); 
                         if (folders.getItemAtIndex(i).get_name() == caller.name) {
-                          //  console.log(folders.getItemAtIndex(i).get_name());
-                           // caller.parentFolder = folders.getItemAtIndex(i);
                             caller.parentFolderId = folders.getItemAtIndex(i).get_listItemAllFields().get_id();
                             caller.targetId = folders.getItemAtIndex(i).get_listItemAllFields().get_id();
                             resolve();
                         }
                     }
 
-                    //caller.parentFolder = responseFolders;
                     reject(false);
 
                 },
@@ -825,15 +666,17 @@ export class DataService {
         var hostweb = ctx.get_web();
         var lists = hostweb.get_lists();
         var listItem: SP.ListItem;
-
+        var file : any;
         ctx.load(hostweb);
 
 
         listItem = hostweb.get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
-        //   if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder) {
-        var file = listItem.get_file();
+        if(caller.type==ContentType.File)
+            file = listItem.get_file();
+        else
+            file = listItem.get_folder();
 
-
+        console.log("ID "+caller.id);
         ctx.load(listItem);
         ctx.load(file);
 
@@ -844,11 +687,10 @@ export class DataService {
 
                     caller.name = file.get_name();
                     caller.srcUrl = file.get_serverRelativeUrl();
-                    caller.title = file.get_title();
+                  //  caller.title = file.get_title();
 
                    for(var i=0; i<caller.parent.fields.length; i++)
                    {
-                       
                         caller.contents.push(new FieldContent(listItem.get_item(caller.parent.fields[i].name),caller.parent.fields[i]));
                    }
 
@@ -868,10 +710,6 @@ export class DataService {
        // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
         var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
         var targetItem = targetList.getItemById(caller.targetId);       
-        var targetFieldt = targetList.get_fields().getByInternalNameOrTitle("Data1");
-      //  var targetFieldt2 = targetList.get_fields().getByInternalNameOrTitle("BASF2");
-     //  var targetField = ctx.castTo(targetFieldt, SP.Taxonomy.TaxonomyField);
-     //   var targetField2 = ctx.castTo(targetFieldt2, SP.Taxonomy.TaxonomyField);
 
         var targets = new Array();
 
@@ -885,8 +723,6 @@ for(var i = 0; i<caller.contents.length;i++){
         
 }
         ctx.load(targetItem);
-    //    ctx.load(targetField);
-     //   ctx.load(targetField2);
        
         return new Promise(function (resolve, reject) {
             ctx.executeQueryAsync(

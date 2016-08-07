@@ -19,7 +19,8 @@ export class ItemDL {
     //exists: boolean;
     contentQueue: Array<number>;
     relativePath: string;
-    folderURL: string;
+    targetFolderURL: string;
+    srcFolderURL: string;
     contentTypeId: string;
     //parentFolder: SP.Folder;
     status: string;
@@ -29,12 +30,13 @@ export class ItemDL {
     contents : Array<FieldContent>;
 
 
-    constructor(id, parent: CopyRoot, folderURL = "", parentFolderId = null) {
+    constructor(id, parent: CopyRoot, targetFolderURL = "", srcFolderURL = "",parentFolderId = null) {
         this.id = id;
         this.parent = parent;
         this.dataService = new DataService();
         this.contentQueue = [];
-        this.folderURL = folderURL;
+        this.targetFolderURL = targetFolderURL;
+        this.srcFolderURL = srcFolderURL;
         //this.parentFolder = parentFolder;
         this.contentTypeId = null;
         this.parentFolderId = parentFolderId;
@@ -193,8 +195,8 @@ export class ItemDL {
     releaseQueue() {
 
         for (var x = 0; x < this.contentQueue.length; x++) {
-           // this.parent.addToArray(this.contentQueue[x], this.folderURL, this.parentFolder);
-            this.parent.addToArray(this.contentQueue[x], this.folderURL, this.parentFolderId);
+           // this.parent.addToArray(this.contentQueue[x], this.targetFolderURL, this.parentFolder);
+            this.parent.addToArray(this.contentQueue[x], this.targetFolderURL, this.srcFolderURL, this.parentFolderId);
         }
 
         this.contentQueue = [];

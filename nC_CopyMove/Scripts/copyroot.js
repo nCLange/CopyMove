@@ -25,7 +25,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                 constructor(delafter, sitecollections) {
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
                     this.targetTitle = documentlibrary_1.DocumentLibrary.targetTitle;
-                    this.rootpath = "";
+                    this.targetRootPath = "";
                     this.rootFolder = null;
                     this.dataService = new dataservice_1.DataService();
                     this.maxCalls = 1;
@@ -34,17 +34,23 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.fields = [];
                     this.canceled = false;
                     this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
-                    console.log(this.srcListId);
+                    // var wat = new RegExp('[\?&]SPListURL=([^&#]*)').exec(window.location.href)[1];
                     var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
                     this.selectedItemIds = tempItemIds[1].split(",").map(Number);
                     this.dataService.getListInfoFromId(this).then(response => {
+                        this.srcRootPath = this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + this.title, "");
+                        if (this.srcRootPath != "") {
+                            this.srcRootPath += "/";
+                            this.srcRootPath = this.srcRootPath.substr(1, this.srcRootPath.length);
+                        }
+                        console.log(this.srcRootPath);
                         if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
-                            this.rootpath = directory_1.Directory.selectedPath;
+                            this.targetRootPath = directory_1.Directory.selectedPath;
                             this.dataService.getFolderFromUrl(this).then(response => {
                                 this.items = [];
                                 this.deleteAfterwards = delafter;
                                 for (var id = 0; id < this.selectedItemIds.length; id++) {
-                                    this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this, this.rootpath, this.rootFolder));
+                                    this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this, this.targetRootPath, this.srcRootPath, this.rootFolder.get_listItemAllFields().get_id()));
                                 }
                             }, response => { console.log("getFolderFromUrl Error " + response); });
                         }
@@ -52,11 +58,11 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                             this.items = [];
                             this.deleteAfterwards = delafter;
                             for (var id = 0; id < this.selectedItemIds.length; id++) {
-                                this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this));
+                                this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this, "", this.srcRootPath));
                             }
                         }
                     }, response => {
-                        console.log("getListTitleFromIdError " + response);
+                        console.log("getListInfoFromIdError " + response);
                     });
                     //  this.targetUrlArray = null;
                     // this.folderString = "";
@@ -88,8 +94,8 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     }*/
                     // console.log("FolderString " +this.folderString);
                 }
-                addToArray(id, folderURL, parentFolderId) {
-                    this.items.push(new itemdl_1.ItemDL(id, this, folderURL, parentFolderId));
+                addToArray(id, targetFolderURL, srcFolderURL, parentFolderId) {
+                    this.items.push(new itemdl_1.ItemDL(id, this, targetFolderURL, srcFolderURL, parentFolderId));
                     //  console.log("ID:" + id + " folderURL: " + folderURL);
                     //console.log(folderURL);
                 }

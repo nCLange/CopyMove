@@ -11,12 +11,11 @@ export class ListField{
         this.name = name;
         this.type = type;
 
-        console.log(this.name+ "//" + this.type);
-
         switch(type){
 
             case "User":
             case "Lookup":
+            case "URL":
                 this.allowed=false;
                 break;
 

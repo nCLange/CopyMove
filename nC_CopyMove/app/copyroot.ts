@@ -11,11 +11,12 @@ export class CopyRoot{
     srcUrl :string;
     targetUrl: string;
    // private selectedItemIds = [23,32, 3];
-    private selectedItemIds: Array<number>;
+    selectedItemIds: Array<number>;
     title : string;
     fields: Array<ListField>;
     targetTitle: string;
-    rootpath: string;
+    targetRootPath: string;
+    srcRootPath: string;
     rootFolder: SP.Folder;
     maxCalls: number;
     currentCalls: number;
@@ -34,7 +35,7 @@ export class CopyRoot{
 
         this.targetUrl = SiteCollection.targetPath;
         this.targetTitle = DocumentLibrary.targetTitle;
-        this.rootpath = "";
+        this.targetRootPath = "";
         this.rootFolder = null;
         this.dataService = new DataService();
         this.maxCalls = 1;
@@ -44,19 +45,28 @@ export class CopyRoot{
         this.canceled = false;
 
         this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
-        console.log(this.srcListId);
+       // var wat = new RegExp('[\?&]SPListURL=([^&#]*)').exec(window.location.href)[1];
+      
         var tempItemIds= new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
         this.selectedItemIds = tempItemIds[1].split(",").map(Number);
         this.dataService.getListInfoFromId(this).then(
             response => {
+                this.srcRootPath = this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl+"/"+this.title,"");
+                if(this.srcRootPath!="") 
+                {
+                    this.srcRootPath+="/";
+                    this.srcRootPath=this.srcRootPath.substr(1,this.srcRootPath.length);
+                }
+                console.log(this.srcRootPath);
+
                 if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
-                        this.rootpath = Directory.selectedPath;
+                        this.targetRootPath = Directory.selectedPath;
                         this.dataService.getFolderFromUrl(this).then(
                             response => {
                                 this.items = [];
                                 this.deleteAfterwards = delafter;
                                 for (var id = 0; id < this.selectedItemIds.length; id++) {
-                                    this.items.push(new ItemDL(this.selectedItemIds[id], this, this.rootpath, this.rootFolder));
+                                    this.items.push(new ItemDL(this.selectedItemIds[id], this, this.targetRootPath,this.srcRootPath,this.rootFolder.get_listItemAllFields().get_id()));
                                 }
                             },
                             response => { console.log("getFolderFromUrl Error " + response); });
@@ -66,12 +76,12 @@ export class CopyRoot{
                         this.items = [];
                         this.deleteAfterwards = delafter;
                         for (var id = 0; id < this.selectedItemIds.length; id++) {
-                            this.items.push(new ItemDL(this.selectedItemIds[id], this));
+                            this.items.push(new ItemDL(this.selectedItemIds[id], this,"",this.srcRootPath));
                         }
                     }
             },
             response =>{ 
-                console.log("getListTitleFromIdError "+response)
+                console.log("getListInfoFromIdError "+response)
 
             }
 
@@ -116,8 +126,8 @@ export class CopyRoot{
 
     }
 
-    addToArray(id,folderURL,parentFolderId) {
-        this.items.push(new ItemDL(id, this, folderURL,parentFolderId));
+    addToArray(id:number, targetFolderURL:string, srcFolderURL:string, parentFolderId:number) {
+        this.items.push(new ItemDL(id, this, targetFolderURL, srcFolderURL ,parentFolderId));
        
       //  console.log("ID:" + id + " folderURL: " + folderURL);
         //console.log(folderURL);

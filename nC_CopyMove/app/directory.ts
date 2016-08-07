@@ -72,7 +72,7 @@ export class Directory {
         if (name == "--1") { Directory.selectedPath = ""; }
         this.parent.select(this.selected);
         this.selected = true;
-        Directory.selectedPath = this.name + "/" +Directory.selectedPath;
+        Directory.selectedPath =  Directory.selectedPath+this.name+"/";
 
 
     }

@@ -10,10 +10,10 @@ System.register([], function(exports_1, context_1) {
                 constructor(name, type) {
                     this.name = name;
                     this.type = type;
-                    console.log(this.name + "//" + this.type);
                     switch (type) {
                         case "User":
                         case "Lookup":
+                        case "URL":
                             this.allowed = false;
                             break;
                         default:

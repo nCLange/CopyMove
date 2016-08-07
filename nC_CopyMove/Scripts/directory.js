@@ -63,7 +63,7 @@ System.register(['./dataservice', './documentlibrary'], function(exports_1, cont
                     }
                     this.parent.select(this.selected);
                     this.selected = true;
-                    Directory.selectedPath = this.name + "/" + Directory.selectedPath;
+                    Directory.selectedPath = Directory.selectedPath + this.name + "/";
                 }
             }
             exports_1("Directory", Directory);
