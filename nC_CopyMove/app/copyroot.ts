@@ -26,6 +26,7 @@ export class CopyRoot{
     items : Array<ItemDL>;
     static targetUrlArray: Array<String>;
     srcListId:string;
+    canceled: boolean;
     
 
     constructor(delafter: boolean, sitecollections: Array<SiteCollection>) {
@@ -40,6 +41,7 @@ export class CopyRoot{
         this.currentCalls = 0;
         this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
         this.fields=[];
+        this.canceled = false;
 
         this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
         console.log(this.srcListId);

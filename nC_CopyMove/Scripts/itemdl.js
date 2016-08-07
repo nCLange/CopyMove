@@ -27,17 +27,20 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     this.parentFolderId = parentFolderId;
                     this.contents = [];
                     // this.dataService.getFileAsBufferArray(parent.srcUrl + parent.title, id);
-                    this.incCall();
+                    if (this.incCall() == true)
+                        return;
                     this.dataService.getContent(this).then(response => {
                         this.decCall();
                         this.status = "Got Status";
                         switch (this.type) {
                             case ContentType.File:
-                                this.incCall();
+                                if (this.incCall() == true)
+                                    return;
                                 this.dataService.readListItem(this).then(response => {
                                     this.decCall();
                                     this.status = "Read File Information";
-                                    this.incCall();
+                                    if (this.incCall() == true)
+                                        return;
                                     /* this.dataService.downloadFile(this).then(
                                          response => {
                                              this.decCall();
@@ -71,7 +74,8 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                         this.decCall();
                                         this.status = "File Copied";
                                         this.fileContent = null; // Delete Buffer
-                                        this.incCall();
+                                        if (this.incCall() == true)
+                                            return;
                                         this.dataService.fillListItem(this).then(response => {
                                             this.decCall();
                                             //  this.dataService.fillListItem(this); // Dunno warum Doppelt
@@ -89,11 +93,13 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                 });
                                 break;
                             case ContentType.Folder:
-                                this.incCall();
+                                if (this.incCall() == true)
+                                    return;
                                 this.dataService.getFolder(this).then(response => {
                                     this.decCall();
                                     this.status = "Got Folder Information";
-                                    this.incCall();
+                                    if (this.incCall() == true)
+                                        return;
                                     this.dataService.copyFolder(this).then(response => {
                                         this.decCall();
                                         this.status = "Done";
@@ -107,19 +113,23 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                 });
                                 break;
                             case ContentType.DocSet:
-                                this.incCall();
+                                if (this.incCall() == true)
+                                    return;
                                 this.dataService.getFolder(this).then(response => {
                                     this.decCall();
                                     this.status = "Got Document Set Information";
-                                    this.incCall();
+                                    if (this.incCall() == true)
+                                        return;
                                     this.dataService.copyDocSet(this).then(response => {
                                         this.decCall();
                                         this.status = "Document Set copied";
-                                        this.incCall();
+                                        if (this.incCall() == true)
+                                            return;
                                         this.dataService.readListItem(this).then(response => {
                                             this.decCall();
                                             this.status = "Read Document Set Information";
-                                            this.incCall();
+                                            if (this.incCall() == true)
+                                                return;
                                             this.dataService.fillListItem(this).then(response => {
                                                 this.decCall();
                                                 // this.dataService.fillListItem(this); // Dunno warum Doppelt
@@ -164,12 +174,17 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     let that = this;
                     if (this.parent.currentCalls >= this.parent.maxCalls) {
                         setTimeout(that.timeOut, 50);
-                        return;
+                        return false;
                     }
                 }
                 incCall() {
+                    if (this.parent.canceled == true) {
+                        this.status = "Canceled";
+                        return true;
+                    }
                     this.timeOut();
                     this.parent.currentCalls++;
+                    return false;
                 }
                 decCall() {
                     this.parent.currentCalls--;

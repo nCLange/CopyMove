@@ -10,21 +10,15 @@ System.register([], function(exports_1, context_1) {
                 constructor(name, type) {
                     this.name = name;
                     this.type = type;
-                    switch (this.type) {
+                    console.log(this.name + "//" + this.type);
+                    switch (type) {
+                        case "User":
+                        case "Lookup":
+                            this.allowed = false;
+                            break;
+                        default:
+                            this.allowed = true;
                     }
-                    /*   switch(type){
-                           case "TaxonomyFieldTypeMulti":
-               
-                              break;
-               
-                           case "Taxoother":
-                               break;
-               
-                           default:
-                               this.content=content;
-               
-                       }
-                 */
                 }
             }
             exports_1("ListField", ListField);

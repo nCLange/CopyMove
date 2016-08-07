@@ -30,7 +30,7 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
                 }
                 canceled() {
                     this.screen = 0;
-                    this.copyroot = null;
+                    this.copyroot.canceled = true;
                 }
                 clicked(delafter) {
                     this.screen = 1;

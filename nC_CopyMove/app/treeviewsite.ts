@@ -26,7 +26,7 @@ export class TreeViewSite {
 
     canceled() {
         this.screen = 0;
-        this.copyroot = null;
+        this.copyroot.canceled = true;
 
     }
 

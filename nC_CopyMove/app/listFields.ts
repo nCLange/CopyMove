@@ -4,35 +4,27 @@
 export class ListField{
     name: string;
     type : string;
+    allowed: boolean;
   //  content : any;
 
     constructor(name,type){
         this.name = name;
         this.type = type;
 
+        console.log(this.name+ "//" + this.type);
 
-        switch(this.type){
+        switch(type){
 
-
-
-            
-        }
-     /*   switch(type){
-            case "TaxonomyFieldTypeMulti":
-
-               break;
-
-            case "Taxoother":
+            case "User":
+            case "Lookup":
+                this.allowed=false;
                 break;
 
             default:
-                this.content=content;
-
+                this.allowed = true;
+  
         }
-  */
+
     }
-
-
-
 
 }

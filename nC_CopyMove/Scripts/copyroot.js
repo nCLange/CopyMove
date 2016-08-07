@@ -32,6 +32,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.currentCalls = 0;
                     this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
                     this.fields = [];
+                    this.canceled = false;
                     this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
                     console.log(this.srcListId);
                     var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
