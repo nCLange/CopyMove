@@ -23,7 +23,6 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
         execute: function() {
             class CopyRoot {
                 constructor(delafter, sitecollections, parent) {
-                    //this.isDone=false;
                     this.errorReport = [];
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
                     this.targetTitle = documentlibrary_1.DocumentLibrary.targetTitle;

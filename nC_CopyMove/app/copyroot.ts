@@ -10,7 +10,6 @@ import {ListField} from './listfields';
 export class CopyRoot{
     srcUrl :string;
     targetUrl: string;
-   // private selectedItemIds = [23,32, 3];
     selectedItemIds: Array<number>;
     title : string;
     fields: Array<ListField>;
@@ -30,13 +29,12 @@ export class CopyRoot{
     canceled: boolean;
     doneCounter: number;
     errorReport: Array<string>;
-   // isDone: boolean;
     parent: any;
     
 
     constructor(delafter: boolean, sitecollections: Array<SiteCollection>,parent: any) {
 
-        //this.isDone=false;
+
         this.errorReport=[];
         this.targetUrl = SiteCollection.targetPath;
         this.targetTitle = DocumentLibrary.targetTitle;
