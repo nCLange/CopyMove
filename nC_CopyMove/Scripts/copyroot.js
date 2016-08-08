@@ -22,7 +22,9 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
             }],
         execute: function() {
             class CopyRoot {
-                constructor(delafter, sitecollections) {
+                constructor(delafter, sitecollections, parent) {
+                    //this.isDone=false;
+                    this.errorReport = [];
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
                     this.targetTitle = documentlibrary_1.DocumentLibrary.targetTitle;
                     this.targetRootPath = "";
@@ -33,6 +35,9 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
                     this.fields = [];
                     this.canceled = false;
+                    this.items = [];
+                    this.doneCounter = 0;
+                    this.parent = parent;
                     this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
                     // var wat = new RegExp('[\?&]SPListURL=([^&#]*)').exec(window.location.href)[1];
                     var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
@@ -47,7 +52,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                         if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
                             this.targetRootPath = directory_1.Directory.selectedPath;
                             this.dataService.getFolderFromUrl(this).then(response => {
-                                this.items = [];
+                                //  this.items = [];
                                 this.deleteAfterwards = delafter;
                                 for (var id = 0; id < this.selectedItemIds.length; id++) {
                                     this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this, this.targetRootPath, this.srcRootPath, this.rootFolder.get_listItemAllFields().get_id()));
@@ -55,7 +60,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                             }, response => { console.log("getFolderFromUrl Error " + response); });
                         }
                         else {
-                            this.items = [];
+                            //   this.items = [];
                             this.deleteAfterwards = delafter;
                             for (var id = 0; id < this.selectedItemIds.length; id++) {
                                 this.items.push(new itemdl_1.ItemDL(this.selectedItemIds[id], this, "", this.srcRootPath));
@@ -98,6 +103,14 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.items.push(new itemdl_1.ItemDL(id, this, targetFolderURL, srcFolderURL, parentFolderId));
                     //  console.log("ID:" + id + " folderURL: " + folderURL);
                     //console.log(folderURL);
+                }
+                done(caller, errorMsg) {
+                    if (errorMsg != null && errorMsg != "")
+                        this.errorReport.push(caller.id + ": " + caller.name + "--" + errorMsg);
+                    this.doneCounter++;
+                    if (this.doneCounter == this.items.length) {
+                        this.parent.screen = 2;
+                    }
                 }
             }
             exports_1("CopyRoot", CopyRoot);

@@ -13,7 +13,7 @@ export class ItemDL {
     name: string;
     title: string;
     srcUrl: string;
-   // fileContent;
+    // fileContent;
     data1: SP.Taxonomy.TaxonomyFieldValueCollection;
     type: ContentType;
     //exists: boolean;
@@ -26,11 +26,11 @@ export class ItemDL {
     status: string;
     data2: SP.Taxonomy.TaxonomyFieldValueCollection;
     parentFolderId: number;
-    contentTypeName:string;
-    contents : Array<FieldContent>;
+    contentTypeName: string;
+    contents: Array<FieldContent>;
 
 
-    constructor(id, parent: CopyRoot, targetFolderURL = "", srcFolderURL = "",parentFolderId = null) {
+    constructor(id, parent: CopyRoot, targetFolderURL = "", srcFolderURL = "", parentFolderId = null) {
         this.id = id;
         this.parent = parent;
         this.dataService = new DataService();
@@ -44,118 +44,132 @@ export class ItemDL {
 
         // this.dataService.getFileAsBufferArray(parent.srcUrl + parent.title, id);
 
-     if(this.incCall()==true) return;
+        if (this.incCall() == true) return;
         this.dataService.getContent(this).then(
             response => {
                 this.decCall();
                 this.status = "Got Status";
                 switch (this.type) {
                     case ContentType.File:
-                        if(this.incCall()==true) return;
+                        if (this.incCall() == true) return;
                         this.dataService.readListItem(this).then(
                             response => {
                                 this.decCall();
                                 this.status = "Read File Information";
-                                 if(this.incCall()==true) return;                             
-                                    this.dataService.soapAjax(this).then(
-                                     response =>{  
+                                if (this.incCall() == true) return;
+                                this.dataService.soapAjax(this).then(
+                                    response => {
                                         this.decCall();
                                         this.status = "Done";
-                                       // this.fileContent = null; // Delete Buffer
-                                       // if(this.incCall()==true) return;
-                                     /*   this.dataService.fillListItem(this).then(
-                                            response => {
-                                                this.decCall();
-                                              //  this.dataService.fillListItem(this); // Dunno warum Doppelt
-                                                this.status = "Done";
-                                            },
-                                            response => {
-                                                this.decCall();
-                                                console.error("Fill Listitems Failure" + response);
-                                            });*/
-                                        },
-                                     response => {
-                                         console.error("File couldn't copy"+ response);
-                                     });
+                                        this.parent.done(this, null);
+                                        // this.fileContent = null; // Delete Buffer
+                                        // if(this.incCall()==true) return;
+                                        /*   this.dataService.fillListItem(this).then(
+                                               response => {
+                                                   this.decCall();
+                                                 //  this.dataService.fillListItem(this); // Dunno warum Doppelt
+                                                   this.status = "Done";
+                                               },
+                                               response => {
+                                                   this.decCall();
+                                                   console.error("Fill Listitems Failure" + response);
+                                               });*/
+                                    },
+                                    response => {
+                                        this.status = "Error";
+                                        this.parent.done(this, "File couldn't copy" + response);
+                                    });
                             }, response => {
                                 this.decCall();
-                                console.log("readFileToCopy Failure " + response);
+                                this.status = "Error";
+                                this.parent.done(this, "readFileToCopy Failure " + response);
                             });
                         break;
                     case ContentType.Folder:
-                        if(this.incCall()==true) return;
+                        if (this.incCall() == true) return;
                         this.dataService.getFolder(this).then(
                             response => {
                                 this.decCall();
                                 this.status = "Got Folder Information";
-                                 if(this.incCall()==true) return;
+                                if (this.incCall() == true) return;
                                 this.dataService.copyFolder(this).then(
                                     response => {
                                         this.decCall();
                                         this.status = "Done";
+                                        this.parent.done(this, null);
                                     },
                                     response => {
                                         this.decCall();
-                                        console.log("copyFolder Failure " + response);
+                                        this.status = "Error";
+                                        this.parent.done(this, "copyFolder Failure " + response);
                                     })
                             },
                             response => {
                                 this.decCall();
-                                console.log("getFolder Failure " + response);
+                                this.status = "Error";
+                                this.parent.done(this, "getFolder Failure " + response);
                             });
                         break;
                     case ContentType.DocSet:
-                        if(this.incCall()==true) return;
+                        if (this.incCall() == true) return;
                         this.dataService.getFolder(this).then(
                             response => {
                                 this.decCall();
                                 this.status = "Got Document Set Information";
-                                if(this.incCall()==true) return;
+                                if (this.incCall() == true) return;
                                 this.dataService.copyDocSet(this).then(
                                     response => {
                                         this.decCall();
                                         this.status = "Document Set copied";
-                                        if(this.incCall()==true) return;
+                                        if (this.incCall() == true) return;
                                         this.dataService.readListItem(this).then(
                                             response => {
                                                 this.decCall();
                                                 this.status = "Read Document Set Information";
-                                                if(this.incCall()==true) return;
+                                                if (this.incCall() == true) return;
                                                 this.dataService.fillListItem(this).then(
                                                     response => {
                                                         this.decCall();
-                                                       // this.dataService.fillListItem(this); // Dunno warum Doppelt
+                                                        // this.dataService.fillListItem(this); // Dunno warum Doppelt
                                                         this.status = "Done";
+                                                        this.parent.done(this, null);
                                                     },
                                                     response => {
                                                         this.decCall();
-                                                        console.log("FillListItemDocSet Failure " + response);
+                                                        this.status = "Error";
+                                                        this.parent.done(this, "FillListItemDocSet Failure " + response);
                                                     });
                                             },
                                             response => {
                                                 this.decCall();
-                                                console.log("readListItem Failure" + response);
+                                                this.status = "Error";
+                                                this.parent.done(this, "readListItem Failure" + response);
                                             });
                                     },
                                     response => {
                                         this.decCall();
-                                        console.log("copyDocSet Failure " + response);
+                                        this.status = "Error";
+                                        this.parent.done(this, "copyDocSet Failure " + response);
                                     })
                             },
                             response => {
                                 this.decCall();
-                                console.log("getFolderDocSet Failure " + response);
+                                this.status = "Error";
+                                this.parent.done(this, "getFolderDocSet Failure " + response);
                             });
                         break;
 
                     default:
-                        console.log("Unknown Format");
+                        this.decCall();
+                        this.status = "Error";
+                        this.parent.done(this, "Unknown Format");
                         break;
                 }
             },
             response => {
                 this.decCall();
-                console.log("getContent Failure" + response);
+                this.status = "Error";
+                this.parent.done(this, "getContent Failure" + response);
             });
     }
 
@@ -166,7 +180,7 @@ export class ItemDL {
     releaseQueue() {
 
         for (var x = 0; x < this.contentQueue.length; x++) {
-           // this.parent.addToArray(this.contentQueue[x], this.targetFolderURL, this.parentFolder);
+            // this.parent.addToArray(this.contentQueue[x], this.targetFolderURL, this.parentFolder);
             this.parent.addToArray(this.contentQueue[x], this.targetFolderURL, this.srcFolderURL, this.parentFolderId);
         }
 
@@ -184,8 +198,8 @@ export class ItemDL {
     }
 
     incCall() {
-        if(this.parent.canceled==true){
-            this.status="Canceled";
+        if (this.parent.canceled == true) {
+            this.status = "Canceled";
             return true;
         }
         this.timeOut();

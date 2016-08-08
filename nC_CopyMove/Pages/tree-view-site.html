@@ -15,16 +15,26 @@
         <button id="cm-button" onclick="return false" (click)="clicked(0)">Move</button>
     </div>
     <div *ngIf="screen==1">
-      <ul>
-       <li *ngFor="let items of filesToCopy" selection-model>
-           <div>
-               {{items.id}}:{{items.name}}----{{items.status}}
-           </div>
-       </li>
-      </ul>
+        <ul>
+            <li *ngFor="let items of filesToCopy" selection-model>
+                <div>
+                    {{items.id}}:{{items.name}}----{{items.status}}
+                </div>
+            </li>
+        </ul>
         <button id="cm-button" onclick="return false" (click)="canceled()">Cancel</button>
     </div>
     <div *ngIf="screen==2">
+        <div *ngIf="errorReport.length>0">
+            <ul>
+                <li *ngFor="let error of errorReport" selection-model>
+                    <span>{{error}}</span>
+                </li>
+            </ul>
+        </div>
+        <div *ngIf="errorReport.length==0">
+            <span> Everything copied. </span>
+        </div> 
         <button id="cm-button" onclick="return false" (click)="clicked(0)">Done</button>
     </div>
 </div>

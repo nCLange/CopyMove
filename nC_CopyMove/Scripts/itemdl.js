@@ -45,6 +45,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                     this.dataService.soapAjax(this).then(response => {
                                         this.decCall();
                                         this.status = "Done";
+                                        this.parent.done(this, null);
                                         // this.fileContent = null; // Delete Buffer
                                         // if(this.incCall()==true) return;
                                         /*   this.dataService.fillListItem(this).then(
@@ -58,11 +59,13 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                                    console.error("Fill Listitems Failure" + response);
                                                });*/
                                     }, response => {
-                                        console.error("File couldn't copy" + response);
+                                        this.status = "Error";
+                                        this.parent.done(this, "File couldn't copy" + response);
                                     });
                                 }, response => {
                                     this.decCall();
-                                    console.log("readFileToCopy Failure " + response);
+                                    this.status = "Error";
+                                    this.parent.done(this, "readFileToCopy Failure " + response);
                                 });
                                 break;
                             case ContentType.Folder:
@@ -76,13 +79,16 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                     this.dataService.copyFolder(this).then(response => {
                                         this.decCall();
                                         this.status = "Done";
+                                        this.parent.done(this, null);
                                     }, response => {
                                         this.decCall();
-                                        console.log("copyFolder Failure " + response);
+                                        this.status = "Error";
+                                        this.parent.done(this, "copyFolder Failure " + response);
                                     });
                                 }, response => {
                                     this.decCall();
-                                    console.log("getFolder Failure " + response);
+                                    this.status = "Error";
+                                    this.parent.done(this, "getFolder Failure " + response);
                                 });
                                 break;
                             case ContentType.DocSet:
@@ -107,30 +113,38 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                                 this.decCall();
                                                 // this.dataService.fillListItem(this); // Dunno warum Doppelt
                                                 this.status = "Done";
+                                                this.parent.done(this, null);
                                             }, response => {
                                                 this.decCall();
-                                                console.log("FillListItemDocSet Failure " + response);
+                                                this.status = "Error";
+                                                this.parent.done(this, "FillListItemDocSet Failure " + response);
                                             });
                                         }, response => {
                                             this.decCall();
-                                            console.log("readListItem Failure" + response);
+                                            this.status = "Error";
+                                            this.parent.done(this, "readListItem Failure" + response);
                                         });
                                     }, response => {
                                         this.decCall();
-                                        console.log("copyDocSet Failure " + response);
+                                        this.status = "Error";
+                                        this.parent.done(this, "copyDocSet Failure " + response);
                                     });
                                 }, response => {
                                     this.decCall();
-                                    console.log("getFolderDocSet Failure " + response);
+                                    this.status = "Error";
+                                    this.parent.done(this, "getFolderDocSet Failure " + response);
                                 });
                                 break;
                             default:
-                                console.log("Unknown Format");
+                                this.decCall();
+                                this.status = "Error";
+                                this.parent.done(this, "Unknown Format");
                                 break;
                         }
                     }, response => {
                         this.decCall();
-                        console.log("getContent Failure" + response);
+                        this.status = "Error";
+                        this.parent.done(this, "getContent Failure" + response);
                     });
                 }
                 addToQueue(input) {

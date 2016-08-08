@@ -23,16 +23,21 @@ export class CopyRoot{
     private deleteAfterwards: boolean;
     dataService: DataService;
     folderString: string;
-
+    siteCol : SiteCollection;
     items : Array<ItemDL>;
     static targetUrlArray: Array<String>;
     srcListId:string;
     canceled: boolean;
+    doneCounter: number;
+    errorReport: Array<string>;
+   // isDone: boolean;
+    parent: any;
     
 
-    constructor(delafter: boolean, sitecollections: Array<SiteCollection>) {
+    constructor(delafter: boolean, sitecollections: Array<SiteCollection>,parent: any) {
 
-
+        //this.isDone=false;
+        this.errorReport=[];
         this.targetUrl = SiteCollection.targetPath;
         this.targetTitle = DocumentLibrary.targetTitle;
         this.targetRootPath = "";
@@ -43,6 +48,9 @@ export class CopyRoot{
         this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
         this.fields=[];
         this.canceled = false;
+        this.items = [];
+        this.doneCounter=0;
+        this.parent= parent;
 
         this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
        // var wat = new RegExp('[\?&]SPListURL=([^&#]*)').exec(window.location.href)[1];
@@ -63,7 +71,7 @@ export class CopyRoot{
                         this.targetRootPath = Directory.selectedPath;
                         this.dataService.getFolderFromUrl(this).then(
                             response => {
-                                this.items = [];
+                              //  this.items = [];
                                 this.deleteAfterwards = delafter;
                                 for (var id = 0; id < this.selectedItemIds.length; id++) {
                                     this.items.push(new ItemDL(this.selectedItemIds[id], this, this.targetRootPath,this.srcRootPath,this.rootFolder.get_listItemAllFields().get_id()));
@@ -73,7 +81,7 @@ export class CopyRoot{
 
                     }
                     else {
-                        this.items = [];
+                     //   this.items = [];
                         this.deleteAfterwards = delafter;
                         for (var id = 0; id < this.selectedItemIds.length; id++) {
                             this.items.push(new ItemDL(this.selectedItemIds[id], this,"",this.srcRootPath));
@@ -133,5 +141,14 @@ export class CopyRoot{
         //console.log(folderURL);
     }
 
+    done(caller:ItemDL,errorMsg){
+        if(errorMsg!=null && errorMsg!="")
+            this.errorReport.push(caller.id+": "+caller.name+"--"+errorMsg);
+        this.doneCounter++;
+        if(this.doneCounter == this.items.length)
+        {
+            this.parent.screen=2;
+        }
+    }
 
 }

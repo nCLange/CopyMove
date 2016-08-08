@@ -34,8 +34,9 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
                 }
                 clicked(delafter) {
                     this.screen = 1;
-                    this.copyroot = new copyroot_1.CopyRoot(delafter, this.sitecollection);
+                    this.copyroot = new copyroot_1.CopyRoot(delafter, this.sitecollection, this);
                     this.filesToCopy = this.copyroot.items;
+                    this.errorReport = this.copyroot.errorReport;
                 }
             };
             __decorate([
@@ -46,6 +47,10 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
                 core_1.Input(), 
                 __metadata('design:type', Array)
             ], TreeViewSite.prototype, "filesToCopy", void 0);
+            __decorate([
+                core_1.Input(), 
+                __metadata('design:type', Array)
+            ], TreeViewSite.prototype, "errorReport", void 0);
             TreeViewSite = __decorate([
                 core_1.Component({
                     selector: 'tree-view-site',

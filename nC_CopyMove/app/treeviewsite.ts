@@ -16,7 +16,7 @@ export class TreeViewSite {
 
     screen: number;
     @Input() filesToCopy: Array<ItemDL>;
-
+    @Input() errorReport: Array<String>;
     copyroot: CopyRoot;
 
     constructor() {
@@ -32,9 +32,11 @@ export class TreeViewSite {
 
     clicked(delafter) {
         this.screen = 1;
-        this.copyroot  = new CopyRoot(delafter, this.sitecollection);
+        this.copyroot  = new CopyRoot(delafter, this.sitecollection,this);
         this.filesToCopy = this.copyroot.items;
+        this.errorReport = this.copyroot.errorReport;
         
     }
+
 
 }
