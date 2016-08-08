@@ -42,49 +42,21 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                     this.status = "Read File Information";
                                     if (this.incCall() == true)
                                         return;
-                                    /* this.dataService.downloadFile(this).then(
-                                         response => {
-                                             this.decCall();
-                                             this.status = "File Downloaded";
-                                             this.incCall();
-                                             this.dataService.createFile2(this).then(
-                                                 response => {
-                                                     this.decCall();
-                                                     this.status = "File created";
-                                                     this.fileContent = null; // Delete Buffer
-                                                     this.incCall();
-                                                     this.dataService.fillListItem(this).then(
-                                                         response => {
-                                                             this.decCall();
-                                                             this.dataService.fillListItem(this); // Dunno warum Doppelt
-                                                             this.status = "Done";
-                                                         },
-                                                         response => {
-                                                             this.decCall();
-                                                             console.error("Fill Listitems Failure" + response);
-                                                         });
-                                                 }, response => {
-                                                     this.decCall();
-                                                     console.error("CreateFile Failure" + response);
-                                                 });
-                                         }, response => {
-                                             this.decCall();
-                                             console.error("DownloadFile Failure " + response);
-                                         });*/
                                     this.dataService.soapAjax(this).then(response => {
                                         this.decCall();
-                                        this.status = "File Copied";
-                                        this.fileContent = null; // Delete Buffer
-                                        if (this.incCall() == true)
-                                            return;
-                                        this.dataService.fillListItem(this).then(response => {
-                                            this.decCall();
-                                            //  this.dataService.fillListItem(this); // Dunno warum Doppelt
-                                            this.status = "Done";
-                                        }, response => {
-                                            this.decCall();
-                                            console.error("Fill Listitems Failure" + response);
-                                        });
+                                        this.status = "Done";
+                                        // this.fileContent = null; // Delete Buffer
+                                        // if(this.incCall()==true) return;
+                                        /*   this.dataService.fillListItem(this).then(
+                                               response => {
+                                                   this.decCall();
+                                                 //  this.dataService.fillListItem(this); // Dunno warum Doppelt
+                                                   this.status = "Done";
+                                               },
+                                               response => {
+                                                   this.decCall();
+                                                   console.error("Fill Listitems Failure" + response);
+                                               });*/
                                     }, response => {
                                         console.error("File couldn't copy" + response);
                                     });

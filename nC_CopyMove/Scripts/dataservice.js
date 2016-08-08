@@ -53,13 +53,16 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
                             caller.title = srcList.get_title();
+                            var consoleOut = "";
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
-                                if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()) {
+                                if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden() && fieldcollection.itemAt(i).get_internalName() != "Title") {
+                                    consoleOut += fieldcollection.itemAt(i).get_internalName() + "||" + fieldcollection.itemAt(i).get_title() + "/";
                                     var listField = new listFields_1.ListField(fieldcollection.itemAt(i).get_internalName(), fieldcollection.itemAt(i).get_typeAsString());
                                     if (listField.allowed)
                                         caller.fields.push(listField);
                                 }
                             }
+                            console.log(consoleOut);
                             var file = !(listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder);
                             if (!file) {
                                 folder = listItem.get_folder().get_parentFolder();
@@ -85,7 +88,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var ctx = new SP.ClientContext(caller.targetUrl);
                     //  var appContextSite = new SP.AppContextSite(ctx, caller.targetUrl);
                     var currentFolder = ctx.get_web().getFolderByServerRelativeUrl(caller.targetTitle + "/" + caller.targetRootPath);
-                    console.log(caller.targetTitle + "/" + caller.targetRootPath);
+                    //console.log(caller.targetTitle+"/"+caller.targetRootPath);
                     ctx.load(currentFolder);
                     ctx.load(currentFolder, "ListItemAllFields");
                     return new Promise(function (resolve, reject) {
@@ -279,8 +282,8 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     return line;
                 }
                 soapAjax(caller) {
-                    console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name);
-                    console.log(caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name);
+                    //  console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
+                    //  console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
                     let that = this;
                     var xmlstring = this.buildSoapEnvelope(caller);
                     return new Promise(function (resolve, reject) {
@@ -512,7 +515,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         file = listItem.get_file();
                     else
                         file = listItem.get_folder();
-                    console.log("ID " + caller.id);
+                    // console.log("ID "+caller.id);
                     ctx.load(listItem);
                     ctx.load(file);
                     return new Promise(function (resolve, reject) {
@@ -542,6 +545,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                             targets.push(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name));
                         ctx.load(targets[i]);
                     }
+                    ctx.load(targetList);
                     ctx.load(targetItem);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(

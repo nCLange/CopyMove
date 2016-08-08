@@ -41,15 +41,18 @@ export class DataService {
 
 
                         caller.title =  srcList.get_title();
-                        
+                        var consoleOut="";
                        
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
-                                if(!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()){
+                                if(!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden() && fieldcollection.itemAt(i).get_internalName()!="Title"){
+                                    consoleOut += fieldcollection.itemAt(i).get_internalName() + "||" + fieldcollection.itemAt(i).get_title()+"/";
                                     var listField = new ListField(fieldcollection.itemAt(i).get_internalName(),fieldcollection.itemAt(i).get_typeAsString());
                                     if(listField.allowed) 
                                         caller.fields.push(listField);
                                 }         
                             }
+
+                            console.log(consoleOut);
 
                         var file = !(listItem.get_fileSystemObjectType()==SP.FileSystemObjectType.folder);
                         if(!file)
@@ -86,7 +89,7 @@ export class DataService {
 
 
         var currentFolder = ctx.get_web().getFolderByServerRelativeUrl(caller.targetTitle + "/" + caller.targetRootPath);
-        console.log(caller.targetTitle+"/"+caller.targetRootPath);
+        //console.log(caller.targetTitle+"/"+caller.targetRootPath);
         ctx.load(currentFolder);
         ctx.load(currentFolder, "ListItemAllFields");
         return new Promise(function (resolve, reject) {
@@ -336,8 +339,8 @@ export class DataService {
     }
 
     soapAjax(caller: ItemDL) {
-        console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
-        console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
+      //  console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
+      //  console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
         let that = this;
         var xmlstring = this.buildSoapEnvelope(caller);
         return new Promise(function (resolve, reject) {
@@ -676,7 +679,7 @@ export class DataService {
         else
             file = listItem.get_folder();
 
-        console.log("ID "+caller.id);
+       // console.log("ID "+caller.id);
         ctx.load(listItem);
         ctx.load(file);
 
@@ -713,33 +716,36 @@ export class DataService {
 
         var targets = new Array();
 
-for(var i = 0; i<caller.contents.length;i++){
-    if(caller.contents[i].field.type=="TaxonomyFieldTypeMulti")
-        targets.push(ctx.castTo(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name),SP.Taxonomy.TaxonomyField));
-    else
-        targets.push(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name));
+        for(var i = 0; i<caller.contents.length;i++){
+            if(caller.contents[i].field.type=="TaxonomyFieldTypeMulti")
+                targets.push(ctx.castTo(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name),SP.Taxonomy.TaxonomyField));
+            else
+                targets.push(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name));
 
-        ctx.load(targets[i]);
-        
-}
+                ctx.load(targets[i]);
+                
+        }
+        ctx.load(targetList);
         ctx.load(targetItem);
        
         return new Promise(function (resolve, reject) {
             ctx.executeQueryAsync(
                 //Success
                 function (data) {
-
+                    
                     for(var i = 0; i<caller.contents.length;i++){
                          if(caller.contents[i].field.type=="TaxonomyFieldTypeMulti")
                          {
-                            var termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, caller.contents[i].value , (targets[i] as SP.Taxonomy.TaxonomyField));
 
+                            var termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, caller.contents[i].value , (targets[i] as SP.Taxonomy.TaxonomyField));
+                    
                             (targets[i] as SP.Taxonomy.TaxonomyField).setFieldValueByValueCollection(targetItem, termValues);
+
                          }
                          else
                          {
-                             
                              targetItem.parseAndSetFieldValue(caller.contents[i].field.name,caller.contents[i].value);
+
                          }
                     }
 

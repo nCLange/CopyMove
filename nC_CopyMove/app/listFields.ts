@@ -11,6 +11,7 @@ export class ListField{
         this.name = name;
         this.type = type;
 
+
         switch(type){
 
             case "User":
