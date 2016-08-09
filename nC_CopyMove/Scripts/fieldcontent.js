@@ -20,6 +20,12 @@ System.register([], function(exports_1, context_1) {
                             break;
                         case "Taxoother":
                             break;
+                        case "DateTime":
+                            console.log(value);
+                            // this.value = new Date(value);
+                            this.value = value;
+                            this.field = field;
+                            break;
                         default:
                             this.value = value;
                             this.field = field;

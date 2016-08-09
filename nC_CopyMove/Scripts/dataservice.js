@@ -39,6 +39,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
             let DataService = class DataService {
                 constructor() {
                     this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
+                    this.searchWebUrl = window.location.protocol + "//" + window.location.host;
                 }
                 getListInfoFromId(caller) {
                     var ctx = new SP.ClientContext(caller.srcUrl);
@@ -103,12 +104,12 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                 searchSiteCollection(caller) {
                     let that = this;
                     return new Promise(function (resolve, reject) {
-                        $.getScript(that.appWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+                        $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                             var executor = new SP.RequestExecutor(that.appWebUrl);
                             executor.executeAsync({
                                 //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
                                 //Leere Bibliotheken werden ignoriert , beheben?
-                                url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false",
+                                url: that.searchWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false&selectproperties'Title,Path'&rowlimit=500",
                                 method: "GET",
                                 headers: { "Accept": "application/json; odata=verbose" },
                                 success: function (data) {
@@ -129,6 +130,53 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 }
+                /*
+                   searchSiteCollection2(caller) {
+                
+                        let that = this;
+                
+                
+                        return new Promise(function (resolve, reject) {
+                
+                            $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+                
+                                var executor = new SP.RequestExecutor(that.appWebUrl);
+                                executor.executeAsync(
+                                    {
+                                        //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'",
+                                        //Leere Bibliotheken werden ignoriert , beheben?
+                                        url: that.searchWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false",
+                
+                                        method: "POST",
+                                        headers: { "Accept": "application/json; odata=verbose" },
+                                         {  '__metadata': {'type':'Microsoft.Office.Server.Search.REST.SearchRequest'},
+                                            'Querytext' : 'contentclass:sts_site',
+                                            'trimduplicates':'false'
+                                     }
+                                        success: function (data) {
+                                            var myoutput = JSON.parse((data.body.toString()));
+                                            var sitecollection = [];
+                                            var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                                            //console.log(siteResult);
+                                            for (var x = 0; x < siteResult.length; x++) {
+                
+                                                sitecollection.push(
+                                                    new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"),caller));
+                                            }
+                
+                                            resolve(sitecollection);
+                                        },
+                                        error: function (data) {
+                                            var sitecollection = [];
+                                            reject(sitecollection);
+                                        }
+                
+                                    }
+                                )
+                            });
+                        });
+                    }
+                */
                 /*  searchDocumentLibrary(pathURL, parent) {
               
                       let that = this;
@@ -335,7 +383,8 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 if (cType.get_id().toString().startsWith("0x0120D520")) {
                                     // console.log("Doc Set: " + caller.id);
                                     caller.type = itemdl_1.ContentType.DocSet;
-                                    caller.contentTypeId = cType.get_id().toString().substring(0, cType.get_id().toString().lastIndexOf("00"));
+                                    console.log(cType.get_id().toString().substring(0, cType.get_id().toString().length - 34));
+                                    caller.contentTypeId = cType.get_id().toString().substring(0, cType.get_id().toString().length - 34);
                                     caller.contentTypeName = cType.get_name();
                                 }
                                 else {
@@ -439,6 +488,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                         root = targetList.getItemById(caller.parentFolderId).get_folder();
                     ctx.load(targetList);
                     var cTypeId = caller.contentTypeId;
+                    console.log(cTypeId);
                     var newCT = ctx.get_web().get_contentTypes().getById(cTypeId);
                     ctx.load(root);
                     ctx.load(newCT);
@@ -557,7 +607,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                     targets[i].setFieldValueByValueCollection(targetItem, termValues);
                                 }
                                 else {
-                                    targetItem.parseAndSetFieldValue(caller.contents[i].field.name, caller.contents[i].value);
+                                    targetItem.set_item(caller.contents[i].field.name, caller.contents[i].value);
                                 }
                             }
                             targetItem.update();

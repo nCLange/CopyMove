@@ -22,7 +22,13 @@ field: ListField;
 
             case "Taxoother":
                 break;
-
+            
+            case "DateTime":
+                console.log(value);
+               // this.value = new Date(value);
+               this.value=value;
+                this.field=field;
+                break;
             default:
                 this.value = value;
                 this.field = field;
