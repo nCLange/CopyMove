@@ -118,6 +118,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                     var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                     //console.log(siteResult);
                                     for (var x = 0; x < siteResult.length; x++) {
+                                        //if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profiles/")) -- Enable to limit scope
                                         sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                     }
                                     resolve(sitecollection);
@@ -340,13 +341,13 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                             type: "POST",
                             dataType: "xml",
                             data: xmlstring,
+                            contentType: "application/soap+xml; charset=utf-8",
                             success: function (xData, status) {
                                 that.getListIDFromFile(caller).then(response => { resolve(); }, response => { reject(response); });
                             },
                             error: function (xData, status) {
                                 reject(xData + " " + status);
                             },
-                            contentType: "application/soap+xml; charset=utf-8"
                         });
                     });
                 }
@@ -645,6 +646,20 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 var directory = [];
                                 reject(directory);
                             }
+                        });
+                    });
+                }
+                deleteEntry(caller) {
+                    var ctx = new SP.ClientContext(caller.srcUrl);
+                    var srcList = ctx.get_web().get_lists().getById(caller.parent.srcListId);
+                    var listItem = srcList.getItemById(caller.id);
+                    listItem.deleteObject();
+                    ctx.load(listItem);
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(function (data) {
+                            resolve();
+                        }, function (data) {
+                            reject(arguments[1].get_message());
                         });
                     });
                 }

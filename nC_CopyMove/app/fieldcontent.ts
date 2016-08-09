@@ -24,7 +24,6 @@ field: ListField;
                 break;
             
             case "DateTime":
-                console.log(value);
                // this.value = new Date(value);
                this.value=value;
                 this.field=field;

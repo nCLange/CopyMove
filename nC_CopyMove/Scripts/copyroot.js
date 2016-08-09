@@ -37,6 +37,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.items = [];
                     this.doneCounter = 0;
                     this.parent = parent;
+                    this.delafter = delafter;
                     this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
                     // var wat = new RegExp('[\?&]SPListURL=([^&#]*)').exec(window.location.href)[1];
                     var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
@@ -107,7 +108,25 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     if (errorMsg != null && errorMsg != "")
                         this.errorReport.push(caller.id + ": " + caller.name + "--" + errorMsg);
                     this.doneCounter++;
-                    if (this.doneCounter == this.items.length) {
+                    if (this.doneCounter >= this.items.length) {
+                        if (this.delafter) {
+                            var error = false;
+                            for (var i = this.items.length - 1; i >= 0; i--) {
+                                if (this.items[i].status == "Done" && this.items[i].type == itemdl_1.ContentType.File) {
+                                    this.items[i].dataService.deleteEntry(this.items[i]);
+                                }
+                                else if (this.items[i].status != "Done" && this.items[i].type == itemdl_1.ContentType.File) {
+                                    error = true;
+                                }
+                                else if (this.items[i].status == "Done" && this.items[i].type != itemdl_1.ContentType.File) {
+                                    if (error == false)
+                                        this.items[i].dataService.deleteEntry(this.items[i]);
+                                }
+                                else {
+                                    error = true;
+                                }
+                            }
+                        }
                         this.parent.screen = 2;
                     }
                 }

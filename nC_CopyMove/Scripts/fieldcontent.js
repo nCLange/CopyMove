@@ -21,7 +21,6 @@ System.register([], function(exports_1, context_1) {
                         case "Taxoother":
                             break;
                         case "DateTime":
-                            console.log(value);
                             // this.value = new Date(value);
                             this.value = value;
                             this.field = field;

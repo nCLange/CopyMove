@@ -132,7 +132,7 @@ export class DataService {
                             var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                             //console.log(siteResult);
                             for (var x = 0; x < siteResult.length; x++) {
-
+                                //if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profiles/")) -- Enable to limit scope
                                 sitecollection.push(
                                     new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                             }
@@ -319,7 +319,7 @@ export class DataService {
         input = JSON.stringify(input);
         input = input.match("Key\":\"" + key + ".*?}").toString();
         input = input.match("(?=Value\":\").*?(?=\",)").toString().substring(8);
-        return input.toString();
+        return (input.toString() as string);
 
     }
 
@@ -396,9 +396,10 @@ export class DataService {
                 type: "POST",
                 dataType: "xml",
                 data: xmlstring,
+                contentType: "application/soap+xml; charset=utf-8",
                 success: function (xData, status) {
                     that.getListIDFromFile(caller).then(
-                        response => { resolve() },
+                        response => { resolve(); },
                         response => { reject(response); }
                     );
                 },
@@ -406,7 +407,7 @@ export class DataService {
                     reject(xData + " " + status);
 
                 },
-                contentType: "application/soap+xml; charset=utf-8"
+              
 
             });
         });
@@ -414,7 +415,6 @@ export class DataService {
     }
 
     getListIDFromFile(caller: ItemDL) {
-
         var ctx = new SP.ClientContext(caller.parent.targetUrl);
         //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
 
@@ -462,8 +462,8 @@ export class DataService {
                             // console.log("Doc Set: " + caller.id);
 
                             caller.type = ContentType.DocSet;
-                            console.log(cType.get_id().toString().substring(0, cType.get_id().toString().length-34));
-                            caller.contentTypeId = cType.get_id().toString().substring(0, cType.get_id().toString().length-34);
+                            console.log(cType.get_id().toString().substring(0, cType.get_id().toString().length - 34));
+                            caller.contentTypeId = cType.get_id().toString().substring(0, cType.get_id().toString().length - 34);
                             caller.contentTypeName = cType.get_name();
                         }
                         else {
@@ -855,6 +855,28 @@ export class DataService {
 
                 }
             )
+        });
+    }
+
+    deleteEntry(caller: ItemDL) {
+
+        var ctx = new SP.ClientContext(caller.srcUrl);
+        var srcList = ctx.get_web().get_lists().getById(caller.parent.srcListId);
+
+        var listItem = srcList.getItemById(caller.id);
+
+        listItem.deleteObject();
+
+        ctx.load(listItem);
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                function (data) {
+                    resolve();
+                },
+                function (data) {
+                  reject(arguments[1].get_message());
+                });
+
         });
     }
 }

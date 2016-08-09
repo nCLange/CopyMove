@@ -45,20 +45,8 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                     this.dataService.soapAjax(this).then(response => {
                                         this.decCall();
                                         this.status = "Done";
-                                        this.parent.done(this, null);
-                                        // this.fileContent = null; // Delete Buffer
-                                        // if(this.incCall()==true) return;
-                                        /*   this.dataService.fillListItem(this).then(
-                                               response => {
-                                                   this.decCall();
-                                                 //  this.dataService.fillListItem(this); // Dunno warum Doppelt
-                                                   this.status = "Done";
-                                               },
-                                               response => {
-                                                   this.decCall();
-                                                   console.error("Fill Listitems Failure" + response);
-                                               });*/
                                     }, response => {
+                                        this.decCall();
                                         this.status = "Error";
                                         this.parent.done(this, "File couldn't copy" + response);
                                     });
