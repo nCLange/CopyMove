@@ -781,7 +781,7 @@ export class DataService {
                 function (data) {
 
                     for (var i = 0; i < caller.contents.length; i++) {
-                        if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti") {
+                        if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti" || caller.contents[i].field.type=="TaxonomyFieldType") {
 
                             var termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, caller.contents[i].value, (targets[i] as SP.Taxonomy.TaxonomyField));
 
@@ -860,7 +860,7 @@ export class DataService {
 
     deleteEntry(caller: ItemDL) {
 
-        var ctx = new SP.ClientContext(caller.srcUrl);
+        var ctx = new SP.ClientContext(caller.parent.srcUrl);
         var srcList = ctx.get_web().get_lists().getById(caller.parent.srcListId);
 
         var listItem = srcList.getItemById(caller.id);

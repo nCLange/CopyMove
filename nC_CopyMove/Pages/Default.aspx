@@ -29,6 +29,7 @@
     <script src="https://code.angularjs.org/2.0.0-beta.17/http.dev.js"></script>
     <script src="https://code.angularjs.org/2.0.0-beta.17/router.dev.js"></script>
     <script src="https://code.angularjs.org/2.0.0-beta.17/upgrade.js"></script>
+    <link rel="stylesheet" href="../styles/layout.css">
     
    
    

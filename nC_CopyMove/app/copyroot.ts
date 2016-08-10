@@ -64,7 +64,7 @@ export class CopyRoot {
                     this.srcRootPath += "/";
                     this.srcRootPath = this.srcRootPath.substr(1, this.srcRootPath.length);
                 }
-                console.log(this.srcRootPath);
+     //           console.log(this.srcRootPath);
 
                 if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
                     this.targetRootPath = Directory.selectedPath;
@@ -141,11 +141,13 @@ export class CopyRoot {
     }
 
     done(caller: ItemDL, errorMsg) {
-        if (errorMsg != null && errorMsg != "")
+        if (errorMsg != null && errorMsg != ""){
             this.errorReport.push(caller.id + ": " + caller.name + "--" + errorMsg);
+        }
         this.doneCounter++;
-
+        console.log(this.doneCounter+"/"+this.items.length);
         if (this.doneCounter >= this.items.length) {
+            console.log(this.delafter);
             if (this.delafter) {
                 var error = false;
                 for (var i = this.items.length - 1; i >= 0; i--) {

@@ -590,7 +590,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var targetItem = targetList.getItemById(caller.targetId);
                     var targets = new Array();
                     for (var i = 0; i < caller.contents.length; i++) {
-                        if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti")
+                        if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti"|| caller.contents[i].field.type == "TaxonomyFieldType")
                             targets.push(ctx.castTo(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name), SP.Taxonomy.TaxonomyField));
                         else
                             targets.push(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name));
@@ -606,6 +606,12 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti") {
                                     var termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, caller.contents[i].value, targets[i]);
                                     targets[i].setFieldValueByValueCollection(targetItem, termValues);
+                                }
+                                else if (  caller.contents[i].field.type == "TaxonomyFieldType")
+                                {
+                                    var termValue = new SP.Taxonomy.TaxonomyFieldValue(ctx,caller.contents[i].value , targets[i]);
+                                    
+                                    targets[i].setFieldValueByValue(targetItem,termValues);
                                 }
                                 else {
                                     targetItem.set_item(caller.contents[i].field.name, caller.contents[i].value);
@@ -650,7 +656,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     });
                 }
                 deleteEntry(caller) {
-                    var ctx = new SP.ClientContext(caller.srcUrl);
+                    var ctx = new SP.ClientContext(caller.parent.srcUrl);
                     var srcList = ctx.get_web().get_lists().getById(caller.parent.srcListId);
                     var listItem = srcList.getItemById(caller.id);
                     listItem.deleteObject();

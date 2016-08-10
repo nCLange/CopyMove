@@ -45,6 +45,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                     this.dataService.soapAjax(this).then(response => {
                                         this.decCall();
                                         this.status = "Done";
+                                        this.parent.done(this, null);
                                     }, response => {
                                         this.decCall();
                                         this.status = "Error";

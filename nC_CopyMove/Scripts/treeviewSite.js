@@ -38,11 +38,18 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
                     this.filesToCopy = this.copyroot.items;
                     this.errorReport = this.copyroot.errorReport;
                 }
+                done() {
+                    window.parent.location.reload();
+                }
             };
             __decorate([
                 core_1.Input(), 
                 __metadata('design:type', Array)
             ], TreeViewSite.prototype, "sitecollection", void 0);
+            __decorate([
+                core_1.Input(), 
+                __metadata('design:type', Boolean)
+            ], TreeViewSite.prototype, "selected", void 0);
             __decorate([
                 core_1.Input(), 
                 __metadata('design:type', Array)

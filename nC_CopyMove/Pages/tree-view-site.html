@@ -2,17 +2,22 @@
     <div *ngIf="screen==0">
         <ul id="listIcon">
             <li *ngFor="let site of sitecollection" selection-model>
-                <!--<span><input type="checkbox" [checked]="dir.checked" (click)="dir.check()"    /></span> -->
 
-                <span (click)="site.toggle()">{{ site.name }}-{{site.path}}</span>
+                <span (click)="site.toggle()">{{ site.name }}</span>
                 <div *ngIf="site.expanded">
                     <tree-view-doclib [documentlibrary]="site.documentLibraries">
                     </tree-view-doclib>
                 </div>
             </li>
         </ul>
-        <button id="cm-button" onclick="return false" (click)="clicked(False)">Copy</button>
-        <button id="cm-button" onclick="return false" (click)="clicked(True)">Move</button>
+        <div *ngIf="selected==true">
+            <button id="cm-button" onclick="return false" (click)="clicked(false)">Copy</button>
+            <button id="cm-button" onclick="return false" (click)="clicked(true)">Move</button>
+        </div>
+        <div *ngIf="selected==false">
+            <button id="cm-button" onclick="return false"  disabled>Copy</button>
+            <button id="cm-button" onclick="return false"  disabled>Move</button>
+        </div>
     </div>
     <div *ngIf="screen==1">
         <ul>
@@ -35,6 +40,6 @@
         <div *ngIf="errorReport.length==0">
             <span> Everything copied. </span>
         </div> 
-        <button id="cm-button" onclick="return false" (click)="clicked(false)">Done</button>
+        <button id="cm-button" onclick="return false" (click)="done()">Done</button>
     </div>
 </div>

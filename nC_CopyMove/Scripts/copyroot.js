@@ -48,7 +48,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                             this.srcRootPath += "/";
                             this.srcRootPath = this.srcRootPath.substr(1, this.srcRootPath.length);
                         }
-                        console.log(this.srcRootPath);
+                        //           console.log(this.srcRootPath);
                         if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
                             this.targetRootPath = directory_1.Directory.selectedPath;
                             this.dataService.getFolderFromUrl(this).then(response => {
@@ -105,10 +105,13 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     //console.log(folderURL);
                 }
                 done(caller, errorMsg) {
-                    if (errorMsg != null && errorMsg != "")
+                    if (errorMsg != null && errorMsg != "") {
                         this.errorReport.push(caller.id + ": " + caller.name + "--" + errorMsg);
+                    }
                     this.doneCounter++;
+                    console.log(this.doneCounter + "/" + this.items.length);
                     if (this.doneCounter >= this.items.length) {
+                        console.log(this.delafter);
                         if (this.delafter) {
                             var error = false;
                             for (var i = this.items.length - 1; i >= 0; i--) {

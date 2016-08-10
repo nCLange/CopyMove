@@ -13,6 +13,7 @@ import {ItemDL} from './itemdl';
 })
 export class TreeViewSite {
     @Input() sitecollection: Array<SiteCollection>;
+    @Input() selected: boolean;
 
     screen: number;
     @Input() filesToCopy: Array<ItemDL>;
@@ -36,6 +37,10 @@ export class TreeViewSite {
         this.filesToCopy = this.copyroot.items;
         this.errorReport = this.copyroot.errorReport;
         
+    }
+
+    done(){
+        window.parent.location.reload();
     }
 
 

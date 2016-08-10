@@ -61,6 +61,7 @@ export class ItemDL {
                                     response => {
                                         this.decCall();
                                         this.status = "Done";
+                                        this.parent.done(this,null);
                                     },
                                     response => {
                                         this.decCall();
