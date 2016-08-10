@@ -5,8 +5,8 @@ import {TreeViewDirectory} from './treeviewdirectory';
 
 @Component({
     selector: 'tree-view-doclib',
-    template: `<ul >
-                <li *ngFor="let library of documentlibrary"><div [style.background-color]="library.getStyle()" (dblclick)="mark(library)" (click)="select(library)">{{library.name}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
+    template: `<ul class="libList">
+                <li class="libListElements" *ngFor="let library of documentlibrary"><div [style.background-color]="library.getStyle()" (dblclick)="mark(library)" (click)="select(library)"><img src="../../_layouts/15/images/sts_list_documentlibrary16.gif">&nbsp;{{library.name}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
                </ul>`,
     directives: [TreeViewDirectory]
 })

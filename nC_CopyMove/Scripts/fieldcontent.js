@@ -19,7 +19,8 @@ System.register([], function(exports_1, context_1) {
                             this.field = field;
                             break;
                         case "TaxonomyFieldType":
-                            this.value = "-1;#" + value.get_label() + "|" + value.get_termGuid();
+                            // this.value = "-1;#" + value.get_label() + "|" + value.get_termGuid();
+                            this.value = value;
                             this.field = field;
                             break;
                         case "DateTime":

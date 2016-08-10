@@ -32,7 +32,7 @@ System.register(['./directory', './dataservice'], function(exports_1, context_1)
                  }*/
                 getStyle() {
                     if (this.selected) {
-                        return "yellow";
+                        return "#BEC9FF";
                     }
                     else {
                         return "white";

@@ -56,6 +56,8 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                             caller.title = srcList.get_title();
                             var consoleOut = "";
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
+                                if (fieldcollection.itemAt(i).get_internalName() == "_CopySource")
+                                    console.log("GUID: " + fieldcollection.itemAt(i).get_id());
                                 if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden() && fieldcollection.itemAt(i).get_internalName() != "Title") {
                                     consoleOut += fieldcollection.itemAt(i).get_internalName() + "||" + fieldcollection.itemAt(i).get_title() + "/";
                                     var listField = new listFields_1.ListField(fieldcollection.itemAt(i).get_internalName(), fieldcollection.itemAt(i).get_typeAsString());
@@ -63,7 +65,6 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                         caller.fields.push(listField);
                                 }
                             }
-                            console.log(consoleOut);
                             var file = !(listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder);
                             if (!file) {
                                 folder = listItem.get_folder().get_parentFolder();
@@ -318,14 +319,18 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     line += "<?xml version= \"1.0\" encoding= \"utf-8\" ?>";
                     line += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
                     line += "<soap12:Body>";
-                    line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
+                    line += "<CopyIntoItems xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
                     line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
                     // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
                     line += "<DestinationUrls>";
                     //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
                     line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name + "</string>";
                     line += "</DestinationUrls>";
-                    line += "</CopyIntoItemsLocal>";
+                    line += "<Fields>";
+                    line += "<FieldInformation Type=\"Text\" DisplayName=\"Copy Source\" InternalName=\"_CopySource\" Id=\"{6b4e226d-3d88-4a36-808d-a129bf52bccf}\"/>";
+                    line += "</Fields>";
+                    line += "<Stream>base64Binary</Stream>";
+                    line += "</CopyIntoItems>";
                     line += "</soap12:Body>";
                     line += "</soap12:Envelope>";
                     return line;
@@ -343,6 +348,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                             data: xmlstring,
                             contentType: "application/soap+xml; charset=utf-8",
                             success: function (xData, status) {
+                                console.log(xData);
                                 that.getListIDFromFile(caller).then(response => { resolve(); }, response => { reject(response); });
                             },
                             error: function (xData, status) {
@@ -357,6 +363,8 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var file = ctx.get_web().getFileByServerRelativeUrl("/" + caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "") + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name);
                     // console.log(file);
                     //  console.log("/"+caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "")+"/"+caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name);
+                    //debux
+                    //
                     ctx.load(file, 'ListItemAllFields');
                     ctx.load(file);
                     return new Promise(function (resolve, reject) {
@@ -384,7 +392,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                 if (cType.get_id().toString().startsWith("0x0120D520")) {
                                     // console.log("Doc Set: " + caller.id);
                                     caller.type = itemdl_1.ContentType.DocSet;
-                                    console.log(cType.get_id().toString().substring(0, cType.get_id().toString().length - 34));
+                                    //console.log(cType.get_id().toString().substring(0, cType.get_id().toString().length - 34));
                                     caller.contentTypeId = cType.get_id().toString().substring(0, cType.get_id().toString().length - 34);
                                     caller.contentTypeName = cType.get_name();
                                 }
@@ -590,7 +598,7 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     var targetItem = targetList.getItemById(caller.targetId);
                     var targets = new Array();
                     for (var i = 0; i < caller.contents.length; i++) {
-                        if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti"|| caller.contents[i].field.type == "TaxonomyFieldType")
+                        if (caller.contents[i].field.type == "TaxonomyFieldTypeMulti" || caller.contents[i].field.type == "TaxonomyFieldType")
                             targets.push(ctx.castTo(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name), SP.Taxonomy.TaxonomyField));
                         else
                             targets.push(targetList.get_fields().getByInternalNameOrTitle(caller.contents[i].field.name));
@@ -607,11 +615,14 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                                     var termValues = new SP.Taxonomy.TaxonomyFieldValueCollection(ctx, caller.contents[i].value, targets[i]);
                                     targets[i].setFieldValueByValueCollection(targetItem, termValues);
                                 }
-                                else if (  caller.contents[i].field.type == "TaxonomyFieldType")
-                                {
-                                    var termValue = new SP.Taxonomy.TaxonomyFieldValue(ctx,caller.contents[i].value , targets[i]);
-                                    
-                                    targets[i].setFieldValueByValue(targetItem,termValues);
+                                else if (caller.contents[i].field.type == "TaxonomyFieldType") {
+                                    var termValue = new SP.Taxonomy.TaxonomyFieldValue();
+                                    if (caller.contents[i].value != null) {
+                                        termValue.set_label(caller.contents[i].value.get_label());
+                                        termValue.set_termGuid(caller.contents[i].value.get_termGuid());
+                                        termValue.set_wssId(-1);
+                                        targets[i].setFieldValueByValue(targetItem, termValue);
+                                    }
                                 }
                                 else {
                                     targetItem.set_item(caller.contents[i].field.name, caller.contents[i].value);
@@ -668,6 +679,70 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                             reject(arguments[1].get_message());
                         });
                     });
+                }
+                deleteCopySource(caller) {
+                    /*
+                                 //  console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
+                            //  console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
+                            let that = this;
+                            var xmlstring = this.buildSoapEnvelopeDelete(caller);
+                            return new Promise(function (resolve, reject) {
+                                jQuery.ajax({
+                                    url: caller.parent.targetUrl + "/_vti_bin/lists.asmx",
+                                    type: "POST",
+                                    dataType: "xml",
+                                    data: xmlstring,
+                                    contentType: "application/soap+xml; charset=utf-8",
+                                    success: function (xData, status) {
+                                        that.getListIDFromFile(caller).then(
+                                            response => {
+                                                
+                                                  that.checkCopySource(caller);
+                                                console.log(xData); resolve();},
+                                            response => { reject(response); }
+                                        );
+                                    },
+                                    error: function (xData, status) {
+                                        reject(xData + " " + status);
+                    
+                                    },
+                    
+                    
+                                });
+                            });
+                    */
+                    return;
+                }
+                buildSoapEnvelopeDelete(caller) {
+                    var line = "";
+                    line += "<?xml version= \"1.0\" encoding= \"utf-8\" ?>";
+                    line += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
+                    line += "<soap12:Body>";
+                    line += "<UpdateListItems xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
+                    line += "<listName>" + caller.parent.title + "</listName>";
+                    line += "<updates>";
+                    line += "<Batch OnError=\"Continue\">";
+                    line += "<Method ID=\"1\" Cmd=\"Update\">";
+                    line += "<Field Name =\"ID\">" + caller.targetId + "</Field>";
+                    line += "<Field Name =\"_CopySource\">\"" + caller.name + "\"</Field>";
+                    line += "</Method>";
+                    line += "</Batch>";
+                    line += "</updates>";
+                    line += "</UpdateListItems>";
+                    line += "</soap12:Body>";
+                    line += "</soap12:Envelope>";
+                    return line;
+                }
+                checkCopySource(caller) {
+                    var ctx = new SP.ClientContext(caller.parent.targetUrl);
+                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
+                    var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+                    var targetItem = targetList.getItemById(caller.targetId);
+                    var targetField = console.log(caller.parent.targetUrl + "/" + caller.parent.title + "/" + caller.targetFolderURL + caller.name);
+                    ctx.load(targetItem);
+                    ctx.executeQueryAsync(function (data) {
+                        console.log(targetItem.get_item("_CopySource"));
+                    }, function (data) { });
                 }
             };
             DataService = __decorate([

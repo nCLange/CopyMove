@@ -24,7 +24,7 @@ System.register(['./dataservice', './documentlibrary'], function(exports_1, cont
                 }
                 getStyle() {
                     if (this.selected) {
-                        return "yellow";
+                        return "#BEC9FF";
                     }
                     else {
                         return "";

@@ -45,7 +45,21 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                     this.dataService.soapAjax(this).then(response => {
                                         this.decCall();
                                         this.status = "Done";
+                                        //     if (this.incCall() == true) return;
                                         this.parent.done(this, null);
+                                        /*  this.dataService.deleteCopySource(this)/*.then(
+                                              response => {
+                                                  this.status = "Done";
+                                                  this.decCall();
+                                                  this.parent.done(this, null);
+                                              },
+                                              response => {
+                                                  this.status = "Error";
+                                                  this.decCall();
+                                                  this.parent.done(this, "Couldn't Delete CopySource: " + response);
+                                              }
+                                          )
+                                      */
                                     }, response => {
                                         this.decCall();
                                         this.status = "Error";
