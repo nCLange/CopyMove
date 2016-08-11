@@ -1,21 +1,17 @@
-System.register(["angular2/platform/browser", 'angular2/http', './app.component'], function(exports_1, context_1) {
+System.register(["@angular/platform-browser-dynamic", './app.component'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var browser_1, http_1, app_component_1;
+    var platform_browser_dynamic_1, app_component_1;
     return {
         setters:[
-            function (browser_1_1) {
-                browser_1 = browser_1_1;
-            },
-            function (http_1_1) {
-                http_1 = http_1_1;
+            function (platform_browser_dynamic_1_1) {
+                platform_browser_dynamic_1 = platform_browser_dynamic_1_1;
             },
             function (app_component_1_1) {
                 app_component_1 = app_component_1_1;
             }],
         execute: function() {
-            // import {DataService} from "./services/dataService";
-            browser_1.bootstrap(app_component_1.AppComponent, [http_1.HTTP_PROVIDERS]);
+            platform_browser_dynamic_1.bootstrap(app_component_1.AppComponent /*, [HTTP_PROVIDERS]*/);
         }
     }
 });

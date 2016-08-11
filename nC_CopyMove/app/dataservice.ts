@@ -1,4 +1,4 @@
-﻿import {Injectable} from 'angular2/core';
+﻿import {Injectable} from '@angular/core';
 import {SiteCollection} from './sitecollection';
 import {DocumentLibrary} from './documentlibrary';
 import {Directory} from './directory';
@@ -369,18 +369,15 @@ export class DataService {
         line += "<?xml version= \"1.0\" encoding= \"utf-8\" ?>";
         line += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
         line += "<soap12:Body>";
-        line += "<CopyIntoItems xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
-        line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
+        line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
+        line += "<SourceUrl>"+ caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
+               // line += "<SourceUrl>"+ caller.name + "</SourceUrl>";
         // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
         line += "<DestinationUrls>";
         //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
         line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name + "</string>";
         line += "</DestinationUrls>";
-        line += "<Fields>";
-        line += "<FieldInformation Type=\"Text\" DisplayName=\"Copy Source\" InternalName=\"_CopySource\" Id=\"{6b4e226d-3d88-4a36-808d-a129bf52bccf}\"/>";
-        line += "</Fields>";
-        line += "<Stream>base64Binary</Stream>";
-        line += "</CopyIntoItems>";
+        line += "</CopyIntoItemsLocal>";
         line += "</soap12:Body>";
         line += "</soap12:Envelope>";
 

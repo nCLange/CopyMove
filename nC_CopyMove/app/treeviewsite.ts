@@ -1,4 +1,4 @@
-﻿import {Component, Input } from "angular2/core";
+﻿import {Component, Input } from "@angular/core";
 import {SiteCollection} from './sitecollection';
 import {TreeViewDocLib} from './treeView';
 import {DocumentLibrary} from './documentlibrary';

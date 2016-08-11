@@ -111,7 +111,6 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.doneCounter++;
                     console.log(this.doneCounter + "/" + this.items.length);
                     if (this.doneCounter >= this.items.length) {
-                        console.log(this.delafter);
                         if (this.delafter) {
                             var error = false;
                             for (var i = this.items.length - 1; i >= 0; i--) {
