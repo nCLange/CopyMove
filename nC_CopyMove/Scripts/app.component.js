@@ -1,4 +1,4 @@
-System.register(['@angular/core', './treeviewsite', './dataservice'], function(exports_1, context_1) {
+System.register(['angular2/core', './treeviewsite', './dataservice'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -52,6 +52,7 @@ System.register(['@angular/core', './treeviewsite', './dataservice'], function(e
                 core_1.Component({
                     selector: "app-main",
                     providers: [dataservice_1.DataService],
+                    // template:'<H1>Hello</H1>'
                     template: '<tree-view-site [sitecollection]="sitecollection" [selected]="selected"></tree-view-site>',
                     directives: [treeviewsite_1.TreeViewSite]
                 }), 

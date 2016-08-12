@@ -1,4 +1,4 @@
-﻿import {Component, Input } from "@angular/core";
+﻿import {Component, Input } from "angular2/core";
 import {SiteCollection} from './sitecollection';
 import {TreeViewDocLib} from './treeView';
 import {DocumentLibrary} from './documentlibrary';
@@ -22,6 +22,8 @@ export class TreeViewSite {
 
     constructor() {
         this.screen = 0;
+        this.filesToCopy = null;
+        this.errorReport = null;
 
     }
 

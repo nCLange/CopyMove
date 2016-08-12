@@ -1,4 +1,4 @@
-﻿import {Component} from '@angular/core';
+﻿import {Component} from 'angular2/core';
 import {TreeViewSite} from './treeviewsite';
 import {SiteCollection} from './sitecollection';
 import {DocumentLibrary} from './documentlibrary';
@@ -8,6 +8,7 @@ import {DataService} from './dataservice';
 @Component({
     selector: "app-main",
     providers: [DataService],
+    // template:'<H1>Hello</H1>'
     template: '<tree-view-site [sitecollection]="sitecollection" [selected]="selected"></tree-view-site>',
     directives: [TreeViewSite]
 })
@@ -19,7 +20,6 @@ export class AppComponent {
         this.sitecollection = [];
         dataService.searchSiteCollection(this).then(
             response => {
-                
                 var tempresponse;
                 tempresponse = response;
                 this.sitecollection = tempresponse;

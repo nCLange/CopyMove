@@ -29,7 +29,7 @@ System.config({
               main: 'index'
         },
         'app': {
-            main: 'main'
+            main: 'app'
         },
        'rxjs':{
            defaultExtension: 'js'

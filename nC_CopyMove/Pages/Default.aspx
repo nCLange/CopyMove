@@ -17,31 +17,24 @@
     <script type="text/javascript" src="../../_layouts/15/sp.taxonomy.js"></script>
     <script type="text/javascript" src="../../_layouts/15/SP.DocumentManagement.js"></script>
     <script type="text/javascript" src="../../_layouts/15/MicrosoftAjax.js"></script>
-    <script src="../libs/es6-shim.js"></script>
+    <script src="../libs/shim.js"></script>
+       
+     
     <script src="../libs/system-polyfills.js"></script>
-    <script src="../libs/zone.js"></script>
-  
-    <script src="../libs/Reflect.js"></script>
-
     <script src="../libs/system.js"></script>
-   
+
+
+
+
+     <script src="../libs/jquery.js"></script>
+     <script src="../libs/Rx.js"></script>
+   <!--      <script src = "../libs/zone.js"></script>-->
+    <script src="https://code.angularjs.org/2.0.0-beta.17/angular2-polyfills.js"></script>
   
-
-    <script src="../libs/Rx.js"></script>
-
-    <script src="../scripts/systemjs.config.js"></script>
-    <script src="../libs/angular2.min.js"></script>
-
-  
-    <script src="../libs/jquery.js"></script>
-   
- 
-    <!--
-     <script src="https://code.angularjs.org/2.0.0-beta.17/angular2-polyfills.js"></script>
     <script src="https://code.angularjs.org/2.0.0-beta.17/angular2.dev.js"></script>
     <script src="https://code.angularjs.org/2.0.0-beta.17/http.dev.js"></script>
     <script src="https://code.angularjs.org/2.0.0-beta.17/router.dev.js"></script>
-    <script src="https://code.angularjs.org/2.0.0-beta.17/upgrade.js"></script>-->
+    <script src="https://code.angularjs.org/2.0.0-beta.17/upgrade.js"></script>
     <link rel="stylesheet" href="../styles/layout.css">
     
    

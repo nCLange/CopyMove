@@ -27,6 +27,9 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     this.contentTypeId = null;
                     this.parentFolderId = parentFolderId;
                     this.contents = [];
+                    this.name = "";
+                    this.status = "";
+                    this.title = "";
                     // this.dataService.getFileAsBufferArray(parent.srcUrl + parent.title, id);
                     if (this.incCall() == true)
                         return;

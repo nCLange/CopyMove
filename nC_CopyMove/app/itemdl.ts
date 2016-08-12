@@ -41,6 +41,9 @@ export class ItemDL {
         this.contentTypeId = null;
         this.parentFolderId = parentFolderId;
         this.contents = [];
+        this.name="";
+        this.status="";
+        this.title="";
 
         // this.dataService.getFileAsBufferArray(parent.srcUrl + parent.title, id);
 

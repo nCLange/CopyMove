@@ -1,4 +1,4 @@
-﻿import {Injectable} from '@angular/core';
+﻿import {Injectable} from 'angular2/core';
 import {SiteCollection} from './sitecollection';
 import {DocumentLibrary} from './documentlibrary';
 import {Directory} from './directory';

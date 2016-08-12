@@ -1,4 +1,4 @@
-System.register(["@angular/core", './treeView', './copyroot'], function(exports_1, context_1) {
+System.register(["angular2/core", './treeView', './copyroot'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -27,6 +27,8 @@ System.register(["@angular/core", './treeView', './copyroot'], function(exports_
             let TreeViewSite = class TreeViewSite {
                 constructor() {
                     this.screen = 0;
+                    this.filesToCopy = null;
+                    this.errorReport = null;
                 }
                 canceled() {
                     this.screen = 0;
