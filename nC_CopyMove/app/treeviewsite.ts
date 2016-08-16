@@ -4,14 +4,19 @@ import {TreeViewDocLib} from './treeView';
 import {DocumentLibrary} from './documentlibrary';
 import {CopyRoot} from './copyroot';
 import {ItemDL} from './itemdl';
+import {SiteColPipe} from './filterpipe';
 
 
 @Component({
     selector: 'tree-view-site',
     templateUrl: './tree-view-site.html',
-    directives: [TreeViewDocLib]
+    directives: [TreeViewDocLib],
+    pipes: [SiteColPipe]
 })
 export class TreeViewSite {
+
+    @Input() searchValue: string = null;
+
     @Input() sitecollection: Array<SiteCollection>;
     @Input() selected: boolean;
 

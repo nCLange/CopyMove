@@ -13,18 +13,13 @@ export class ItemDL {
     name: string;
     title: string;
     srcUrl: string;
-    // fileContent;
-    data1: SP.Taxonomy.TaxonomyFieldValueCollection;
     type: ContentType;
-    //exists: boolean;
     contentQueue: Array<number>;
     relativePath: string;
     targetFolderURL: string;
     srcFolderURL: string;
     contentTypeId: string;
-    //parentFolder: SP.Folder;
     status: string;
-    data2: SP.Taxonomy.TaxonomyFieldValueCollection;
     parentFolderId: number;
     contentTypeName: string;
     contents: Array<FieldContent>;
@@ -51,16 +46,14 @@ export class ItemDL {
         this.dataService.getContent(this).then(
             response => {
                 this.decCall();
-                this.status = "Got Status";
                 switch (this.type) {
                     case ContentType.File:
                         if (this.incCall() == true) return;
                         this.dataService.readListItem(this).then(
                             response => {
                                 this.decCall();
-                                this.status = "Read File Information";
                                 if (this.incCall() == true) return;
-                                this.dataService.soapAjax(this).then(
+                                this.dataService.customSoapAjax(this).then(
                                     response => {
                                         this.decCall();
                                         this.status = "Done";
@@ -84,12 +77,12 @@ export class ItemDL {
                                     response => {
                                         this.decCall();
                                         this.status = "Error";
-                                        this.parent.done(this, "File couldn't copy" + response);
+                                        this.parent.done(this, "File couldn't be copied: " + response);
                                     });
                             }, response => {
                                 this.decCall();
                                 this.status = "Error";
-                                this.parent.done(this, "readFileToCopy Failure " + response);
+                                this.parent.done(this, "File couldn't be read: " + response);
                             });
                         break;
                     case ContentType.Folder:
@@ -97,7 +90,6 @@ export class ItemDL {
                         this.dataService.getFolder(this).then(
                             response => {
                                 this.decCall();
-                                this.status = "Got Folder Information";
                                 if (this.incCall() == true) return;
                                 this.dataService.copyFolder(this).then(
                                     response => {
@@ -108,13 +100,13 @@ export class ItemDL {
                                     response => {
                                         this.decCall();
                                         this.status = "Error";
-                                        this.parent.done(this, "copyFolder Failure " + response);
+                                        this.parent.done(this, "Folder couldn't be copied: " + response);
                                     })
                             },
                             response => {
                                 this.decCall();
                                 this.status = "Error";
-                                this.parent.done(this, "getFolder Failure " + response);
+                                this.parent.done(this, "Folder couldn't be read: " + response);
                             });
                         break;
                     case ContentType.DocSet:
@@ -122,17 +114,14 @@ export class ItemDL {
                         this.dataService.getFolder(this).then(
                             response => {
                                 this.decCall();
-                                this.status = "Got Document Set Information";
                                 if (this.incCall() == true) return;
                                 this.dataService.copyDocSet(this).then(
                                     response => {
                                         this.decCall();
-                                        this.status = "Document Set copied";
                                         if (this.incCall() == true) return;
                                         this.dataService.readListItem(this).then(
                                             response => {
                                                 this.decCall();
-                                                this.status = "Read Document Set Information";
                                                 if (this.incCall() == true) return;
                                                 this.dataService.fillListItem(this).then(
                                                     response => {
@@ -144,39 +133,39 @@ export class ItemDL {
                                                     response => {
                                                         this.decCall();
                                                         this.status = "Error";
-                                                        this.parent.done(this, "FillListItemDocSet Failure " + response);
+                                                        this.parent.done(this, "List Fields couldn't be set: " + response);
                                                     });
                                             },
                                             response => {
                                                 this.decCall();
                                                 this.status = "Error";
-                                                this.parent.done(this, "readListItem Failure" + response);
+                                                this.parent.done(this, "List Fields couldn't be read: " + response);
                                             });
                                     },
                                     response => {
                                         this.decCall();
                                         this.status = "Error";
-                                        this.parent.done(this, "copyDocSet Failure " + response);
+                                        this.parent.done(this, "Document Set couldn't be copied: " + response);
                                     })
                             },
                             response => {
                                 this.decCall();
                                 this.status = "Error";
-                                this.parent.done(this, "getFolderDocSet Failure " + response);
+                                this.parent.done(this, "Document Set couldn't be read: " + response);
                             });
                         break;
 
                     default:
                         this.decCall();
                         this.status = "Error";
-                        this.parent.done(this, "Unknown Format");
+                        this.parent.done(this, "Format is unknown.");
                         break;
                 }
             },
             response => {
                 this.decCall();
                 this.status = "Error";
-                this.parent.done(this, "getContent Failure" + response);
+                this.parent.done(this, "Couldn't read Content Type: " + response);
             });
     }
 
@@ -198,6 +187,7 @@ export class ItemDL {
     timeOut() {
         let that = this;
         if (this.parent.currentCalls >= this.parent.maxCalls) {
+            this.status= "Waiting";
             setTimeout(that.timeOut, 50);
             return false;
 
@@ -211,6 +201,7 @@ export class ItemDL {
         }
         this.timeOut();
         this.parent.currentCalls++;
+        this.status="Copying";
         return false;
     }
 

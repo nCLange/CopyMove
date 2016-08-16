@@ -46,9 +46,20 @@ System.register(['angular2/core', './treeviewdirectory'], function(exports_1, co
                 core_1.Component({
                     selector: 'tree-view-doclib',
                     template: `<ul class="libList">
-                <li class="libListElements" *ngFor="let library of documentlibrary"><div [style.background-color]="library.getStyle()" (dblclick)="mark(library)" (click)="select(library)"><img src="../../_layouts/15/images/sts_list_documentlibrary16.gif">&nbsp;{{library.name}}</div><div *ngIf="library.expanded"><tree-view-directory [folderLookUp]="library"></tree-view-directory></div></li>
+                <div *ngFor="let library of documentlibrary">
+                    <div *ngIf="library.visible==true">
+                        <li class="libListElements">
+                            <div [style.background-color]="library.getStyle()" (dblclick)="mark(library)" (click)="select(library)">
+                                <img src="../../_layouts/15/images/sts_list_documentlibrary16.gif">&nbsp;{{library.name}}
+                            </div>
+                            <div *ngIf="library.expanded">
+                                <tree-view-directory [folderLookUp]="library"></tree-view-directory>
+                            </div>
+                        </li>
+                    </div>
+                </div>
                </ul>`,
-                    directives: [treeviewdirectory_1.TreeViewDirectory]
+                    directives: [treeviewdirectory_1.TreeViewDirectory],
                 }), 
                 __metadata('design:paramtypes', [])
             ], TreeViewDocLib);

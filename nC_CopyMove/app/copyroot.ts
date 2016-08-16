@@ -94,58 +94,17 @@ export class CopyRoot {
 
         );
 
-
-        //  this.targetUrlArray = null;
-        // this.folderString = "";
-        /*
-        for (var i = 0; i < sitecollections.length; i++) {
-            var url;
-            if (sitecollections[i].expanded) {
-                this.targetUrl = sitecollections[i].path;
-              
-               for (var j = 0; j < sitecollections[i].documentLibraries.length; j++) {
-                   if (sitecollections[i].documentLibraries[j].expanded) {
-                       this.targetTitle = sitecollections[i].documentLibraries[j].name;
-                       var folder:any = sitecollections[i].documentLibraries[j];
-                       while (folder.expanded) {
-                           for (var k = 0; k < folder.directories.length; k++) {
-                             
-                               if (folder.directories[k].expanded) {
-                                   folder = folder.directories[k];
-                                  // -> if folder expanded and children folder isnt -> get absolute URL
-                                  // -> if DL expanded and children folder isnt -> get url DL
-                               }                           
-                           }
-                           break;
-                       }
-                   }
-
-                }
-            }
-        }*/
-
-        // console.log("FolderString " +this.folderString);
-
-
-
-
-
-
     }
 
     addToArray(id: number, targetFolderURL: string, srcFolderURL: string, parentFolderId: number) {
         this.items.push(new ItemDL(id, this, targetFolderURL, srcFolderURL, parentFolderId));
-
-        //  console.log("ID:" + id + " folderURL: " + folderURL);
-        //console.log(folderURL);
     }
 
     done(caller: ItemDL, errorMsg) {
         if (errorMsg != null && errorMsg != ""){
-            this.errorReport.push(caller.id + ": " + caller.name + "--" + errorMsg);
+            this.errorReport.push("ID:"+caller.id + ": " + caller.name + " " + errorMsg);
         }
         this.doneCounter++;
-        console.log(this.doneCounter+"/"+this.items.length);
         if (this.doneCounter >= this.items.length) {
             if (this.delafter) {
                 var error = false;

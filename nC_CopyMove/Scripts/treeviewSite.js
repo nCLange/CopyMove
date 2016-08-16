@@ -1,4 +1,4 @@
-System.register(["angular2/core", './treeView', './copyroot'], function(exports_1, context_1) {
+System.register(["angular2/core", './treeView', './copyroot', './filterpipe'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, treeView_1, copyroot_1;
+    var core_1, treeView_1, copyroot_1, filterpipe_1;
     var TreeViewSite;
     return {
         setters:[
@@ -22,10 +22,14 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
             },
             function (copyroot_1_1) {
                 copyroot_1 = copyroot_1_1;
+            },
+            function (filterpipe_1_1) {
+                filterpipe_1 = filterpipe_1_1;
             }],
         execute: function() {
             let TreeViewSite = class TreeViewSite {
                 constructor() {
+                    this.searchValue = null;
                     this.screen = 0;
                     this.filesToCopy = null;
                     this.errorReport = null;
@@ -46,6 +50,10 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
             };
             __decorate([
                 core_1.Input(), 
+                __metadata('design:type', String)
+            ], TreeViewSite.prototype, "searchValue", void 0);
+            __decorate([
+                core_1.Input(), 
                 __metadata('design:type', Array)
             ], TreeViewSite.prototype, "sitecollection", void 0);
             __decorate([
@@ -64,7 +72,8 @@ System.register(["angular2/core", './treeView', './copyroot'], function(exports_
                 core_1.Component({
                     selector: 'tree-view-site',
                     templateUrl: './tree-view-site.html',
-                    directives: [treeView_1.TreeViewDocLib]
+                    directives: [treeView_1.TreeViewDocLib],
+                    pipes: [filterpipe_1.SiteColPipe]
                 }), 
                 __metadata('design:paramtypes', [])
             ], TreeViewSite);

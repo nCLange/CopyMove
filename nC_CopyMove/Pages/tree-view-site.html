@@ -2,15 +2,22 @@
     <hr>
     <div class="content">
         <div *ngIf="screen==0">
+            <input type="text" name="SearchForDL" class="searchBar" placeholder="Filter Dossiers..." [value]="searchValue" (input)="searchValue=$event.target.value;" />
+            <img class ="magglass" src="../../_layouts/15/images/search32x32.png"/>
             <ul id="listIcon">
-                <li *ngFor="let site of sitecollection" selection-model>
+                <div *ngFor="let site of sitecollection | SiteColFilter:searchValue" selection-model>
+                    <div *ngIf="site.visible==true && site.documentLibraries.length>0">
+                        <li>
 
-                    <span (click)="site.toggle()">{{ site.name }}</span>
-                    <div *ngIf="site.expanded">
-                        <tree-view-doclib [documentlibrary]="site.documentLibraries">
-                        </tree-view-doclib>
+                            <span (click)="site.toggle()">{{ site.name }}</span>
+                            <div *ngIf="site.expanded">
+                                <tree-view-doclib [documentlibrary]="site.documentLibraries">
+                                </tree-view-doclib>
+                            </div>
+
+                        </li>
                     </div>
-                </li>
+                </div>
             </ul>
             <div *ngIf="selected==true">
                 <div class="footer">

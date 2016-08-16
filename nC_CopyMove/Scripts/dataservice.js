@@ -332,6 +332,47 @@ System.register(['angular2/core', './sitecollection', './documentlibrary', './di
                     line += "</soap12:Envelope>";
                     return line;
                 }
+                buildCustomSoapEnvelope(caller) {
+                    var line = "";
+                    line += "<?xml version= \"1.0\" encoding= \"utf-8\" ?>";
+                    line += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
+                    line += "<soap12:Body>";
+                    line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
+                    line += "<SourceUrl>" + caller.parent.srcUrl + "|" + caller.parent.title + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
+                    // line += "<SourceUrl>"+ caller.name + "</SourceUrl>";
+                    // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
+                    line += "<DestinationUrls>";
+                    //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
+                    line += "<string>" + caller.parent.targetUrl + "|" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name + "</string>";
+                    line += "</DestinationUrls>";
+                    line += "</CopyIntoItemsLocal>";
+                    line += "</soap12:Body>";
+                    line += "</soap12:Envelope>";
+                    return line;
+                }
+                customSoapAjax(caller) {
+                    //  console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
+                    //  console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
+                    let that = this;
+                    var xmlstring = this.buildCustomSoapEnvelope(caller);
+                    return new Promise(function (resolve, reject) {
+                        jQuery.ajax({
+                            url: "http://localhost:2991/copy.asmx",
+                            type: "POST",
+                            dataType: "xml",
+                            data: xmlstring,
+                            crossDomain: true,
+                            contentType: "application/soap+xml; charset=utf-8",
+                            success: function (xData, status) {
+                                console.log(xData);
+                                that.getListIDFromFile(caller).then(response => { resolve(); }, response => { reject(response); });
+                            },
+                            error: function (xData, status) {
+                                reject(xData + " " + status);
+                            },
+                        });
+                    });
+                }
                 soapAjax(caller) {
                     //  console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
                     //  console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );

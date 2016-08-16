@@ -15,6 +15,18 @@
 
 }
 
+.ms-dialog .magglass{
+    position:absolute;
+    margin-left: 145px;
+    margin-top: 2px;
+    width:19px;
+
+}
+
+.ms-dialog .searchBar {
+    position:absolute;
+
+}
 .ms-dialog .content {
 
     overflow:auto;
@@ -36,6 +48,7 @@
 
 .ms-dialog #listIcon {
     float:left;
+    margin-top:40px;
 }
 
 .ms-dialog .copyList{

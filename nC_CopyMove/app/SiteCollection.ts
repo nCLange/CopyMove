@@ -12,6 +12,7 @@ export class SiteCollection {
     private dataService: DataService
     parent: AppComponent;
     static targetPath: string;
+    visible:boolean;
     
     
 
@@ -23,22 +24,25 @@ export class SiteCollection {
         this.dataService = new DataService();
         this.parent = parent;
         this.documentLibraries = [];
+        this.visible = true;
+
+        this.dataService.searchDocumentLibrary2(this.path,this).then(
+                response => {
+                    var tempresponse;
+                    tempresponse = response;
+                    this.documentLibraries = tempresponse;
+                }, response => {
+                    console.log("Failure " + response);
+                });
+
     }
 
  
     toggle() {
         this.expanded = !this.expanded;
-        if (this.expanded) {
-            this.dataService.searchDocumentLibrary2(this.path,this).then(
-                response => {
-                    var tempresponse;
-                    tempresponse = response;
-                    this.documentLibraries = tempresponse;
-                    console.log(tempresponse);
-                }, response => {
-                    console.log("Failure " + response);
-                });
-        }
+     //   if (this.expanded) {
+
+     //   }
     }
 
 

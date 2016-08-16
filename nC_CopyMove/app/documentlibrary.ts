@@ -12,6 +12,7 @@ export class DocumentLibrary {
     dataService: DataService;
     parent: SiteCollection;
     static targetTitle: string;
+    visible:boolean;
 
     constructor(name, path, parent) {
         this.name = name;
@@ -22,6 +23,7 @@ export class DocumentLibrary {
         this.expanded = false;
         this.dataService = new DataService();
         this.directories = [];
+        this.visible=true;
       //  this.directories = [new Directory("thisname",[new Directory("thisbla",[new Directory("thisbla")])])];
         
     }
@@ -51,7 +53,6 @@ export class DocumentLibrary {
                     
                     tempresponse = response;
                     this.directories = tempresponse;
-                    console.log(tempresponse);
                 }, response => {
                     console.log("Failure " + response);
                 });

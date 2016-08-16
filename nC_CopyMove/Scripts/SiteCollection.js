@@ -18,19 +18,19 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     this.dataService = new dataservice_1.DataService();
                     this.parent = parent;
                     this.documentLibraries = [];
+                    this.visible = true;
+                    this.dataService.searchDocumentLibrary2(this.path, this).then(response => {
+                        var tempresponse;
+                        tempresponse = response;
+                        this.documentLibraries = tempresponse;
+                    }, response => {
+                        console.log("Failure " + response);
+                    });
                 }
                 toggle() {
                     this.expanded = !this.expanded;
-                    if (this.expanded) {
-                        this.dataService.searchDocumentLibrary2(this.path, this).then(response => {
-                            var tempresponse;
-                            tempresponse = response;
-                            this.documentLibraries = tempresponse;
-                            console.log(tempresponse);
-                        }, response => {
-                            console.log("Failure " + response);
-                        });
-                    }
+                    //   if (this.expanded) {
+                    //   }
                 }
                 check() {
                     let newState = !this.checked;

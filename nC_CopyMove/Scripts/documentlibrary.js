@@ -22,6 +22,7 @@ System.register(['./directory', './dataservice'], function(exports_1, context_1)
                     this.expanded = false;
                     this.dataService = new dataservice_1.DataService();
                     this.directories = [];
+                    this.visible = true;
                     //  this.directories = [new Directory("thisname",[new Directory("thisbla",[new Directory("thisbla")])])];
                 }
                 /* cutPath(path) {
@@ -45,7 +46,6 @@ System.register(['./directory', './dataservice'], function(exports_1, context_1)
                         this.dataService.searchDirectories(this.parent.path, this.relpath, this).then(response => {
                             tempresponse = response;
                             this.directories = tempresponse;
-                            console.log(tempresponse);
                         }, response => {
                             console.log("Failure " + response);
                         });
