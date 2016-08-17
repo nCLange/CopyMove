@@ -175,9 +175,9 @@ $cUIExtn = "<CommandUIExtension>
                          Alt="""" 
                          Sequence=""900""
                          Command=""CopyMove"" 
-                         LabelText=""Copy/Move"" 
+                         LabelText=""Copy Move"" 
                          TemplateAlias=""o1"" 
-                         Image32by32=""_layouts/15/images/placeholder32x32.png"" 
+                         Image32by32=""_layouts/15/images/rtrsendtoicon.png"" 
                          Image16by16=""_layouts/15/images/placeholder16x16.png"" />
                      </CommandUIDefinition></CommandUIDefinitions>
                    <CommandUIHandlers>
