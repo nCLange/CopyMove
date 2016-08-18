@@ -57,22 +57,19 @@ export class ItemDL {
                                     response => {
                                         this.decCall();
                                         this.status = "Done";
-                                   //     if (this.incCall() == true) return;
                                         this.parent.done(this, null);
-                                      /*  this.dataService.deleteCopySource(this)/*.then(
-                                            response => {
-                                                this.status = "Done";
-                                                this.decCall();
-                                                this.parent.done(this, null);
-                                            },
-                                            response => {
-                                                this.status = "Error";
-                                                this.decCall();
-                                                this.parent.done(this, "Couldn't Delete CopySource: " + response);
-                                            }
-                                        )
-                                    */
-
+                                       /* if (this.incCall() == true) return;
+                                        this.dataService.fillListItem(this).then(
+                                                    response => {
+                                                        this.decCall();
+                                                        this.status = "Done";
+                                                        this.parent.done(this, null);
+                                                    },
+                                                    response => {
+                                                        this.decCall();
+                                                        this.status = "Error";
+                                                        this.parent.done(this, "List Fields couldn't be set: " + response);
+                                                    });*/
                                     },
                                     response => {
                                         this.decCall();
@@ -184,11 +181,12 @@ export class ItemDL {
 
     }
 
-    timeOut() {
-        let that = this;
-        if (that.parent.currentCalls >= that.parent.maxCalls) {
-            that.status= "Waiting";
-            setTimeout(that.timeOut, 50);
+    timeOut(context) {
+        console.log(context.parent.currentCalls+"/"+context.parent.maxCalls);
+        if (context.parent.currentCalls >= context.parent.maxCalls) {
+            console.log("hello");
+            context.status= "Waiting";
+            setTimeout(context.timeOut, 50);
             return false;
 
         }
@@ -199,7 +197,7 @@ export class ItemDL {
             this.status = "Canceled";
             return true;
         }
-        this.timeOut();
+        this.timeOut(this);
         this.parent.currentCalls++;
         this.status="Copying";
         return false;

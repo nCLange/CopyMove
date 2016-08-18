@@ -10,7 +10,7 @@ System.register([], function(exports_1, context_1) {
                     switch (field.type) {
                         case "TaxonomyFieldTypeMulti":
                             var terms = new Array();
-                            var termValues;
+                            // var termValues;
                             for (var i = 0; i < value.get_count(); i++) {
                                 terms.push("-1;#" + value.getItemAtIndex(i).get_label() + "|" + value.getItemAtIndex(i).get_termGuid());
                             }

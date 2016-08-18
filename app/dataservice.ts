@@ -47,7 +47,7 @@ export class DataService {
 
                     for (var i = 0; i < fieldcollection.get_count(); i++) {
                         if(fieldcollection.itemAt(i).get_internalName()=="_CopySource") console.log("GUID: "+fieldcollection.itemAt(i).get_id());
-                        if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden() && fieldcollection.itemAt(i).get_internalName() != "Title") {
+                        if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()) {
                             consoleOut += fieldcollection.itemAt(i).get_internalName() + "||" + fieldcollection.itemAt(i).get_title() + "/";
                             var listField = new ListField(fieldcollection.itemAt(i).get_internalName(), fieldcollection.itemAt(i).get_typeAsString());
                             if (listField.allowed)
@@ -393,12 +393,12 @@ export class DataService {
         line += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
         line += "<soap12:Body>";
         line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
-        line += "<SourceUrl>"+ caller.parent.srcUrl + "|" + caller.parent.title +"/"+ caller.srcFolderURL + caller.name + "</SourceUrl>";
+        line += "<SourceUrl>"+ caller.parent.srcUrl + "|" + caller.parent.title +"|"+ caller.srcFolderURL + caller.name + "</SourceUrl>";
                // line += "<SourceUrl>"+ caller.name + "</SourceUrl>";
         // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
         line += "<DestinationUrls>";
         //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
-        line += "<string>" + caller.parent.targetUrl + "|" + caller.parent.targetTitle +"/"+ caller.targetFolderURL + caller.name + "</string>";
+        line += "<string>" + caller.parent.targetUrl + "|" + caller.parent.targetTitle +"|"+ caller.targetFolderURL + caller.name + "</string>";
         line += "</DestinationUrls>";
         line += "</CopyIntoItemsLocal>";
         line += "</soap12:Body>";
@@ -880,6 +880,11 @@ export class DataService {
 
 
 
+                   /* if(caller.type==ContentType.File){
+                        var file = targetItem.get_file();
+                    file.checkIn("Copied",SP.CheckinType.majorCheckIn);
+                        ctx.load(file);
+                    }*/
 
                     targetItem.update();
                     ctx.executeQueryAsync(

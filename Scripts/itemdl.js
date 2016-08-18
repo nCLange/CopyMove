@@ -50,21 +50,19 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                     _this.dataService.customSoapAjax(_this).then(function (response) {
                                         _this.decCall();
                                         _this.status = "Done";
-                                        //     if (this.incCall() == true) return;
                                         _this.parent.done(_this, null);
-                                        /*  this.dataService.deleteCopySource(this)/*.then(
-                                              response => {
-                                                  this.status = "Done";
-                                                  this.decCall();
-                                                  this.parent.done(this, null);
-                                              },
-                                              response => {
-                                                  this.status = "Error";
-                                                  this.decCall();
-                                                  this.parent.done(this, "Couldn't Delete CopySource: " + response);
-                                              }
-                                          )
-                                      */
+                                        /* if (this.incCall() == true) return;
+                                         this.dataService.fillListItem(this).then(
+                                                     response => {
+                                                         this.decCall();
+                                                         this.status = "Done";
+                                                         this.parent.done(this, null);
+                                                     },
+                                                     response => {
+                                                         this.decCall();
+                                                         this.status = "Error";
+                                                         this.parent.done(this, "List Fields couldn't be set: " + response);
+                                                     });*/
                                     }, function (response) {
                                         _this.decCall();
                                         _this.status = "Error";
@@ -161,11 +159,12 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     }
                     this.contentQueue = [];
                 };
-                ItemDL.prototype.timeOut = function () {
-                    var that = this;
-                    if (that.parent.currentCalls >= that.parent.maxCalls) {
-                        that.status = "Waiting";
-                        setTimeout(that.timeOut, 50);
+                ItemDL.prototype.timeOut = function (context) {
+                    console.log(context.parent.currentCalls + "/" + context.parent.maxCalls);
+                    if (context.parent.currentCalls >= context.parent.maxCalls) {
+                        console.log("hello");
+                        context.status = "Waiting";
+                        setTimeout(context.timeOut, 50);
                         return false;
                     }
                 };
@@ -174,7 +173,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                         this.status = "Canceled";
                         return true;
                     }
-                    this.timeOut();
+                    this.timeOut(this);
                     this.parent.currentCalls++;
                     this.status = "Copying";
                     return false;
