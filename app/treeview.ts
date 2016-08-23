@@ -10,7 +10,7 @@ import {TreeViewDirectory} from './treeviewdirectory';
                     <div *ngIf="library.visible==true">
                         <li class="libListElements">
                             <div [style.background-color]="library.getStyle()" (dblclick)="mark(library)" (click)="select(library)">
-                                <img src="../../_layouts/15/images/sts_list_documentlibrary16.gif">&nbsp;{{library.name}}
+                                <img src="../images/dossiers.svg" width="16" height="16">&nbsp;{{library.title}}
                             </div>
                             <div *ngIf="library.expanded">
                                 <tree-view-directory [folderLookUp]="library"></tree-view-directory>

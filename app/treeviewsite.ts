@@ -40,7 +40,7 @@ export class TreeViewSite {
 
     clicked(delafter) {
         this.screen = 1;
-        this.copyroot  = new CopyRoot(delafter, this.sitecollection,this);
+        this.copyroot  = new CopyRoot(delafter, /*this.sitecollection,*/this);
         this.filesToCopy = this.copyroot.items;
         this.errorReport = this.copyroot.errorReport;
         

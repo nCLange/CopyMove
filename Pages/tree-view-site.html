@@ -4,6 +4,9 @@
         <div *ngIf="screen==0">
             <input type="text" name="SearchForDL" class="searchBar" placeholder="Filter Dossiers..." [value]="searchValue" (input)="searchValue=$event.target.value;" />
             <img class ="magglass" src="../../_layouts/15/images/search32x32.png"/>
+            <div class = "loadingSiteCol" *ngIf="sitecollection.length<1">
+                <img src="../../_layouts/15/images/progress.gif"/>
+            </div>
             <ul id="listIcon">
                 <div *ngFor="let site of sitecollection | SiteColFilter:searchValue" selection-model>
                     <div *ngIf="site.visible==true && site.documentLibraries.length>0">
@@ -25,13 +28,12 @@
                     <button id="cm-button" class="ctrlButton" onclick="return false" (click)="clicked(true)"><b>Move</b></button>
                     <button id="cm-button" class="ctrlButton" onclick="return false" (click)="clicked(false)"><b>Copy</b></button>
                     <button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Cancel</button>
-
-
                 </div>
             </div>
             <div *ngIf="selected!=true">
                 <div class="footer">
                     <hr>
+                    <div class="destRemind">Double-click to select destination</div>
                     <button id="cm-button" class="ctrlButton" onclick="return false" disabled>Move</button>
                     <button id="cm-button" class="ctrlButton" onclick="return false" disabled>Copy</button>
                     <button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Cancel</button>
@@ -59,13 +61,13 @@
         </div>
         <div *ngIf="screen==2">
             <div *ngIf="errorReport.length>0">
-                <ul>
+                <ul class="anError">
                     <li *ngFor="let error of errorReport" selection-model>
                         <span>{{error}}</span>
                     </li>
                 </ul>
             </div>
-            <div *ngIf="errorReport.length==0">
+            <div class="noError" *ngIf="errorReport.length==0">
                 <span> Everything copied. </span>
             </div>
             <div class="footer">

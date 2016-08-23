@@ -12,6 +12,7 @@ export class CopyRoot {
     targetUrl: string;
     selectedItemIds: Array<number>;
     title: string;
+    name: string;
     fields: Array<ListField>;
     targetTitle: string;
     targetRootPath: string;
@@ -31,14 +32,16 @@ export class CopyRoot {
     errorReport: Array<string>;
     parent: any;
     delafter: boolean;
+    targetName : string;
 
 
-    constructor(delafter: boolean, sitecollections: Array<SiteCollection>, parent: any) {
+    constructor(delafter: boolean, /*sitecollections: Array<SiteCollection>,*/ parent: any) {
 
 
         this.errorReport = [];
         this.targetUrl = SiteCollection.targetPath;
         this.targetTitle = DocumentLibrary.targetTitle;
+        this.targetName = DocumentLibrary.targetName;
         this.targetRootPath = "";
         this.rootFolder = null;
         this.dataService = new DataService();
@@ -52,6 +55,7 @@ export class CopyRoot {
         this.parent = parent;
         this.delafter = delafter;
 
+
         this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
         // var wat = new RegExp('[\?&]SPListURL=([^&#]*)').exec(window.location.href)[1];
 
@@ -59,7 +63,7 @@ export class CopyRoot {
         this.selectedItemIds = tempItemIds[1].split(",").map(Number);
         this.dataService.getListInfoFromId(this).then(
             response => {
-                this.srcRootPath = this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + this.title, "");
+                this.srcRootPath = this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + this.name, "");
                 if (this.srcRootPath != "") {
                     this.srcRootPath += "/";
                     this.srcRootPath = this.srcRootPath.substr(1, this.srcRootPath.length);
@@ -104,11 +108,14 @@ export class CopyRoot {
         if (errorMsg != null && errorMsg != ""){
             this.errorReport.push("ID:"+caller.id + ": " + caller.name + " " + errorMsg);
         }
+        for(var i=0; i<20; i++)
+            this.errorReport.push(i+" Hello")
         this.doneCounter++;
         if (this.doneCounter >= this.items.length) {
             if (this.delafter) {
                 var error = false;
                 for (var i = this.items.length - 1; i >= 0; i--) {
+                    console.log(i);
                     if (this.items[i].status == "Done" && this.items[i].type == ContentType.File) {
                         this.items[i].dataService.deleteEntry(this.items[i]);
                     }

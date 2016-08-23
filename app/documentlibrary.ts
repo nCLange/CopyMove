@@ -4,6 +4,7 @@ import {SiteCollection} from './sitecollection';
 
 export class DocumentLibrary {
     name: string;
+    title: string;
     selected: boolean;
     path: string;
     expanded: boolean;
@@ -12,10 +13,12 @@ export class DocumentLibrary {
     dataService: DataService;
     parent: SiteCollection;
     static targetTitle: string;
+    static targetName : string ;
     visible:boolean;
 
-    constructor(name, path, parent) {
+    constructor(name, title,path, parent) {
         this.name = name;
+        this.title = title;
         this.selected = false;
         this.parent = parent;
         this.relpath = path;
@@ -65,7 +68,8 @@ export class DocumentLibrary {
         }
         this.parent.unsetAll();
         this.selected = true;
-        DocumentLibrary.targetTitle = this.name;
+        DocumentLibrary.targetTitle = this.title;
+        DocumentLibrary.targetName = this.name;
 
     }
 

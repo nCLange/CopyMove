@@ -13,8 +13,9 @@ System.register(['./directory', './dataservice'], function(exports_1, context_1)
             }],
         execute: function() {
             DocumentLibrary = (function () {
-                function DocumentLibrary(name, path, parent) {
+                function DocumentLibrary(name, title, path, parent) {
                     this.name = name;
+                    this.title = title;
                     this.selected = false;
                     this.parent = parent;
                     this.relpath = path;
@@ -59,7 +60,8 @@ System.register(['./directory', './dataservice'], function(exports_1, context_1)
                     }
                     this.parent.unsetAll();
                     this.selected = true;
-                    DocumentLibrary.targetTitle = this.name;
+                    DocumentLibrary.targetTitle = this.title;
+                    DocumentLibrary.targetName = this.name;
                 };
                 DocumentLibrary.prototype.unsetAll = function () {
                     this.parent.unsetAll();

@@ -47,17 +47,20 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     var srcList = ctx.get_web().get_lists().getById(caller.srcListId);
                     var fieldcollection = srcList.get_fields();
                     var folder;
+                    var rootFolder = srcList.get_rootFolder();
                     var listItem = srcList.getItemById(caller.selectedItemIds[0]);
                     ctx.load(srcList);
                     ctx.load(fieldcollection);
+                    ctx.load(rootFolder);
                     ctx.load(listItem);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
+                            caller.name = rootFolder.get_name();
                             caller.title = srcList.get_title();
+                            console.log(rootFolder.get_name());
                             var consoleOut = "";
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
-                                if (fieldcollection.itemAt(i).get_internalName() == "_CopySource")
-                                    console.log("GUID: " + fieldcollection.itemAt(i).get_id());
+                                //  if(fieldcollection.itemAt(i).get_internalName()=="_CopySource") console.log("GUID: "+fieldcollection.itemAt(i).get_id());
                                 if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()) {
                                     consoleOut += fieldcollection.itemAt(i).get_internalName() + "||" + fieldcollection.itemAt(i).get_title() + "/";
                                     var listField = new listFields_1.ListField(fieldcollection.itemAt(i).get_internalName(), fieldcollection.itemAt(i).get_typeAsString());
@@ -89,7 +92,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 DataService.prototype.getFolderFromUrl = function (caller) {
                     var ctx = new SP.ClientContext(caller.targetUrl);
                     //  var appContextSite = new SP.AppContextSite(ctx, caller.targetUrl);
-                    var currentFolder = ctx.get_web().getFolderByServerRelativeUrl(caller.targetTitle + "/" + caller.targetRootPath);
+                    // console.log(caller.targetUrl + "/" + caller.targetTitle+ "/" + caller.targetRootPath);
+                    var currentFolder = ctx.get_web().getFolderByServerRelativeUrl(caller.targetUrl + "/" + caller.targetName + "/" + caller.targetRootPath);
                     //console.log(caller.targetTitle+"/"+caller.targetRootPath);
                     ctx.load(currentFolder);
                     ctx.load(currentFolder, "ListItemAllFields");
@@ -133,95 +137,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 };
-                /*
-                   searchSiteCollection2(caller) {
-                
-                        let that = this;
-                
-                
-                        return new Promise(function (resolve, reject) {
-                
-                            $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
-                
-                                var executor = new SP.RequestExecutor(that.appWebUrl);
-                                executor.executeAsync(
-                                    {
-                                        //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'",
-                                        //Leere Bibliotheken werden ignoriert , beheben?
-                                        url: that.searchWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false",
-                
-                                        method: "POST",
-                                        headers: { "Accept": "application/json; odata=verbose" },
-                                         {  '__metadata': {'type':'Microsoft.Office.Server.Search.REST.SearchRequest'},
-                                            'Querytext' : 'contentclass:sts_site',
-                                            'trimduplicates':'false'
-                                     }
-                                        success: function (data) {
-                                            var myoutput = JSON.parse((data.body.toString()));
-                                            var sitecollection = [];
-                                            var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                                            //console.log(siteResult);
-                                            for (var x = 0; x < siteResult.length; x++) {
-                
-                                                sitecollection.push(
-                                                    new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"),caller));
-                                            }
-                
-                                            resolve(sitecollection);
-                                        },
-                                        error: function (data) {
-                                            var sitecollection = [];
-                                            reject(sitecollection);
-                                        }
-                
-                                    }
-                                )
-                            });
-                        });
-                    }
-                */
-                /*  searchDocumentLibrary(pathURL, parent) {
-              
-                      let that = this;
-              
-              
-              
-                      var executor = new SP.RequestExecutor(this.appWebUrl);
-              
-                      return new Promise(function (resolve, reject) {
-              
-              
-              
-                          executor.executeAsync(
-                              {
-                                  //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'",
-                                  //Leere Bibliotheken werden ignoriert , beheben?
-                                  url: that.appWebUrl + "/_api/search/query?querytext='contentclass:sts_list_documentlibrary+path:" + pathURL + "'&trimduplicates=false",
-              
-                                  method: "GET",
-                                  headers: { "Accept": "application/json; odata=verbose" },
-                                  success: function (data) {
-                                      var myoutput = JSON.parse((data.body.toString()));
-                                      var documentlibraries = [];
-                                      var dossierResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                                      for (var x = 0; x < dossierResult.length; x++) {
-              
-                                          documentlibraries.push(new DocumentLibrary(that.searchJSONForValue(dossierResult[x].Cells.results, "Title"), that.searchJSONForValue(dossierResult[x].Cells.results, "Path"), parent));
-                                      }
-              
-                                      resolve(documentlibraries);
-                                  },
-                                  error: function (data) {
-                                      var documentlibraries = [];
-                                      reject(documentlibraries);
-                                  }
-              
-                              }
-                          )
-                      });
-              
-                  }
-                  */
                 DataService.prototype.searchDocumentLibrary2 = function (pathURL, parent) {
                     //var executor = new SP.RequestExecutor(this.appWebUrl);
                     var that = this;
@@ -231,7 +146,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             executor.executeAsync({
                                 //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
                                 //Leere Bibliotheken werden ignoriert , beheben?
-                                url: pathURL + "/_api/web/lists",
+                                url: pathURL + "/_api/web/lists?$expand=rootFolder",
                                 method: "GET",
                                 headers: { "Accept": "application/json; odata=verbose" },
                                 success: function (data) {
@@ -239,8 +154,9 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     var documentlibraries = [];
                                     var dossierResult = myoutput.d.results;
                                     for (var x = 0; x < dossierResult.length; x++) {
-                                        if (dossierResult[x].DocumentTemplateUrl != null && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Documents" && dossierResult[x].Title != "Site Assets")
-                                            documentlibraries.push(new documentlibrary_1.DocumentLibrary(dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
+                                        if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Documents" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
+                                            documentlibraries.push(new documentlibrary_1.DocumentLibrary(dossierResult[x].RootFolder.Name, dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
+                                        }
                                     }
                                     resolve(documentlibraries);
                                 },
@@ -321,12 +237,12 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     line += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
                     line += "<soap12:Body>";
                     line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
-                    line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
+                    line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.name + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
                     // line += "<SourceUrl>"+ caller.name + "</SourceUrl>";
                     // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
                     line += "<DestinationUrls>";
                     //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
-                    line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name + "</string>";
+                    line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name + "</string>";
                     line += "</DestinationUrls>";
                     line += "</CopyIntoItemsLocal>";
                     line += "</soap12:Body>";
@@ -339,12 +255,12 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     line += "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">";
                     line += "<soap12:Body>";
                     line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
-                    line += "<SourceUrl>" + caller.parent.srcUrl + "|" + caller.parent.title + "|" + caller.srcFolderURL + caller.name + "</SourceUrl>";
+                    line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.name + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
                     // line += "<SourceUrl>"+ caller.name + "</SourceUrl>";
                     // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
                     line += "<DestinationUrls>";
                     //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
-                    line += "<string>" + caller.parent.targetUrl + "|" + caller.parent.targetTitle + "|" + caller.targetFolderURL + caller.name + "</string>";
+                    line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name + "</string>";
                     line += "</DestinationUrls>";
                     line += "</CopyIntoItemsLocal>";
                     line += "</soap12:Body>";
@@ -352,8 +268,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     return line;
                 };
                 DataService.prototype.customSoapAjax = function (caller) {
-                    //  console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
-                    //  console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
                     var that = this;
                     var xmlstring = this.buildCustomSoapEnvelope(caller);
                     return new Promise(function (resolve, reject) {
@@ -363,21 +277,24 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             dataType: "xml",
                             data: xmlstring,
                             crossDomain: true,
+                            xhrFields: {
+                                withCredentials: true
+                            },
                             contentType: "application/soap+xml; charset=utf-8",
+                            headers: { "Accept": "application/xml; odata=verbose" },
                             success: function (xData, status) {
-                                console.log(xData);
                                 that.getListIDFromFile(caller).then(function (response) { resolve(); }, function (response) { reject(response); });
                             },
                             error: function (xData, status) {
-                                reject(xData + " " + status);
+                                console.log(xData);
+                                reject(status);
                             },
                         });
                     });
                 };
                 DataService.prototype.soapAjax = function (caller) {
-                    //  console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
-                    //  console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
                     var that = this;
+                    console.log(caller.parent.srcUrl + "|" + caller.parent.name + "|" + caller.srcFolderURL + "|" + caller.name);
                     var xmlstring = this.buildSoapEnvelope(caller);
                     return new Promise(function (resolve, reject) {
                         jQuery.ajax({
@@ -387,10 +304,10 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             data: xmlstring,
                             contentType: "application/soap+xml; charset=utf-8",
                             success: function (xData, status) {
-                                console.log(xData);
                                 that.getListIDFromFile(caller).then(function (response) { resolve(); }, function (response) { reject(response); });
                             },
                             error: function (xData, status) {
+                                console.log(xData);
                                 reject(xData + " " + status);
                             },
                         });
@@ -399,11 +316,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 DataService.prototype.getListIDFromFile = function (caller) {
                     var ctx = new SP.ClientContext(caller.parent.targetUrl);
                     //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
-                    var file = ctx.get_web().getFileByServerRelativeUrl("/" + caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "") + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name);
-                    // console.log(file);
-                    //  console.log("/"+caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "")+"/"+caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name);
-                    //debux
-                    //
+                    var file = ctx.get_web().getFileByServerRelativeUrl("/" + caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "") + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name);
                     ctx.load(file, 'ListItemAllFields');
                     ctx.load(file);
                     return new Promise(function (resolve, reject) {
@@ -416,7 +329,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     });
                 };
                 DataService.prototype.getContent = function (caller) {
-                    var targetLib = caller.parent.targetTitle;
+                    //      var targetLib = caller.parent.targetTitle;
                     var that = this;
                     var listItem;
                     var ctx = new SP.ClientContext(caller.parent.srcUrl);
@@ -723,48 +636,16 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     var ctx = new SP.ClientContext(caller.parent.srcUrl);
                     var srcList = ctx.get_web().get_lists().getById(caller.parent.srcListId);
                     var listItem = srcList.getItemById(caller.id);
-                    listItem.deleteObject();
                     ctx.load(listItem);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function (data) {
+                            listItem.deleteObject();
+                            ctx.executeQueryAsync(); // why Error Bug when Last Item deleteObject outside
                             resolve();
                         }, function (data) {
                             reject(arguments[1].get_message());
                         });
                     });
-                };
-                DataService.prototype.deleteCopySource = function (caller) {
-                    /*
-                                 //  console.log(caller.parent.srcUrl + "/" + caller.parent.title + "/" + caller.srcFolderURL + caller.name );
-                            //  console.log( caller.parent.targetUrl + "/" + caller.parent.targetTitle + "/" + caller.targetFolderURL + caller.name );
-                            let that = this;
-                            var xmlstring = this.buildSoapEnvelopeDelete(caller);
-                            return new Promise(function (resolve, reject) {
-                                jQuery.ajax({
-                                    url: caller.parent.targetUrl + "/_vti_bin/lists.asmx",
-                                    type: "POST",
-                                    dataType: "xml",
-                                    data: xmlstring,
-                                    contentType: "application/soap+xml; charset=utf-8",
-                                    success: function (xData, status) {
-                                        that.getListIDFromFile(caller).then(
-                                            response => {
-                                                
-                                                  that.checkCopySource(caller);
-                                                console.log(xData); resolve();},
-                                            response => { reject(response); }
-                                        );
-                                    },
-                                    error: function (xData, status) {
-                                        reject(xData + " " + status);
-                    
-                                    },
-                    
-                    
-                                });
-                            });
-                    */
-                    return;
                 };
                 DataService.prototype.buildSoapEnvelopeDelete = function (caller) {
                     var line = "";
@@ -791,7 +672,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
                     var targetItem = targetList.getItemById(caller.targetId);
-                    var targetField = console.log(caller.parent.targetUrl + "/" + caller.parent.title + "/" + caller.targetFolderURL + caller.name);
+                    var targetField = console.log(caller.parent.targetUrl + "/" + caller.parent.name + "/" + caller.targetFolderURL + caller.name);
                     ctx.load(targetItem);
                     ctx.executeQueryAsync(function (data) {
                         console.log(targetItem.get_item("_CopySource"));

@@ -29,7 +29,6 @@
 }
 .ms-dialog .content {
 
-    overflow:auto;
     height:330px;
 }
 
@@ -46,11 +45,48 @@
     color: inherit;
 }
 
-.ms-dialog #listIcon {
+.ms-dialog .destRemind{
+    margin-left:50px;
     float:left;
-    margin-top:40px;
+    font-size:19px;
+    color:red;
 }
 
+.ms-dialog .noError{
+  margin-left:250px;
+  top:100px;
+  position:relative;
+  font-size:20px;
+  color:green;  
+}
+
+.ms-dialog .anError{
+    overflow:auto;
+    width: 90%;
+    height: 300px;
+}
+
+.ms-dialog .loadingSiteCol{
+    position:absolute;
+    margin-top:30px;
+    margin-left:20px;
+}
+
+.ms-dialog #listIcon {
+    float:left;
+    margin-top:30px;
+    overflow:auto;
+    height:300px;
+    width:90%;
+}
+
+.ms-dialog .dirList{
+    list-style-type: none;
+}
+
+.ms-dialog .libList{
+    list-style-type: none;
+}
 .ms-dialog .copyList{
     list-style-type: none;
     margin-left: 100px;

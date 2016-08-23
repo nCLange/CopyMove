@@ -43,7 +43,7 @@ System.register(['@angular/core', './documentlibrary'], function(exports_1, cont
                 TreeViewDirectory = __decorate([
                     core_1.Component({
                         selector: 'tree-view-directory',
-                        template: "<ul class=\"dirList\">\n                <li class=\"dirListElements\" *ngFor=\"let directory of folderLookUp.directories\"><div [style.background-color]=\"directory.getStyle()\"(dblclick)=\"mark(directory)\" (click)=\"select(directory)\"><img src=\"../../_layouts/15/images/folder.gif\">&nbsp;{{directory.name}}</div><div *ngIf=\"directory.expanded\"><tree-view-directory [folderLookUp]=\"directory\"></tree-view-directory></div></li>\n               </ul>",
+                        template: "<ul class=\"dirList\">\n                <li class=\"dirListElements\" *ngFor=\"let directory of folderLookUp.directories\"><div [style.background-color]=\"directory.getStyle()\"(dblclick)=\"mark(directory)\" (click)=\"select(directory)\"><img src=\"../images/Folders.svg\" width=\"16\" height=\"16\">&nbsp;{{directory.name}}</div><div *ngIf=\"directory.expanded\"><tree-view-directory [folderLookUp]=\"directory\"></tree-view-directory></div></li>\n               </ul>",
                         directives: [TreeViewDirectory]
                     }), 
                     __metadata('design:paramtypes', [])

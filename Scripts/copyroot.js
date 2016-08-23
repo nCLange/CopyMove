@@ -22,11 +22,12 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
             }],
         execute: function() {
             CopyRoot = (function () {
-                function CopyRoot(delafter, sitecollections, parent) {
+                function CopyRoot(delafter, /*sitecollections: Array<SiteCollection>,*/ parent) {
                     var _this = this;
                     this.errorReport = [];
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
                     this.targetTitle = documentlibrary_1.DocumentLibrary.targetTitle;
+                    this.targetName = documentlibrary_1.DocumentLibrary.targetName;
                     this.targetRootPath = "";
                     this.rootFolder = null;
                     this.dataService = new dataservice_1.DataService();
@@ -44,7 +45,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
                     this.selectedItemIds = tempItemIds[1].split(",").map(Number);
                     this.dataService.getListInfoFromId(this).then(function (response) {
-                        _this.srcRootPath = _this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + _this.title, "");
+                        _this.srcRootPath = _this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + _this.name, "");
                         if (_this.srcRootPath != "") {
                             _this.srcRootPath += "/";
                             _this.srcRootPath = _this.srcRootPath.substr(1, _this.srcRootPath.length);
@@ -78,11 +79,14 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     if (errorMsg != null && errorMsg != "") {
                         this.errorReport.push("ID:" + caller.id + ": " + caller.name + " " + errorMsg);
                     }
+                    for (var i = 0; i < 20; i++)
+                        this.errorReport.push(i + " Hello");
                     this.doneCounter++;
                     if (this.doneCounter >= this.items.length) {
                         if (this.delafter) {
                             var error = false;
                             for (var i = this.items.length - 1; i >= 0; i--) {
+                                console.log(i);
                                 if (this.items[i].status == "Done" && this.items[i].type == itemdl_1.ContentType.File) {
                                     this.items[i].dataService.deleteEntry(this.items[i]);
                                 }

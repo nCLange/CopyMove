@@ -40,7 +40,7 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
                 };
                 TreeViewSite.prototype.clicked = function (delafter) {
                     this.screen = 1;
-                    this.copyroot = new copyroot_1.CopyRoot(delafter, this.sitecollection, this);
+                    this.copyroot = new copyroot_1.CopyRoot(delafter, /*this.sitecollection,*/ this);
                     this.filesToCopy = this.copyroot.items;
                     this.errorReport = this.copyroot.errorReport;
                 };
