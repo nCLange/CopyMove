@@ -6,6 +6,11 @@
     //using Microsoft.SharePoint.ApplicationRuntime;
     using Microsoft.SharePoint.Client.Taxonomy;
     using Microsoft.SharePoint;
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
+    using System.Globalization;
+
     // using System.Diagnostics;
 
     /// <summary>
@@ -25,206 +30,174 @@
         /// <inheritdoc />
         public uint CopyIntoItemsLocal(string SourceUrl, string[] DestinationUrls, out CopyResult[] Results)
         {
+            if (string.IsNullOrEmpty(SourceUrl))
+            {
+                throw new ArgumentNullException(nameof(SourceUrl));
+            }
+            else if (DestinationUrls == null || DestinationUrls.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(DestinationUrls));
+            }
+
             Results = new CopyResult[DestinationUrls.Length];
-            ;
-
-
             for (int i = 0; i < DestinationUrls.Length; i++)
             {
                 Results[i] = new CopyResult();
                 try
                 {
-                    AddFile(SourceUrl, DestinationUrls[i]);
-
-                   
+                    AddFileEx(SourceUrl, DestinationUrls[i]);
                     Results[i].ErrorCode = CopyErrorCode.Success;
                     Results[i].DestinationUrl = DestinationUrls[0];
                     Results[i].ErrorMessage = "Copied";
                 }
                 catch (Exception e)
                 {
-                    //e.Message
-                    //   throw new Exception();
                     Results[i].ErrorCode = CopyErrorCode.Unknown;
                     Results[i].DestinationUrl = DestinationUrls[0];
                     Results[i].ErrorMessage = e.Message;
-                }
 
-   
+                    return 1;
+                }
             }
 
             return 0;
-
-            //  pushFile(SourceUrl, bla[0],bla[1]);
-            //
-
-
         }
 
         /// <inheritdoc />
         public uint GetItem(string Url, out FieldInformation[] Fields, out byte[] Stream)
         {
-
-
             throw new NotSupportedException();
         }
 
-        public SPFile GetFile(string srcUrl)
-
+        private static void AddFileEx(string sourceUrl, string destinationUrl)
         {
-
-            SPSite mysite = new SPSite(srcUrl);
-            SPWeb myweb = mysite.OpenWeb();
-            // get the source list and items
-
-            //   SPList targetWeb = myweb.Lists.TryGetList(srcTitle);
-
-            return myweb.GetFile(srcUrl);
-
-            //return null;
-            /*
-            // set up the src client
-
-            string[] bla = srcUrl.Split('|'); 
-
-
-            srcUrl = bla[0];
-
-            string srcTitle = bla[1];
-
-           // string srcFolder = bla[2];
-           // if (srcFolder != "") srcFolder += "/";
-
-            string srcId = bla[2];
-
-            ClientContext srcContext = new ClientContext(srcUrl);
-         
-            // set up the destination context
-
-          //  ClientContext destContext = new ClientContext(destUrl);
-
-
-            // get the source list and items
-
-            List srcWeb = srcContext.Web.Lists.GetByTitle(srcTitle);
-
-            srcContext.Load(srcWeb);
-            Console.WriteLine(srcWeb);
-            //   List srcList = srcWeb.Lists.GetByTitle(srcLibrary);
-
-            Microsoft.SharePoint.Client.File item = srcWeb.GetItemById(srcId).File;
-
-
-            srcContext.Load(item);
-            srcContext.ExecuteQuery();
-            // get the destination list
-
-            // Web destWeb = destContext.Web;
-
-            //            destContext.Load(destWeb);
-
-
-            //          destContext.ExecuteQuery();
-
-            // Console.WriteLine(item.DisplayName);
-
-            return item;
-            */
-        }
-
-        //SSOM
-        public void pushFile(string srcUrl, string destinationUrl, string destinationTitle)
-        {
-
-            SPSecurity.RunWithElevatedPrivileges(delegate
+            using (ClientContext srcCtx = EstablishClientContext(sourceUrl))
+            using (ClientContext context = EstablishClientContext(destinationUrl))
             {
+                Uri sourceUri = new Uri(sourceUrl);
+                Uri destinationUri = new Uri(destinationUrl);
 
-                SPSite srcsite = new SPSite(srcUrl);
-                SPWeb srcweb = srcsite.OpenWeb();
+                var contentTuple = new System.Collections.Generic.List<System.Collections.Generic.List<object>>();
+                Web web = srcCtx.Web;
+                File file = web.GetFileByServerRelativeUrl(sourceUri.PathAndQuery);
+                FieldCollection fieldCol =  file.ListItemAllFields.ParentList.Fields;
+                ListItem item = file.ListItemAllFields;
 
-                SPFile srcItem = srcweb.GetFile(srcUrl);
+                srcCtx.Load(file);
+                srcCtx.Load(item);
+                srcCtx.Load(fieldCol);
+                srcCtx.ExecuteQuery();
+                for (int i = 0; i < fieldCol.Count; i++)
+                {
+                    if (!fieldCol[i].FromBaseType && !fieldCol[i].Hidden)
+                        contentTuple.Add(new System.Collections.Generic.List<object> { fieldCol[i].InternalName, fieldCol[i].TypeAsString });
+                }
 
-                SPSite mysite = new SPSite(destinationUrl);
-                SPWeb myweb = mysite.OpenWeb();
-
-                SPList targetWeb = myweb.Lists.TryGetList(destinationTitle);
-
-                using (System.IO.Stream stream = srcItem.OpenBinaryStream())
+                foreach (System.Collections.Generic.List<object> tuple in contentTuple)
                 {
 
-                    targetWeb.RootFolder.Files.Add(srcItem.Name, stream);
-                    stream.Close();
-
+                    tuple.Add(item.FieldValues[tuple[0].ToString()]);
                 }
-            });
 
+                web = context.Web;
+                context.Load(web);
+                context.ExecuteQuery();
+
+                using (System.IO.Stream fs = File.OpenBinaryDirect(context, file.ServerRelativeUrl).Stream)
+                {
+                    File.SaveBinaryDirect(context, destinationUri.PathAndQuery, fs, true);
+                    //  fs.Dispose();
+                }
+
+                file = web.GetFileByServerRelativeUrl(destinationUri.PathAndQuery);
+                item = file.ListItemAllFields;
+                fieldCol = item.ParentList.Fields;
+
+                context.Load(fieldCol);
+                context.Load(file);
+                context.Load(item);
+                context.ExecuteQuery();
+
+                foreach (System.Collections.Generic.List<object> tuple in contentTuple)
+                {
+                    if (tuple[2] != null)
+                    {
+                        if (tuple[1].ToString().Equals("TaxonomyFieldTypeMulti"))
+                        {
+                            var terms = new System.Collections.Generic.List<string>();
+
+                            for (var i = 0; i < ((TaxonomyFieldValueCollection)tuple[2]).Count; i++)
+                            {
+                                terms.Add("-1;#" + ((TaxonomyFieldValueCollection)tuple[2])[i].Label + "|" + ((TaxonomyFieldValueCollection)tuple[2])[i].TermGuid);
+                            }
+
+                            Field field = fieldCol.GetByInternalNameOrTitle(tuple[0].ToString());
+                            TaxonomyField txField = context.CastTo<TaxonomyField>(field);
+
+                            var termValues = new TaxonomyFieldValueCollection(context, string.Join(";#", terms.ToArray()), txField);
+                            txField.SetFieldValueByValueCollection(item, termValues);
+
+
+
+                        }
+                        else if (tuple[1].ToString().Equals("TaxonomyFieldType"))
+                        {
+                            var termValue = new TaxonomyFieldValue();
+                            termValue.Label = ((TaxonomyFieldValue)tuple[2]).Label;
+                            termValue.TermGuid = ((TaxonomyFieldValue)tuple[2]).TermGuid;
+                            termValue.WssId = -1;
+                            Field field = fieldCol.GetByInternalNameOrTitle(tuple[0].ToString());
+                            TaxonomyField txField = context.CastTo<TaxonomyField>(field);
+                            txField.SetFieldValueByValue(item, termValue);
+
+                        }
+                        else
+                            item[tuple[0].ToString()] = tuple[2];
+                    }
+                }
+                item.Update();
+                if (!(file.CheckOutType == CheckOutType.None)) file.CheckIn("Copied", CheckinType.MajorCheckIn);
+
+                context.Load(item);
+                context.Load(file);
+                context.ExecuteQuery();
+
+            }
         }
 
+        private static ClientContext EstablishClientContext(string url)
+        {
+            string[] parts = url.Split('/');
+            LinkedList<string> list = new LinkedList<string>();
+            StringBuilder builder = new StringBuilder();
+            foreach (string part in parts)
+            {
+                builder.Append(part);
+                list.AddLast(builder.ToString());
+                builder.Append('/');
+            }
 
-        /*   public void SaveFile( string destUrl, string listUrl, string relativeItemUrl, byte[] fileData)
-           {
-
-               ClientContext context = new ClientContext(destUrl);
-
-               using (System.IO.Stream stream = new System.IO.MemoryStream(fileData))
-               {
-                   var fci = new FileCreationInformation
-                   {
-                       Url = relativeItemUrl,
-                       ContentStream = stream,
-                       Overwrite = true
-                   };
-
-
-                   File file = context.Web.GetList("Dest3").RootFolder.Files.Add(fci);
-                 //  Folder folder = context.Web.GetFolderByServerRelativeUrl(folderRelativeUrl);
-                  // FileCollection files = folder.Files;
-                  // File file = files.Add(fci);
-
-                   //context.Load(files);
-                   context.Load(file);
-                   context.ExecuteQuery();
-               }
-           }*/
-
-
-        /*
-                public static void CopyFolderToAnotherSiteCollection(string sourceUrl, string destinationUrl,
-                  string listName, string folderUrl, string folderName)
+            foreach (string probeUrl in list.Reverse())
+            {
+                ClientContext context = null;
+                try
                 {
-                    string listRelatvieFolderUrl = folderUrl.Substring(folderUrl.IndexOf("/") + 1);
-                    using (Site sourceSite = new Site(sourceUrl))
+                    context = new ClientContext(probeUrl);
+                    context.GetFormDigestDirect();
+                    return context;
+                }
+                catch
+                {
+                    if (context != null)
                     {
-                        using (Web sourceWeb = sourceSite.OpenWeb())
-                        {
-                            SPFolder sourceFolder = sourceWeb.GetFolder(folderUrl);
-                            using (SPSite destSite = new SPSite(destinationUrl))
-                            {
-                                using (SPWeb destWeb = destSite.OpenWeb())
-                                {
-                                    SPListItem destItem = destWeb.Lists[listName].Items.
-                                        Add(string.Empty, SPFileSystemObjectType.Folder, listRelatvieFolderUrl);
-
-                                    destItem.Update();
-
-                                    SPFolder destFolder = destWeb.GetFolder(folderUrl);
-
-                                    foreach (SPFile file in sourceFolder.Files)
-                                    {
-                                        destFolder.Files.Add(file.Url, file.OpenBinary());
-                                    }
-
-                                    foreach (SPFolder folder in sourceFolder.SubFolders)
-                                    {
-                                        CopyFolderToAnotherSiteCollection(sourceUrl, destinationUrl, listName,
-                                            folder.Url, folder.Name);
-                                    }
-
-                                }
-                            }
-                        }
+                        context.Dispose();
                     }
-                }*/
+                }
+            }
+
+            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Could not establish a connection to the URL '{0}'.", url));
+        }
+
         private void AddFile(string srcUrl, string targetUrl)
         {
 
