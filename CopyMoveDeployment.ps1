@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param (
-    [Parameter(Mandatory = $false)][string]$SrcUrl = "http://win-iprrvsfootq/sites/dev"
+    [Parameter(Mandatory = $false)][string]$Url = "http://win-iprrvsfootq/sites/dev"
 )
 
 Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue
@@ -11,7 +11,7 @@ Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue
 
 $input = Read-Host 'Deploy on all Site collections? (Y)/(N)'
 
-$rootSite = New-Object Microsoft.SharePoint.SPSite($SrcUrl)
+<#$rootSite = New-Object Microsoft.SharePoint.SPSite($SrcUrl)
 $spWebApp = $rootSite.WebApplication
 
 foreach($site in $spWebApp.Sites)
@@ -29,7 +29,7 @@ foreach($site in $spWebApp.Sites)
 
         Write-Host "$($siteAdmin.ParentWeb.Url) - $($siteAdmin.DisplayName)"
         $Url = $siteAdmin.ParentWeb.Url
-
+        #>
         $VerbosePreference = "Continue"
 
         $context = New-Object Microsoft.SharePoint.Client.ClientContext $Url
@@ -251,7 +251,7 @@ foreach($site in $spWebApp.Sites)
          $context.Load($action)
          $context.ExecuteQuery()
          $context.dispose();
-
+<#
    }
     $site.Dispose()
-}
+}#>

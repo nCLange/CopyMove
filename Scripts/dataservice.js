@@ -376,12 +376,14 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     listItem = ctx.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
                     var files = listItem.get_folder().get_files();
                     var folders = listItem.get_folder().get_folders();
+                    var folder = listItem.get_folder();
                     ctx.load(listItem);
+                    ctx.load(folder);
                     ctx.load(files, 'Include(ListItemAllFields)');
                     ctx.load(folders, 'Include(ListItemAllFields)');
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
-                            caller.name = listItem.get_item('Title');
+                            caller.name = folder.get_name();
                             for (var i = 0; i < files.get_count(); i++) {
                                 caller.addToQueue(files.getItemAtIndex(i).get_listItemAllFields().get_id());
                             }
@@ -400,6 +402,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 DataService.prototype.copyFolder = function (caller) {
                     var targetList;
                     var listItem;
+                    console.log(caller.name);
                     var ctx = new SP.ClientContext(caller.parent.targetUrl);
                     // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
                     var itemCreateInfo;
@@ -408,9 +411,11 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     // folderItem.
                     ctx.load(targetList);
                     if (caller.parentFolderId == null) {
+                        console.log(1);
                         thisFolder = targetList.get_rootFolder().get_folders().add(caller.name);
                     }
                     else {
+                        console.log(2);
                         thisFolder = targetList.getItemById(caller.parentFolderId).get_folder().get_folders().add(caller.name);
                     } // Überarbeiten
                     //   console.log(caller.parentFolder.get_folders());
@@ -420,17 +425,22 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         ctx.executeQueryAsync(function () {
                             // caller.parentFolder= thisFolder;
                             caller.parentFolderId = thisFolder.get_listItemAllFields().get_id();
-                            var thisListItem = thisFolder.get_listItemAllFields();
-                            thisListItem.set_item("Title", caller.name);
-                            thisListItem.update();
-                            ctx.load(thisListItem);
-                            ctx.executeQueryAsync(function () {
-                                console.log(thisListItem.get_item("Title"));
-                                caller.releaseQueue();
-                                resolve();
-                            }, function () {
-                                reject(arguments[1].get_message());
-                            });
+                            /*  var thisListItem:SP.ListItem = thisFolder.get_listItemAllFields();
+                            //  thisListItem.set_item("Title",caller.name);
+                              thisListItem.update();
+                              ctx.load(thisListItem);
+                              ctx.executeQueryAsync(
+                                  function(){
+                                     // console.log(thisListItem.get_item("Title"));
+                                      caller.releaseQueue();
+                                      resolve();
+                                  },
+                                  function(){
+                                       reject(arguments[1].get_message());
+                                  }
+                              );*/
+                            caller.releaseQueue();
+                            resolve();
                         }, function (x, args) {
                             /*    if (args.get_errorTypeName() == "Microsoft.SharePoint.SPException" && args.get_message().includes("already exists")) {
             
