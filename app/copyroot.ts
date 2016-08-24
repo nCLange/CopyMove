@@ -33,6 +33,7 @@ export class CopyRoot {
     parent: any;
     delafter: boolean;
     targetName : string;
+    srcListUrl: string;
 
 
     constructor(delafter: boolean, /*sitecollections: Array<SiteCollection>,*/ parent: any) {
@@ -42,6 +43,7 @@ export class CopyRoot {
         this.targetUrl = SiteCollection.targetPath;
         this.targetTitle = DocumentLibrary.targetTitle;
         this.targetName = DocumentLibrary.targetName;
+        this.srcListUrl = DocumentLibrary.srcListUrl;
         this.targetRootPath = "";
         this.rootFolder = null;
         this.dataService = new DataService();

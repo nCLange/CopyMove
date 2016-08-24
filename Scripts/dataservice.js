@@ -109,6 +109,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 };
                 DataService.prototype.searchSiteCollection = function (caller) {
                     var that = this;
+                    console.log("Version: 3");
                     return new Promise(function (resolve, reject) {
                         $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                             var executor = new SP.RequestExecutor(that.appWebUrl);
@@ -155,13 +156,16 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     var dossierResult = myoutput.d.results;
                                     for (var x = 0; x < dossierResult.length; x++) {
                                         if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Documents" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
-                                            documentlibraries.push(new documentlibrary_1.DocumentLibrary(dossierResult[x].RootFolder.Name, dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
+                                            console.log(dossierResult[x].RootFolder.ServerRelativeUrl.replace(dossierResult[x].ParentWebUrl + "/", ''));
+                                            var name = dossierResult[x].RootFolder.ServerRelativeUrl.replace(dossierResult[x].ParentWebUrl + "/", '');
+                                            documentlibraries.push(new documentlibrary_1.DocumentLibrary(name, dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
                                         }
                                     }
                                     resolve(documentlibraries);
                                 },
                                 error: function (data) {
                                     var documentlibraries = [];
+                                    console.log(data);
                                     reject(documentlibraries);
                                 }
                             });
@@ -169,30 +173,37 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     });
                 };
                 DataService.prototype.searchDirectories = function (pathUrl, relPath, parent) {
-                    var executor = new SP.RequestExecutor(this.appWebUrl);
-                    //var executor = new SP.RequestExecutor(pathUrl);
                     var that = this;
+                    console.log("Rel Path string: " + relPath);
                     return new Promise(function (resolve, reject) {
-                        executor.executeAsync({
-                            url: pathUrl + "/_api/web/GetFolderByServerRelativeUrl('" + relPath + "')/Folders?$expand=ListItemAllFields",
-                            //Leere Bibliotheken werden ignoriert , beheben?
-                            //url: (pathUrl+"/_api/web/GetFolderByServerRelativeUrl('"+relPath+"')"),
-                            method: "GET",
-                            headers: { "Accept": "application/json; odata=verbose" },
-                            success: function (data) {
-                                var myoutput = JSON.parse((data.body.toString()));
-                                var directory = [];
-                                var siteResult = myoutput.d.results;
-                                for (var x = 0; x < siteResult.length; x++) {
-                                    if (siteResult[x].Name != "Forms" && !siteResult[x].ListItemAllFields.ContentTypeId.startsWith("0x0120D520"))
-                                        directory.push(new directory_1.Directory(siteResult[x].Name, parent));
+                        $.getScript(pathUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+                            var executor = new SP.RequestExecutor(that.appWebUrl);
+                            //var executor = new SP.RequestExecutor(pathUrl);
+                            executor.executeAsync({
+                                url: pathUrl + "/_api/web/GetFolderByServerRelativeUrl('" + relPath + "')/Folders?$expand=ListItemAllFields",
+                                //Leere Bibliotheken werden ignoriert , beheben?
+                                //url: (pathUrl+"/_api/web/GetFolderByServerRelativeUrl('"+relPath+"')"),
+                                method: "GET",
+                                headers: { "Accept": "application/json; odata=verbose" },
+                                success: function (data) {
+                                    var myoutput = JSON.parse((data.body.toString()));
+                                    var directory = [];
+                                    var siteResult = myoutput.d.results;
+                                    console.log("Return Value");
+                                    console.log(siteResult);
+                                    for (var x = 0; x < siteResult.length; x++) {
+                                        if (siteResult[x].Name != "Forms" && !siteResult[x].ListItemAllFields.ContentTypeId.startsWith("0x0120D520"))
+                                            directory.push(new directory_1.Directory(siteResult[x].Name, parent));
+                                    }
+                                    resolve(directory);
+                                },
+                                error: function (data) {
+                                    var directory = [];
+                                    console.log("Error");
+                                    console.log(data);
+                                    reject(directory);
                                 }
-                                resolve(directory);
-                            },
-                            error: function (data) {
-                                var directory = [];
-                                reject(directory);
-                            }
+                            });
                         });
                     });
                 };

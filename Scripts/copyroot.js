@@ -28,6 +28,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
                     this.targetTitle = documentlibrary_1.DocumentLibrary.targetTitle;
                     this.targetName = documentlibrary_1.DocumentLibrary.targetName;
+                    this.srcListUrl = documentlibrary_1.DocumentLibrary.srcListUrl;
                     this.targetRootPath = "";
                     this.rootFolder = null;
                     this.dataService = new dataservice_1.DataService();

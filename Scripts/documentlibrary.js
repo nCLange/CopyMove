@@ -24,6 +24,7 @@ System.register(['./directory', './dataservice'], function(exports_1, context_1)
                     this.dataService = new dataservice_1.DataService();
                     this.directories = [];
                     this.visible = true;
+                    this.listUrl = "";
                     //  this.directories = [new Directory("thisname",[new Directory("thisbla",[new Directory("thisbla")])])];
                 }
                 /* cutPath(path) {
@@ -62,6 +63,7 @@ System.register(['./directory', './dataservice'], function(exports_1, context_1)
                     this.selected = true;
                     DocumentLibrary.targetTitle = this.title;
                     DocumentLibrary.targetName = this.name;
+                    DocumentLibrary.srcListUrl = this.listUrl;
                 };
                 DocumentLibrary.prototype.unsetAll = function () {
                     this.parent.unsetAll();

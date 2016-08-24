@@ -13,7 +13,9 @@ export class DocumentLibrary {
     dataService: DataService;
     parent: SiteCollection;
     static targetTitle: string;
-    static targetName : string ;
+    static targetName : string;
+    static srcListUrl: string;
+    listUrl:string;
     visible:boolean;
 
     constructor(name, title,path, parent) {
@@ -27,6 +29,7 @@ export class DocumentLibrary {
         this.dataService = new DataService();
         this.directories = [];
         this.visible=true;
+        this.listUrl="";
       //  this.directories = [new Directory("thisname",[new Directory("thisbla",[new Directory("thisbla")])])];
         
     }
@@ -70,6 +73,7 @@ export class DocumentLibrary {
         this.selected = true;
         DocumentLibrary.targetTitle = this.title;
         DocumentLibrary.targetName = this.name;
+        DocumentLibrary.srcListUrl = this.listUrl;
 
     }
 
