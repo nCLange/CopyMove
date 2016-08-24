@@ -23,7 +23,8 @@ export class DocumentLibrary {
         this.title = title;
         this.selected = false;
         this.parent = parent;
-        this.relpath = path;
+     //   this.relpath = path;
+        this.relpath = name;
        // this.cutPath(path);
         this.expanded = false;
         this.dataService = new DataService();

@@ -42,11 +42,12 @@ export class DataService {
                 function () {
 
 
-
-                    caller.name = rootFolder.get_name();
+                    caller.name = rootFolder.get_serverRelativeUrl().replace(srcList.get_parentWebUrl()+"/",'');
                     caller.title = srcList.get_title();
-                    console.log(rootFolder.get_name());
                     var consoleOut = "";
+
+                 //   console.log(rootFolder.get_serverRelativeUrl());
+                 //   console.log(srcList.get_parentWebUrl());
 
                     for (var i = 0; i < fieldcollection.get_count(); i++) {
                         //  if(fieldcollection.itemAt(i).get_internalName()=="_CopySource") console.log("GUID: "+fieldcollection.itemAt(i).get_id());
@@ -114,7 +115,7 @@ export class DataService {
     searchSiteCollection(caller) {
 
         let that = this;
-        console.log("Version: 3");
+    
 
 
         return new Promise(function (resolve, reject) {
@@ -200,7 +201,6 @@ export class DataService {
     searchDirectories(pathUrl, relPath, parent) {
 
         let that = this;
-        console.log("Rel Path string: " + relPath);
         return new Promise(function (resolve, reject) {
             $.getScript(pathUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                 var executor = new SP.RequestExecutor(that.appWebUrl);
@@ -222,8 +222,6 @@ export class DataService {
                             var directory = [];
 
                             var siteResult = myoutput.d.results;
-                            console.log("Return Value");
-                            console.log(siteResult);
                             for (var x = 0; x < siteResult.length; x++) {
                                 if (siteResult[x].Name != "Forms" && !siteResult[x].ListItemAllFields.ContentTypeId.startsWith("0x0120D520"))
                                     directory.push(
@@ -545,11 +543,9 @@ export class DataService {
 
         if (caller.parentFolderId == null) {
 
-            console.log(1);
             thisFolder = targetList.get_rootFolder().get_folders().add(caller.name);
         }
         else {
-            console.log(2);
             thisFolder = targetList.getItemById(caller.parentFolderId).get_folder().get_folders().add(caller.name);
         } // Überarbeiten
 
@@ -615,7 +611,6 @@ export class DataService {
 
         ctx.load(targetList);
         var cTypeId = caller.contentTypeId;
-        console.log(cTypeId);
         var newCT: SP.ContentType = ctx.get_web().get_contentTypes().getById(cTypeId);
 
         ctx.load(root);
@@ -927,8 +922,8 @@ export class DataService {
         var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
         var targetItem = targetList.getItemById(caller.targetId);
 
-        var targetField =
-            console.log(caller.parent.targetUrl + "/" + caller.parent.name + "/" + caller.targetFolderURL + caller.name);
+       // var targetField =
+        //    console.log(caller.parent.targetUrl + "/" + caller.parent.name + "/" + caller.targetFolderURL + caller.name);
 
         ctx.load(targetItem);
 

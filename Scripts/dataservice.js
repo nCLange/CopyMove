@@ -55,10 +55,11 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     ctx.load(listItem);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
-                            caller.name = rootFolder.get_name();
+                            caller.name = rootFolder.get_serverRelativeUrl().replace(srcList.get_parentWebUrl() + "/", '');
                             caller.title = srcList.get_title();
-                            console.log(rootFolder.get_name());
                             var consoleOut = "";
+                            //   console.log(rootFolder.get_serverRelativeUrl());
+                            //   console.log(srcList.get_parentWebUrl());
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
                                 //  if(fieldcollection.itemAt(i).get_internalName()=="_CopySource") console.log("GUID: "+fieldcollection.itemAt(i).get_id());
                                 if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()) {
@@ -109,7 +110,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 };
                 DataService.prototype.searchSiteCollection = function (caller) {
                     var that = this;
-                    console.log("Version: 3");
                     return new Promise(function (resolve, reject) {
                         $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                             var executor = new SP.RequestExecutor(that.appWebUrl);
@@ -174,7 +174,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 };
                 DataService.prototype.searchDirectories = function (pathUrl, relPath, parent) {
                     var that = this;
-                    console.log("Rel Path string: " + relPath);
                     return new Promise(function (resolve, reject) {
                         $.getScript(pathUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                             var executor = new SP.RequestExecutor(that.appWebUrl);
@@ -189,8 +188,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     var myoutput = JSON.parse((data.body.toString()));
                                     var directory = [];
                                     var siteResult = myoutput.d.results;
-                                    console.log("Return Value");
-                                    console.log(siteResult);
                                     for (var x = 0; x < siteResult.length; x++) {
                                         if (siteResult[x].Name != "Forms" && !siteResult[x].ListItemAllFields.ContentTypeId.startsWith("0x0120D520"))
                                             directory.push(new directory_1.Directory(siteResult[x].Name, parent));
@@ -422,11 +419,9 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     // folderItem.
                     ctx.load(targetList);
                     if (caller.parentFolderId == null) {
-                        console.log(1);
                         thisFolder = targetList.get_rootFolder().get_folders().add(caller.name);
                     }
                     else {
-                        console.log(2);
                         thisFolder = targetList.getItemById(caller.parentFolderId).get_folder().get_folders().add(caller.name);
                     } // Überarbeiten
                     //   console.log(caller.parentFolder.get_folders());
@@ -479,7 +474,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         root = targetList.getItemById(caller.parentFolderId).get_folder();
                     ctx.load(targetList);
                     var cTypeId = caller.contentTypeId;
-                    console.log(cTypeId);
                     var newCT = ctx.get_web().get_contentTypes().getById(cTypeId);
                     ctx.load(root);
                     ctx.load(newCT);
@@ -693,7 +687,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
                     var targetItem = targetList.getItemById(caller.targetId);
-                    var targetField = console.log(caller.parent.targetUrl + "/" + caller.parent.name + "/" + caller.targetFolderURL + caller.name);
+                    // var targetField =
+                    //    console.log(caller.parent.targetUrl + "/" + caller.parent.name + "/" + caller.targetFolderURL + caller.name);
                     ctx.load(targetItem);
                     ctx.executeQueryAsync(function (data) {
                         console.log(targetItem.get_item("_CopySource"));

@@ -118,7 +118,6 @@ export class CopyRoot {
             if (this.delafter) {
                 var error = false;
                 for (var i = this.items.length - 1; i >= 0; i--) {
-                    console.log(i);
                     if (this.items[i].status == "Done" && this.items[i].type == ContentType.File) {
                         this.items[i].dataService.deleteEntry(this.items[i]);
                     }

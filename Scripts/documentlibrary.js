@@ -18,7 +18,8 @@ System.register(['./directory', './dataservice'], function(exports_1, context_1)
                     this.title = title;
                     this.selected = false;
                     this.parent = parent;
-                    this.relpath = path;
+                    //   this.relpath = path;
+                    this.relpath = name;
                     // this.cutPath(path);
                     this.expanded = false;
                     this.dataService = new dataservice_1.DataService();
