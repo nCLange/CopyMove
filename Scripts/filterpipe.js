@@ -31,9 +31,12 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                         if (dossierName.length < 3) {
                             site.visible = true;
                             site.expanded = false;
-                            return site;
                         }
                         for (var i = 0; i < site.documentLibraries.length; i++) {
+                            if (dossierName.length < 3) {
+                                site.documentLibraries[i].visible = true;
+                                continue;
+                            }
                             //console.log((site as SiteCollection).documentLibraries[i].name+"---"+dossierName);
                             if (site.documentLibraries[i].name.toLowerCase().includes(dossierName.toLowerCase())) {
                                 site.documentLibraries[i].visible = true;

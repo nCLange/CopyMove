@@ -106,10 +106,11 @@ export class CopyRoot {
 
     done(caller: ItemDL, errorMsg) {
         if (errorMsg != null && errorMsg != ""){
-            this.errorReport.push("ID:"+caller.id + ": " + caller.name + " " + errorMsg);
+            this.errorReport.push(caller.name + ": " + errorMsg);
         }
-        for(var i=0; i<20; i++)
-            this.errorReport.push(i+" Hello")
+      /*  for(var i=0; i<20; i++)
+              this.errorReport.push(i+" Hello");*/
+
         this.doneCounter++;
         if (this.doneCounter >= this.items.length) {
             if (this.delafter) {

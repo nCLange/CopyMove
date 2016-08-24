@@ -33,12 +33,14 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
                     this.screen = 0;
                     this.filesToCopy = null;
                     this.errorReport = null;
+                    this.moved = false;
                 }
                 TreeViewSite.prototype.canceled = function () {
                     this.screen = 0;
                     this.copyroot.canceled = true;
                 };
                 TreeViewSite.prototype.clicked = function (delafter) {
+                    this.moved = delafter;
                     this.screen = 1;
                     this.copyroot = new copyroot_1.CopyRoot(delafter, /*this.sitecollection,*/ this);
                     this.filesToCopy = this.copyroot.items;
@@ -67,6 +69,10 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
                     core_1.Input(), 
                     __metadata('design:type', Array)
                 ], TreeViewSite.prototype, "errorReport", void 0);
+                __decorate([
+                    core_1.Input(), 
+                    __metadata('design:type', Boolean)
+                ], TreeViewSite.prototype, "moved", void 0);
                 TreeViewSite = __decorate([
                     core_1.Component({
                         selector: 'tree-view-site',

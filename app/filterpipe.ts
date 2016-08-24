@@ -19,10 +19,14 @@ export class SiteColPipe {
             if(dossierName.length<3){
                 (site as SiteCollection).visible=true;
                 (site as SiteCollection).expanded=false;
-                return site;
             }
             
             for (var i = 0; i < (site as SiteCollection).documentLibraries.length; i++) {
+                if(dossierName.length<3)
+                    {
+                        (site as SiteCollection).documentLibraries[i].visible = true;
+                        continue;
+                    }
                 //console.log((site as SiteCollection).documentLibraries[i].name+"---"+dossierName);
                 if ((site as SiteCollection).documentLibraries[i].name.toLowerCase().includes(dossierName.toLowerCase())) {
                     (site as SiteCollection).documentLibraries[i].visible = true;

@@ -2,10 +2,11 @@
     <hr>
     <div class="content">
         <div *ngIf="screen==0">
-            <input type="text" name="SearchForDL" class="searchBar" placeholder="Filter Dossiers..." [value]="searchValue" (input)="searchValue=$event.target.value;" />
-            <img class ="magglass" src="../../_layouts/15/images/search32x32.png"/>
-            <div class = "loadingSiteCol" *ngIf="sitecollection.length<1">
-                <img src="../../_layouts/15/images/progress.gif"/>
+            <input type="text" name="SearchForDL" class="searchBar" placeholder="Filter Dossiers..." [value]="searchValue" (input)="searchValue=$event.target.value;"
+            />
+            <img class="magglass" src="../../_layouts/15/images/search32x32.png" />
+            <div class="loadingSiteCol" *ngIf="sitecollection.length<1">
+                <img src="../../_layouts/15/images/progress.gif" />
             </div>
             <ul id="listIcon">
                 <div *ngFor="let site of sitecollection | SiteColFilter:searchValue" selection-model>
@@ -68,7 +69,12 @@
                 </ul>
             </div>
             <div class="noError" *ngIf="errorReport.length==0">
-                <span> Everything copied. </span>
+                <div *ngIf="moved==true">
+                    <span> Everything moved. </span>
+                </div>
+                <div *ngIf="moved!=true">
+                    <span> Everything copied. </span>
+                </div>
             </div>
             <div class="footer">
                 <hr>
