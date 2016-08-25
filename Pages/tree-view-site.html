@@ -1,19 +1,35 @@
-﻿<div id="copymove">
+﻿<script type="text/javascript">
+
+              
+               /*  spButtons.Append('<a accesskey="C" class="ms-dlgCloseBtn" title="Close dialog" onClick="window.parent.location.reload()">' +
+                     '<span style="padding: 8px; height: 16px; width: 16px; display: inline-block;">' +
+                     '<span class="s4-clust" style="height: 16px; width: 16px; position: relative; display: inline-block; overflow: hidden;">' +
+                     '<img class="ms-dlgCloseBtnImg" style="left: -0px !important; top: -645px !important; position: absolute;" alt="Close dialog" src="/_layouts/15/images/fgimg.png" />' +
+                     '</span></span></a>');*/
+                //  $(bla).off().find("*").off();
+            
+              /*     $(bla).on("click", function(e){
+                                         thisparent.location.reload();
+                                           
+                                    });*/
+</script>
+
+<div id="copymove">
     <hr>
     <div class="content">
         <div *ngIf="screen==0">
             <input type="text" name="SearchForDL" class="searchBar" placeholder="Filter Dossiers..." [value]="searchValue" (input)="searchValue=$event.target.value;"
             />
-            <img class="magglass" src="../../_layouts/15/images/search32x32.png" />
+            <!-- <img class="magglass" src="../../_layouts/15/images/search32x32.png" />-->
             <div class="loadingSiteCol" *ngIf="sitecollection.length<1">
-                <img src="../../_layouts/15/images/progress.gif" />
+                <img src="../../_layouts/15/images/progress-circle-24.gif" />
             </div>
-            <ul id="listIcon">
+            <ul id="listIcon" class="siteColList">
                 <div *ngFor="let site of sitecollection | SiteColFilter:searchValue" selection-model>
                     <div *ngIf="site.visible==true && site.documentLibraries.length>0">
                         <li>
 
-                            <span (click)="site.toggle()">{{ site.name }}</span>
+                            <span (click)="site.toggle()"><img src="../images/Sitecol.svg" width="16" height="16">&nbsp;{{ site.name }}</span>
                             <div *ngIf="site.expanded">
                                 <tree-view-doclib [documentlibrary]="site.documentLibraries">
                                 </tree-view-doclib>
@@ -28,7 +44,7 @@
                     <hr>
                     <button id="cm-button" class="ctrlButton" onclick="return false" (click)="clicked(true)"><b>Move</b></button>
                     <button id="cm-button" class="ctrlButton" onclick="return false" (click)="clicked(false)"><b>Copy</b></button>
-                    <button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Cancel</button>
+                    <button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Close</button>
                 </div>
             </div>
             <div *ngIf="selected!=true">
@@ -37,7 +53,7 @@
                     <div class="destRemind">Double-click to select destination</div>
                     <button id="cm-button" class="ctrlButton" onclick="return false" disabled>Move</button>
                     <button id="cm-button" class="ctrlButton" onclick="return false" disabled>Copy</button>
-                    <button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Cancel</button>
+                    <button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Close</button>
                 </div>
             </div>
         </div>
@@ -46,7 +62,7 @@
             <ul class="copyList">
                 <li *ngFor="let items of filesToCopy" selection-model>
                     <div>
-                        <div class="itemscopied">{{items.id}}:{{items.name}}</div>
+                        <div class="itemscopied">{{items.name}}</div>
                         <div class="statuscopied">
                             <div *ngIf="items.status=='Done'" class="finish">{{items.status}}</div>
                             <div *ngIf="items.status!='Done'&&items.status!='Error'" class="progress">{{items.status}}</div>
@@ -70,10 +86,10 @@
             </div>
             <div class="noError" *ngIf="errorReport.length==0">
                 <div *ngIf="moved==true">
-                    <span> Everything moved. </span>
+                    <span> Everything moved </span>
                 </div>
                 <div *ngIf="moved!=true">
-                    <span> Everything copied. </span>
+                    <span> Everything copied </span>
                 </div>
             </div>
             <div class="footer">

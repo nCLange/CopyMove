@@ -47,7 +47,7 @@ export class CopyRoot {
         this.targetRootPath = "";
         this.rootFolder = null;
         this.dataService = new DataService();
-        this.maxCalls = 1;
+        this.maxCalls = 3;
         this.currentCalls = 0;
         this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
         this.fields = [];

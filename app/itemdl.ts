@@ -36,7 +36,7 @@ export class ItemDL {
         this.contentTypeId = null;
         this.parentFolderId = parentFolderId;
         this.contents = [];
-        this.name = " ";
+        this.name = ".";
         this.status = "Preparing";
        // this.title = " ";
 

@@ -125,8 +125,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                     //console.log(siteResult);
                                     for (var x = 0; x < siteResult.length; x++) {
-                                        //if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profiles/")) -- Enable to limit scope
-                                        sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
+                                        if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/"))
+                                            sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                     }
                                     resolve(sitecollection);
                                 },
@@ -301,7 +301,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 };
                 DataService.prototype.soapAjax = function (caller) {
                     var that = this;
-                    console.log(caller.parent.srcUrl + "|" + caller.parent.name + "|" + caller.srcFolderURL + "|" + caller.name);
+                    console.log(caller.parent.srcUrl + "/" + caller.parent.name + "/" + caller.srcFolderURL + caller.name);
+                    console.log(caller.parent.targetUrl + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name);
                     var xmlstring = this.buildSoapEnvelope(caller);
                     return new Promise(function (resolve, reject) {
                         jQuery.ajax({
@@ -309,8 +310,13 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             type: "POST",
                             dataType: "xml",
                             data: xmlstring,
+                            xhrFields: {
+                                withCredentials: true
+                            },
                             contentType: "application/soap+xml; charset=utf-8",
                             success: function (xData, status) {
+                                console.log("returnData:");
+                                console.log(xData);
                                 that.getListIDFromFile(caller).then(function (response) { resolve(); }, function (response) { reject(response); });
                             },
                             error: function (xData, status) {

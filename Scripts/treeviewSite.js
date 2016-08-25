@@ -47,7 +47,7 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
                     this.errorReport = this.copyroot.errorReport;
                 };
                 TreeViewSite.prototype.done = function () {
-                    window.parent.location.reload();
+                    window.parent.location.reload(true);
                 };
                 __decorate([
                     core_1.Input(), 

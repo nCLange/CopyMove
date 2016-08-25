@@ -50,7 +50,7 @@ export class TreeViewSite {
     }
 
     done(){
-        window.parent.location.reload();
+        window.parent.location.reload(true);
     }
 
 

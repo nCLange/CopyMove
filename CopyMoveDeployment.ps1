@@ -1,15 +1,46 @@
 ﻿[CmdletBinding()]
 param (
-    [Parameter(Mandatory = $false)][string]$Url = "http://win-iprrvsfootq/sites/dev"
+    [Parameter(Mandatory = $false)][string]$SrcUrl = "http://win-iprrvsfootq/sites/dev"
 )
 
 Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue
 
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Sharepoint.Client.Search")
 
 
 $input = Read-Host 'Deploy on all Site collections? (Y)/(N)'
+
+$context = New-Object Microsoft.SharePoint.Client.ClientContext $SrcUrl
+$keywordQuery = New-Object Microsoft.SharePoint.Client.Search.Query.KeywordQuery($context)
+
+
+$keywordQuery.QueryText = "contentclass:sts_site"
+$keywordQuery.RowLimit=500
+Write-Host $keywordQuery.BlockDedupeMode
+#$keywordQuery.Properties="Path"
+$keywordQuery.TrimDuplicates= "false"
+$keywordQuery.TrimDuplicates= !$keywordQuery.TrimDuplicates
+Write-Host $keywordQuery.TrimDuplicates.ToString()
+$searchExec = New-Object Microsoft.SharePoint.Client.Search.Query.SearchExecutor($context)
+$results = $searchExec.ExecuteQuery($keywordQuery)
+$context.ExecuteQuery() 
+
+foreach($result in $results.Value[0].ResultRows)
+
+    {
+    if($result["Path"] -notlike "*profile*") { continue }
+
+        $Url = $result["Path"]
+        Write-Host $Url
+    
+        if($input.ToLower() -like 'n'){
+            if($Url -notlike $SrcUrl){
+                continue
+            }
+         }
+
 
 <#$rootSite = New-Object Microsoft.SharePoint.SPSite($SrcUrl)
 $spWebApp = $rootSite.WebApplication
@@ -18,10 +49,6 @@ foreach($site in $spWebApp.Sites)
 {
     foreach($siteAdmin in $site.RootWeb.SiteAdministrators)
     {
-        if($input.ToLower() -like 'n'){
-            if($siteAdmin.ParentWeb.Url -notlike $SrcUrl){
-                continue
-            }
         }
         else {
          if($siteAdmin.ParentWeb.Url -notlike '*profile*'){ continue}
@@ -238,6 +265,7 @@ foreach($site in $spWebApp.Sites)
                                                         title: 'Copy or Move content',
                                                         width: 700,
                                                         height: 400,
+                                                        showClose: false,
                                                         url: '${Url}/Site Assets/CopyMove/pages/Default.aspx?SPListId={SelectedListId}&amp;SPListURL={Source}&amp;SPListItemId={SelectedItemId}'};
                              SP.UI.ModalDialog.showModalDialog(options);
                              ""/>
@@ -251,6 +279,8 @@ foreach($site in $spWebApp.Sites)
          $context.Load($action)
          $context.ExecuteQuery()
          $context.dispose();
+
+         }
 <#
    }
     $site.Dispose()

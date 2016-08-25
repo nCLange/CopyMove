@@ -38,7 +38,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                                 continue;
                             }
                             //console.log((site as SiteCollection).documentLibraries[i].name+"---"+dossierName);
-                            if (site.documentLibraries[i].name.toLowerCase().includes(dossierName.toLowerCase())) {
+                            if (site.documentLibraries[i].title.toLowerCase().includes(dossierName.toLowerCase())) {
                                 site.documentLibraries[i].visible = true;
                                 if (dossierName != "")
                                     site.expanded = true;

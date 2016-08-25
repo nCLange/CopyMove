@@ -29,7 +29,18 @@
                             <script src="../libs/jquery.min.js"></script>
                             <link rel="stylesheet" href="../styles/layout.css">
 
+                            <script type="text/javascript">
+                          /*    $(document).ready(function() {
+                                   var spButtons = jQuery('.ms-dlgTitleBtns', window.parent.document);
+                                    spButtons.find('a.ms-dlgCloseBtn').remove();
+                                    spButtons.append('<a accesskey="C" class="ms-dlgCloseBtn" title="Close dialog" onClick="window.parent.location.reload()">' +
+                                    '<span style="padding: 8px; height: 16px; width: 16px; display: inline-block;">' +
+                                    '<span class="s4-clust" style="height: 16px; width: 16px; position: relative; display: inline-block; overflow: hidden;">' +
+                                    '<img class="ms-dlgCloseBtnImg" style="left: -0px !important; top: -645px !important; position: absolute;" alt="Close dialog" src="../_layouts/15/images/fgimg.png" />' +
+                                    '</span></span></a>');
+                                });*/
 
+                            </script>
 
                             <script>
         System.config({

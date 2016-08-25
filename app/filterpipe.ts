@@ -28,7 +28,7 @@ export class SiteColPipe {
                         continue;
                     }
                 //console.log((site as SiteCollection).documentLibraries[i].name+"---"+dossierName);
-                if ((site as SiteCollection).documentLibraries[i].name.toLowerCase().includes(dossierName.toLowerCase())) {
+                if ((site as SiteCollection).documentLibraries[i].title.toLowerCase().includes(dossierName.toLowerCase())) {
                     (site as SiteCollection).documentLibraries[i].visible = true;
                     if(dossierName!="")
                         (site as SiteCollection).expanded = true;
