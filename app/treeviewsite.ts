@@ -19,6 +19,7 @@ export class TreeViewSite {
 
     @Input() sitecollection: Array<SiteCollection>;
     @Input() selected: boolean;
+    @Input() errorSiteCol: string;
 
     screen: number;
     @Input() filesToCopy: Array<ItemDL>;

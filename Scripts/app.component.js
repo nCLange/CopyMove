@@ -28,13 +28,17 @@ System.register(['@angular/core', './treeviewsite', './dataservice'], function(e
                 function AppComponent(dataService) {
                     var _this = this;
                     this.dataService = dataService;
+                    this.errorSiteCol = "";
                     this.sitecollection = [];
                     dataService.searchSiteCollection(this).then(function (response) {
                         var tempresponse;
                         tempresponse = response;
                         _this.sitecollection = tempresponse;
+                        if (_this.sitecollection.length == 0)
+                            _this.errorSiteCol = "Couldn't find any Site Collections";
                     }, function (response) {
                         console.log("Failure " + response);
+                        _this.errorSiteCol = "Failure with the search API: " + response;
                     });
                 }
                 AppComponent.prototype.unsetAll = function () {
@@ -53,7 +57,7 @@ System.register(['@angular/core', './treeviewsite', './dataservice'], function(e
                         selector: "app-main",
                         providers: [dataservice_1.DataService],
                         // template:'<H1>Hello</H1>'
-                        template: '<tree-view-site [sitecollection]="sitecollection" [selected]="selected"></tree-view-site>',
+                        template: '<tree-view-site [sitecollection]="sitecollection" [selected]="selected" [errorSiteCol]="errorSiteCol"></tree-view-site>',
                         directives: [treeviewsite_1.TreeViewSite]
                     }), 
                     __metadata('design:paramtypes', [dataservice_1.DataService])

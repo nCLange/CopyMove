@@ -63,6 +63,10 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
                 ], TreeViewSite.prototype, "selected", void 0);
                 __decorate([
                     core_1.Input(), 
+                    __metadata('design:type', String)
+                ], TreeViewSite.prototype, "errorSiteCol", void 0);
+                __decorate([
+                    core_1.Input(), 
                     __metadata('design:type', Array)
                 ], TreeViewSite.prototype, "filesToCopy", void 0);
                 __decorate([

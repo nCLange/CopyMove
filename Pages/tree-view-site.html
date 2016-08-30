@@ -22,7 +22,12 @@
             />
             <!-- <img class="magglass" src="../../_layouts/15/images/search32x32.png" />-->
             <div class="loadingSiteCol" *ngIf="sitecollection.length<1">
-                <img src="../../_layouts/15/images/progress-circle-24.gif" />
+                <div *ngIf="errorSiteCol.length<1">
+                    <img src="../../_layouts/15/images/progress-circle-24.gif" />
+                </div>
+                <div *ngIf="errorSiteCol.length>0">
+                    <span>{{errorSiteCol}}</span>
+                </div>
             </div>
             <ul id="listIcon" class="siteColList">
                 <div *ngFor="let site of sitecollection | SiteColFilter:searchValue" selection-model>

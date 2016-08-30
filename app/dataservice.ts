@@ -134,14 +134,16 @@ export class DataService {
                         success: function (data) {
                             var myoutput = JSON.parse((data.body.toString()));
                             var sitecollection = [];
-                            var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                            //console.log(siteResult);
-                            for (var x = 0; x < siteResult.length; x++) {
-                                if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profile/"))
-                                    sitecollection.push(
-                                        new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
+                            try{
+                                var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                                //console.log(siteResult);
+                                for (var x = 0; x < siteResult.length; x++) {
+                                 if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profile/"))
+                                        sitecollection.push(
+                                            new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
+                                }
                             }
-
+                            catch(err) { var sitecollection=[]; reject(err);}
                             resolve(sitecollection);
                         },
                         error: function (data) {

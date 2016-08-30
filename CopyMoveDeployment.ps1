@@ -3,11 +3,15 @@ param (
     [Parameter(Mandatory = $false)][string]$SrcUrl = "http://win-iprrvsfootq/sites/dev"
 )
 
-Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue
+#Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue
 
-[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")
-[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
-[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Sharepoint.Client.Search")
+dir -Path $PSScriptRoot -Filter "*.dll" | % {
+    [System.Reflection.Assembly]::LoadFile($_.FullName)
+    }
+
+#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")
+#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
+#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Sharepoint.Client.Search")
 
 
 $input = Read-Host 'Deploy on all Site collections? (Y)/(N)'
@@ -18,9 +22,9 @@ $keywordQuery = New-Object Microsoft.SharePoint.Client.Search.Query.KeywordQuery
 
 $keywordQuery.QueryText = "contentclass:sts_site"
 $keywordQuery.RowLimit=500
-Write-Host $keywordQuery.BlockDedupeMode
+#Write-Host $keywordQuery.BlockDedupeMode
 #$keywordQuery.Properties="Path"
-$keywordQuery.TrimDuplicates= "false"
+$keywordQuery.TrimDuplicates= "fill"
 $keywordQuery.TrimDuplicates= !$keywordQuery.TrimDuplicates
 Write-Host $keywordQuery.TrimDuplicates.ToString()
 $searchExec = New-Object Microsoft.SharePoint.Client.Search.Query.SearchExecutor($context)
@@ -30,7 +34,7 @@ $context.ExecuteQuery()
 foreach($result in $results.Value[0].ResultRows)
 
     {
-    if($result["Path"] -notlike "*profile*") { continue }
+  #  if($result["Path"] -notlike "*profile*") { continue }
 
         $Url = $result["Path"]
         Write-Host $Url
@@ -67,11 +71,16 @@ foreach($site in $spWebApp.Sites)
 
         #Add docbib
 
-        $docBib = $web.Lists.GetByTitle(“Site Assets”);
-        $context.Load($docBib);
+      #  $docBib = $web.Lists.GetByTitle(“Site Assets”);
+      #  $context.Load($docBib);
+        $lists = $web.Lists
+        $context.Load($lists)
         $context.ExecuteQuery();
 
-        if($docBib -ne $null)
+        $docBib = $web.Lists | where ($_.Title -eq "Site Assets")
+
+        if($docbib)
+       # if($docBib -ne $null)
         {
             $docBib.DeleteObject();
             $context.ExecuteQuery();

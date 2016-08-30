@@ -9,22 +9,27 @@ import {DataService} from './dataservice';
     selector: "app-main",
     providers: [DataService],
     // template:'<H1>Hello</H1>'
-    template: '<tree-view-site [sitecollection]="sitecollection" [selected]="selected"></tree-view-site>',
+    template: '<tree-view-site [sitecollection]="sitecollection" [selected]="selected" [errorSiteCol]="errorSiteCol"></tree-view-site>',
     directives: [TreeViewSite]
 })
 
 export class AppComponent {
     sitecollection: Array<SiteCollection>;
+    errorSiteCol: string;
     selected: boolean;
     constructor(private dataService: DataService) {
+        this.errorSiteCol = "";
         this.sitecollection = [];
         dataService.searchSiteCollection(this).then(
             response => {
                 var tempresponse;
                 tempresponse = response;
                 this.sitecollection = tempresponse;
+                if(this.sitecollection.length==0) 
+                    this.errorSiteCol = "Couldn't find any Site Collections";
             }, response => {
                 console.log("Failure " + response);
+                 this.errorSiteCol="Failure with the search API: "+response;
             });
     }
 
