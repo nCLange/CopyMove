@@ -22,6 +22,7 @@ $keywordQuery = New-Object Microsoft.SharePoint.Client.Search.Query.KeywordQuery
 
 $keywordQuery.QueryText = "contentclass:sts_site"
 $keywordQuery.RowLimit=500
+$keywordQuery.SourceId = "8413cd39-2156-4e00-b54d-11efd9abdb89"
 #Write-Host $keywordQuery.BlockDedupeMode
 #$keywordQuery.Properties="Path"
 $keywordQuery.TrimDuplicates= "fill"
@@ -71,20 +72,22 @@ foreach($site in $spWebApp.Sites)
 
         #Add docbib
 
-      #  $docBib = $web.Lists.GetByTitle(“Site Assets”);
-      #  $context.Load($docBib);
-        $lists = $web.Lists
+        $docBib = $web.Lists.GetByTitle(“Site Assets”);
+        $context.Load($docBib);
+      <#  $lists = $web.Lists
         $context.Load($lists)
-        $context.ExecuteQuery();
+        $context.ExecuteQuery()
 
         $docBib = $web.Lists | where ($_.Title -eq "Site Assets")
-
-        if($docbib)
-       # if($docBib -ne $null)
-        {
-            $docBib.DeleteObject();
-            $context.ExecuteQuery();
+        $context.Load($docBib)
+        $context.ExecuteQuery()
+        if($docBib)#>
+       if($docBib -ne $null)
+        {   
+            $docBib.DeleteObject()
+            $context.ExecuteQuery()
         }
+ 
 
         $listTemplate = [Microsoft.SharePoint.SPListTemplateType]::DocumentLibrary
         $ListCreationInfo = New-Object Microsoft.SharePoint.Client.ListCreationInformation
