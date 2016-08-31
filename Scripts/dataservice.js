@@ -109,7 +109,12 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     });
                 };
                 DataService.prototype.searchSiteCollection = function (caller) {
+                    var type = "";
                     var that = this;
+                    /*  var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
+                      var stringindex = relUrl.indexOf("/");
+                      type = relUrl.substr(stringindex+1,3);
+                      console.log(type);*/
                     return new Promise(function (resolve, reject) {
                         $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                             var executor = new SP.RequestExecutor(that.appWebUrl);
@@ -126,8 +131,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                         var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                         //console.log(siteResult);
                                         for (var x = 0; x < siteResult.length; x++) {
-                                            if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/"))
-                                                sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
+                                            //   if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profile/"+type))
+                                            sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                         }
                                     }
                                     catch (err) {

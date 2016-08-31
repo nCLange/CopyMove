@@ -113,8 +113,12 @@ export class DataService {
     }
 
     searchSiteCollection(caller) {
-
+        var type ="";
         let that = this;
+      /*  var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
+        var stringindex = relUrl.indexOf("/");
+        type = relUrl.substr(stringindex+1,3);
+        console.log(type);*/
     
 
 
@@ -138,7 +142,7 @@ export class DataService {
                                 var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                 //console.log(siteResult);
                                 for (var x = 0; x < siteResult.length; x++) {
-                                 if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profile/"))
+                              //   if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profile/"+type))
                                         sitecollection.push(
                                             new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                 }
