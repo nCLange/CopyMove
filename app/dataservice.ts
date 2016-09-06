@@ -42,12 +42,12 @@ export class DataService {
                 function () {
 
 
-                    caller.name = rootFolder.get_serverRelativeUrl().replace(srcList.get_parentWebUrl()+"/",'');
+                    caller.name = rootFolder.get_serverRelativeUrl().replace(srcList.get_parentWebUrl() + "/", '');
                     caller.title = srcList.get_title();
                     var consoleOut = "";
 
-                 //   console.log(rootFolder.get_serverRelativeUrl());
-                 //   console.log(srcList.get_parentWebUrl());
+                    //   console.log(rootFolder.get_serverRelativeUrl());
+                    //   console.log(srcList.get_parentWebUrl());
 
                     for (var i = 0; i < fieldcollection.get_count(); i++) {
                         //  if(fieldcollection.itemAt(i).get_internalName()=="_CopySource") console.log("GUID: "+fieldcollection.itemAt(i).get_id());
@@ -113,13 +113,13 @@ export class DataService {
     }
 
     searchSiteCollection(caller) {
-        var type ="";
+        var type = "";
         let that = this;
-      /*  var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
-        var stringindex = relUrl.indexOf("/");
-        type = relUrl.substr(stringindex+1,3);
-        console.log(type);*/
-    
+        /*  var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
+          var stringindex = relUrl.indexOf("/");
+          type = relUrl.substr(stringindex+1,3);
+          console.log(type);*/
+
 
 
         return new Promise(function (resolve, reject) {
@@ -138,16 +138,16 @@ export class DataService {
                         success: function (data) {
                             var myoutput = JSON.parse((data.body.toString()));
                             var sitecollection = [];
-                            try{
+                            try {
                                 var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                 //console.log(siteResult);
                                 for (var x = 0; x < siteResult.length; x++) {
-                              //   if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profile/"+type))
-                                        sitecollection.push(
-                                            new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
+                                    //   if(that.searchJSONForValue(siteResult[x].Cells.results,"Path").includes("/profile/"+type))
+                                    sitecollection.push(
+                                        new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                 }
                             }
-                            catch(err) { var sitecollection=[]; reject(err);}
+                            catch (err) { var sitecollection = []; reject(err); }
                             resolve(sitecollection);
                         },
                         error: function (data) {
@@ -183,9 +183,9 @@ export class DataService {
                             var documentlibraries = [];
                             var dossierResult = myoutput.d.results;
                             for (var x = 0; x < dossierResult.length; x++) {
-                
-                                if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Documents" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
-                                    var name = dossierResult[x].RootFolder.ServerRelativeUrl.replace(dossierResult[x].ParentWebUrl+"/",'');
+
+                                if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
+                                    var name = dossierResult[x].RootFolder.ServerRelativeUrl.replace(dossierResult[x].ParentWebUrl + "/", '');
                                     documentlibraries.push(new DocumentLibrary(name, dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
                                 }
                             }
@@ -378,8 +378,8 @@ export class DataService {
 
     soapAjax(caller: ItemDL) {
         let that = this;
-        console.log(caller.parent.srcUrl + "/" + caller.parent.name + "/" + caller.srcFolderURL  + caller.name);
-        console.log(caller.parent.targetUrl + "/" + caller.parent.targetName + "/" + caller.targetFolderURL  + caller.name);
+        console.log(caller.parent.srcUrl + "/" + caller.parent.name + "/" + caller.srcFolderURL + caller.name);
+        console.log(caller.parent.targetUrl + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name);
         var xmlstring = this.buildSoapEnvelope(caller);
         return new Promise(function (resolve, reject) {
             jQuery.ajax({
@@ -601,7 +601,81 @@ export class DataService {
         });
 
     }
+    copyDocSetByName(caller: ItemDL) {
 
+        let that = this;
+
+        var targetList: SP.List;
+        var listItem: SP.ListItem;
+        var root: SP.Folder;
+        var ctx = new SP.ClientContext(caller.parent.targetUrl);
+        // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+
+        targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+        if (caller.parentFolderId == null)
+            root = targetList.get_rootFolder();
+        else
+            root = targetList.getItemById(caller.parentFolderId).get_folder();
+
+        ctx.load(targetList);
+        var cTypeId = caller.contentTypeId;
+        var newCTs: SP.ContentTypeCollection = ctx.get_web().get_contentTypes();
+
+
+
+        ctx.load(root);
+        ctx.load(newCTs);
+        console.log("1");
+
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                function () {
+                    var newCTId = null;
+                    for (var i = 0; i < newCTs.get_count(); i++) {
+                        if (newCTs.getItemAtIndex(i).get_name() == caller.contentTypeName) {
+                            console.log(caller.contentTypeName);
+                            newCTId = newCTs.getItemAtIndex(i).get_id();
+                            break;
+                        }
+                    }
+                    if (newCTId == null) reject("Content type wasn't found in target Library");
+                    SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCTId);
+                    ctx.executeQueryAsync(
+                        function () {
+                            that.getFolderFromDocSet(caller).then(
+                                response => {
+                                    caller.releaseQueue();
+                                    resolve();
+                                },
+                                response => {
+
+                                    reject("0:" + response)
+                                });
+                        },
+                        function () {
+                            if (arguments[1].get_message().includes("already exists")) {
+                                that.getFolderFromDocSet(caller).then(
+                                    response => {
+                                        caller.releaseQueue();
+                                   	    resolve();
+                                    },
+                                    response => {
+                                        reject("2:" + response)
+                                    });
+                            }
+                            else
+                                reject("1:" + arguments[1].get_message());
+                        });
+                },
+                function (x, args) {
+
+
+                    reject("3:" + arguments[1].get_message());
+                }
+            );
+        });
+
+    }
 
     // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
     copyDocSet(caller: ItemDL) {
@@ -933,7 +1007,7 @@ export class DataService {
         var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
         var targetItem = targetList.getItemById(caller.targetId);
 
-       // var targetField =
+        // var targetField =
         //    console.log(caller.parent.targetUrl + "/" + caller.parent.name + "/" + caller.targetFolderURL + caller.name);
 
         ctx.load(targetItem);

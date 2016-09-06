@@ -166,7 +166,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     var documentlibraries = [];
                                     var dossierResult = myoutput.d.results;
                                     for (var x = 0; x < dossierResult.length; x++) {
-                                        if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Documents" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
+                                        if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
                                             var name = dossierResult[x].RootFolder.ServerRelativeUrl.replace(dossierResult[x].ParentWebUrl + "/", '');
                                             documentlibraries.push(new documentlibrary_1.DocumentLibrary(name, dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
                                         }
@@ -472,6 +472,61 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
             
                                 }*/
                             reject(arguments[1].get_message());
+                        });
+                    });
+                };
+                DataService.prototype.copyDocSetByName = function (caller) {
+                    var that = this;
+                    var targetList;
+                    var listItem;
+                    var root;
+                    var ctx = new SP.ClientContext(caller.parent.targetUrl);
+                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+                    targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+                    if (caller.parentFolderId == null)
+                        root = targetList.get_rootFolder();
+                    else
+                        root = targetList.getItemById(caller.parentFolderId).get_folder();
+                    ctx.load(targetList);
+                    var cTypeId = caller.contentTypeId;
+                    var newCTs = ctx.get_web().get_contentTypes();
+                    ctx.load(root);
+                    ctx.load(newCTs);
+                    console.log("1");
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(function () {
+                            var newCTId = null;
+                            for (var i = 0; i < newCTs.get_count(); i++) {
+                                if (newCTs.getItemAtIndex(i).get_name() == caller.contentTypeName) {
+                                    console.log(caller.contentTypeName);
+                                    newCTId = newCTs.getItemAtIndex(i).get_id();
+                                    break;
+                                }
+                            }
+                            if (newCTId == null)
+                                reject("Content type wasn't found in target Library");
+                            SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCTId);
+                            ctx.executeQueryAsync(function () {
+                                that.getFolderFromDocSet(caller).then(function (response) {
+                                    caller.releaseQueue();
+                                    resolve();
+                                }, function (response) {
+                                    reject("0:" + response);
+                                });
+                            }, function () {
+                                if (arguments[1].get_message().includes("already exists")) {
+                                    that.getFolderFromDocSet(caller).then(function (response) {
+                                        caller.releaseQueue();
+                                        resolve();
+                                    }, function (response) {
+                                        reject("2:" + response);
+                                    });
+                                }
+                                else
+                                    reject("1:" + arguments[1].get_message());
+                            });
+                        }, function (x, args) {
+                            reject("3:" + arguments[1].get_message());
                         });
                     });
                 };

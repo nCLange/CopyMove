@@ -47,7 +47,7 @@ System.register(['@angular/core', './treeviewsite', './dataservice'], function(e
                         for (var j = 0; j < this.sitecollection[i].documentLibraries.length; j++) {
                             this.sitecollection[i].documentLibraries[j].selected = false;
                             for (var k = 0; k < this.sitecollection[i].documentLibraries[j].directories.length; k++) {
-                                this.sitecollection[i].documentLibraries[j].directories[k].selected = false;
+                                this.sitecollection[i].documentLibraries[j].directories[k].unsetAll();
                             }
                         }
                     }

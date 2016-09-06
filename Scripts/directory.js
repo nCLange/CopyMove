@@ -66,6 +66,12 @@ System.register(['./dataservice', './documentlibrary'], function(exports_1, cont
                     this.selected = true;
                     Directory.selectedPath = Directory.selectedPath + this.name + "/";
                 };
+                Directory.prototype.unsetAll = function () {
+                    this.selected = false;
+                    for (var i = 0; i < this.directories.length; i++) {
+                        this.directories[i].unsetAll();
+                    }
+                };
                 return Directory;
             }());
             exports_1("Directory", Directory);

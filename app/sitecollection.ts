@@ -47,6 +47,7 @@ export class SiteCollection {
 
 
 
+
     check() {
         let newState = !this.checked;
         this.checked = newState;
