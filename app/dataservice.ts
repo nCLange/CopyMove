@@ -6,6 +6,11 @@ import {ItemDL, ContentType} from './itemdl';
 import {CopyRoot} from './copyroot';
 import {ListField} from './listFields';
 import {FieldContent} from './fieldcontent';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+//import 'rxjs/add/operator/catch';
+//import 'rxjs/Rx';
+//import {Http, Response, Headers} from '@angular/http';
 
 @Injectable()
 export class DataService {
@@ -17,9 +22,43 @@ export class DataService {
 
     constructor() {
         this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
-        this.searchWebUrl = window.location.protocol + "//" + window.location.host;
+        // this.searchWebUrl = window.location.protocol + "//" + window.location.host;
+        this.searchWebUrl = this.appWebUrl;
 
     }
+
+    getListPermission(url, title, isTitle) {
+        var ctx = new SP.ClientContext(url);
+        var web = ctx.get_web();
+        var list;
+        // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
+        if (isTitle)
+            list = web.get_lists().getByTitle(title);
+        else
+            list = web.get_lists().getById(title);
+
+        var user = web.get_currentUser();
+
+
+        ctx.load(user);
+        ctx.load(list, "EffectiveBasePermissions");
+
+
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                function () {
+                    console.log(list);
+                    console.log(user);
+                    // var permission = list.getUserEffectivePermissions(user.get_loginName());
+                    var permission = list.get_effectiveBasePermissions();
+                    resolve(permission);
+                },
+                function () {
+                    reject(arguments[1].get_message());
+                });
+        });
+    }
+
 
     getListInfoFromId(caller: CopyRoot) {
         var ctx = new SP.ClientContext(caller.srcUrl);
@@ -118,7 +157,7 @@ export class DataService {
         /*  var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
           var stringindex = relUrl.indexOf("/");
           type = relUrl.substr(stringindex+1,3);
-          console.log(type);*/
+        */
 
 
 
@@ -132,7 +171,6 @@ export class DataService {
                         //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
                         //Leere Bibliotheken werden ignoriert , beheben?
                         url: that.searchWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false&selectproperties'Title,Path'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'",
-
                         method: "GET",
                         headers: { "Accept": "application/json; odata=verbose" },
                         success: function (data) {
@@ -148,9 +186,11 @@ export class DataService {
                                 }
                             }
                             catch (err) { var sitecollection = []; reject(err); }
+                            sitecollection.sort(function (a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); })
                             resolve(sitecollection);
                         },
                         error: function (data) {
+                            console.log(data);
                             var sitecollection = [];
                             reject(sitecollection);
                         }
@@ -161,46 +201,269 @@ export class DataService {
         });
     }
 
+    searchDocLibFilter(caller, input, curProm) {
+        var type = "";
+        let that = this;
+        /*  var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
+          var stringindex = relUrl.indexOf("/");
+          type = relUrl.substr(stringindex+1,3);
+          console.log(type);*/
+        var documentlibraries = [];
+        var siteCollections: Array<SiteCollection> = [];
+
+
+
+        return new Promise(function (resolve, reject) {
+
+            $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+
+                var executor = new SP.RequestExecutor(that.appWebUrl);
+                executor.executeAsync(
+                    {
+                        //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
+                        //Leere Bibliotheken werden ignoriert , beheben?
+                        url: that.searchWebUrl + "/_api/search/query?querytext='Title:*" + input + "* contentclass:sts_list_documentlibrary'&trimduplicates=false&selectproperties='Title,Path,SiteName'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'",
+                        method: "GET",
+                        headers: { "Accept": "application/json; odata=verbose" },
+                        success: function (data) {
+                            var myoutput = JSON.parse((data.body.toString()));
+                            var docResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+
+                            for (var x = 0; x < docResult.length; x++) {
+//                                console.log(docResult[x].Cells.results);
+
+                                var siteName = that.JSONObjectHelper(docResult[x].Cells.results, "SiteName");
+                                var path = that.JSONObjectHelper(docResult[x].Cells.results, "Path");
+
+                                  /*      if(!path.includes("/profile/"+type))
+                                    continue;*/
+
+                                path = path.substr(0, path.lastIndexOf("/Forms/"));
+                                path = path.replace(siteName + "/", '');
+
+                                var name: string = that.JSONObjectHelper(docResult[x].Cells.results, "Title");
+
+                                var position = name.indexOf(" - ");
+                                var siteColName = name.substr(0, name.indexOf(" - "));
+                                var docLibName = name.substr(position + 3, name.length - position + 3);
+                        //        console.log("Position: " + position + " siteCol: " + siteColName + " docLib: " + docLibName);
+
+
+                                var found = -1;
+                                var founddocLib = -1;
+                                for (var i = 0; i < siteCollections.length; i++) {
+                                    if (siteCollections[i].path == siteName) {
+                                        found = i;
+                                        for (var j = 0; j < siteCollections[i].documentLibraries.length; j++) {
+                                            if (siteCollections[i].documentLibraries[j].name == docLibName) {
+                                                founddocLib = j;
+                                                break;
+                                            }
+                                        }
+                                        if (founddocLib == -1) {
+                                            siteCollections[i].createDocLib(path, docLibName, "");
+                                        }
+                                        founddocLib = -1;
+                                        break;
+                                    }
+                                }
+
+                                if (found != -1) {
+                                    found = -1;
+                                }
+                                else {
+                                    siteCollections.push(new SiteCollection(siteColName, siteName, caller));
+                                    siteCollections[siteCollections.length - 1].createDocLib(path, docLibName, "");
+                                }
+
+
+
+
+
+                                console.log(path);
+                                //  name = name.replace(list.get_parentWebUrl() + "/", '');
+
+                                //      documentlibraries.push(new DocumentLibrary(path, name, name, null));
+
+                            }
+
+                            console.log(siteCollections);
+                            var output = [curProm, siteCollections];
+                            resolve(output);
+                        },
+                        error: function (data) {
+                            var sitecollection = [];
+                            var output = [curProm, sitecollection];
+                            reject(output);
+                        }
+
+                    }
+                )
+            });
+        });
+    }
+    /*
+        handleError(error: Response) {
+            console.error(error);
+            return Observable.throw(error.json().error || 'Server error');
+        }*/
+
+    /* searchDocLibFilterObservable = (caller, input): Observable<DocumentLibrary> => {
+         var type = "";
+         let that = this;
+           var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
+           var stringindex = relUrl.indexOf("/");
+           type = relUrl.substr(stringindex+1,3);
+           console.log(type);
+         var documentlibraries = [];
+         var url = that.searchWebUrl + "/_api/search/query?querytext='Title:*" + input + "* contentclass:sts_list_documentlibrary'&trimduplicates=false&selectproperties='Title,Path,SiteName'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'";
+ 
+         return this._http.get(url).map((response: Response) => {var backback = <DocumentLibrary>response.json()}.catch(response:Response => {<DocumentLibrary>response.json()}));
+ */
+    // $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+    /*
+                    var executor = new SP.RequestExecutor(that.appWebUrl);
+                    executor.executeAsync(
+                        {
+                            //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
+                            //Leere Bibliotheken werden ignoriert , beheben?
+                            url: that.searchWebUrl + "/_api/search/query?querytext='Title:*" + input + "* contentclass:sts_list_documentlibrary'&trimduplicates=false&selectproperties='Title,Path,SiteName'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'",
+                            method: "GET",
+                         //   headers: { "Accept": "application/json; odata=verbose" },
+                            success: function (data) {
+                                var myoutput = JSON.parse((data.body.toString()));
+                                var docResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                                for (var x = 0; x < docResult.length; x++) {
+                                    console.log(docResult[x].Cells.results);
+    
+                                    var path = that.JSONObjectHelper(docResult[x].Cells.results, "Path");
+    
+                                    var name = that.JSONObjectHelper(docResult[x].Cells.results, "Title");
+                                    var siteNames = that.JSONObjectHelper(docResult[x].Cells.results, "SiteName");
+                                    console.log(name);
+    
+                                    path = path.substr(0, path.lastIndexOf("/Forms/"));
+                                    path = path.replace(siteNames + "/", '');
+                                    console.log(path);
+                                    //  name = name.replace(list.get_parentWebUrl() + "/", '');
+    
+                                    documentlibraries.push(new DocumentLibrary(path, name, name, null));
+    
+                                }
+    
+                                console.log(docResult);
+                                resolve(documentlibraries);
+                            },
+                            error: function (data) {
+                                var sitecollection = [];
+                                reject(sitecollection);
+                            }
+    
+                        }
+                    )
+              //  });
+           // });*/
+    //   }
+
+    JSONObjectHelper(inputArray, key) {
+        for (var i = 0; i < inputArray.length; i++) {
+            if (inputArray[i].Key == key) {
+                return inputArray[i].Value;
+            }
+        }
+        return null;
+    }
+
+
     searchDocumentLibrary2(pathURL, parent) {
         //var executor = new SP.RequestExecutor(this.appWebUrl);
 
         let that = this;
 
         return new Promise(function (resolve, reject) {
-            $.getScript(pathURL + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+            //   $.getScript(pathURL + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
 
-                var executor = new SP.RequestExecutor(that.appWebUrl);
+            var executor = new SP.RequestExecutor(that.appWebUrl);
+            console.log(that.appWebUrl);
+            console.log(pathURL);
 
-                executor.executeAsync(
-                    {
-                        //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
-                        //Leere Bibliotheken werden ignoriert , beheben?
-                        url: pathURL + "/_api/web/lists?$expand=rootFolder",
-                        method: "GET",
-                        headers: { "Accept": "application/json; odata=verbose" },
-                        success: function (data) {
-                            var myoutput = JSON.parse((data.body.toString()));
-                            var documentlibraries = [];
-                            var dossierResult = myoutput.d.results;
-                            for (var x = 0; x < dossierResult.length; x++) {
-
-                                if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
-                                    var name = dossierResult[x].RootFolder.ServerRelativeUrl.replace(dossierResult[x].ParentWebUrl + "/", '');
-                                    documentlibraries.push(new DocumentLibrary(name, dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
-                                }
+            executor.executeAsync(
+                {
+                    //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
+                    //Leere Bibliotheken werden ignoriert , beheben?
+                    url: pathURL + "/_api/web/lists?$expand=rootFolder",
+                    // url: pathURL + "/_api/web/lists",
+                    method: "GET",
+                    headers: { "Accept": "application/json; odata=verbose" },
+                    success: function (data) {
+                        var myoutput = JSON.parse((data.body.toString()));
+                        var documentlibraries = [];
+                        var dossierResult = myoutput.d.results;
+                        for (var x = 0; x < dossierResult.length; x++) {
+                            console.log(dossierResult);
+                            if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
+                                var name = dossierResult[x].RootFolder.ServerRelativeUrl.replace(dossierResult[x].ParentWebUrl + "/", '');
+                                console.log(name);
+                                documentlibraries.push(new DocumentLibrary(name, dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
                             }
-
-                            resolve(documentlibraries);
-                        },
-                        error: function (data) {
-                            var documentlibraries = [];
-                            console.log(data);
-                            reject(documentlibraries);
                         }
 
-                    });
-            });
+                        resolve(documentlibraries);
+                    },
+                    error: function (data) {
+                        var documentlibraries = [];
+                        console.log(data);
+                        reject(documentlibraries);
+                    }
+
+                });
         });
+        // });
+    }
+
+
+    searchDocumentLibrary3(pathURL, parent) {
+        //var executor = new SP.RequestExecutor(this.appWebUrl);
+
+        let that = this;
+
+
+        var ctx = new SP.ClientContext(pathURL);
+        // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+
+        var lists = ctx.get_web().get_lists();
+        var documentlibraries = [];
+        ctx.load(lists);
+        return new Promise(function (resolve, reject) {
+            ctx.executeQueryAsync(
+                function () {
+                    var listenum = lists.getEnumerator();
+                    while (listenum.moveNext()) {
+                        var list = listenum.get_current();
+                        if (list.get_baseTemplate() == 101) {
+                            //   console.log(list);
+                            //  console.log(list.get_documentTemplateUrl());
+                            if (list.get_documentTemplateUrl()) {
+                                var name = list.get_documentTemplateUrl().substr(0, list.get_documentTemplateUrl().lastIndexOf("/Forms/"));
+                                name = name.replace(list.get_parentWebUrl() + "/", '');
+                                //var name = "";
+                                //    console.log(name);
+                                if (list.get_title() != "App Packages" && list.get_title() != "Site Assets" && list.get_title() != "Websiteobjekte" && list.get_title() != "SiteAssets")
+                                    documentlibraries.push(new DocumentLibrary(name, list.get_title(), list.get_entityTypeName(), parent));
+                            }
+                        }
+                    }
+                    resolve(documentlibraries);
+                },
+                function (data) {
+                    console.log(data);
+                    reject([]);
+                }
+            )
+            //   $.getScript(pathURL + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
+
+        });
+        // });
     }
 
     searchDirectories(pathUrl, relPath, parent) {
@@ -625,7 +888,6 @@ export class DataService {
 
         ctx.load(root);
         ctx.load(newCTs);
-        console.log("1");
 
         return new Promise(function (resolve, reject) {
             ctx.executeQueryAsync(

@@ -46,31 +46,57 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
                     this.selectedItemIds = tempItemIds[1].split(",").map(Number);
                     this.dataService.getListInfoFromId(this).then(function (response) {
-                        _this.srcRootPath = _this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + _this.name, "");
-                        if (_this.srcRootPath != "") {
-                            _this.srcRootPath += "/";
-                            _this.srcRootPath = _this.srcRootPath.substr(1, _this.srcRootPath.length);
-                        }
-                        //           console.log(this.srcRootPath);
-                        if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
-                            _this.targetRootPath = directory_1.Directory.selectedPath;
-                            _this.dataService.getFolderFromUrl(_this).then(function (response) {
-                                //  this.items = [];
-                                _this.deleteAfterwards = delafter;
-                                for (var id = 0; id < _this.selectedItemIds.length; id++) {
-                                    _this.items.push(new itemdl_1.ItemDL(_this.selectedItemIds[id], _this, _this.targetRootPath, _this.srcRootPath, _this.rootFolder.get_listItemAllFields().get_id()));
-                                }
-                            }, function (response) { console.log("getFolderFromUrl Error " + response); });
-                        }
-                        else {
-                            //   this.items = [];
-                            _this.deleteAfterwards = delafter;
-                            for (var id = 0; id < _this.selectedItemIds.length; id++) {
-                                _this.items.push(new itemdl_1.ItemDL(_this.selectedItemIds[id], _this, "", _this.srcRootPath));
+                        _this.dataService.getListPermission(_this.srcUrl, _this.srcListId, false).then(function (response) {
+                            if (!response.has(SP.PermissionKind.viewListItems)) {
+                                _this.cancel("Keine Berechtigung den Listeninhalt in der Quellbibliothek zu lesen");
+                                return;
                             }
-                        }
+                            if (!response.has(SP.PermissionKind.deleteListItems) && _this.delafter) {
+                                _this.cancel("Keine Berechtigung die Listenelemente in der Quellbibliothek zu löschen");
+                                return;
+                            }
+                            _this.dataService.getListPermission(_this.srcUrl, _this.targetTitle, true).then(function (response) {
+                                if (!response.has(SP.PermissionKind.viewListItems)) {
+                                    _this.cancel("Keine Berechtigung den Listeninhalt in der Zielbibliothek zu lesen");
+                                    return;
+                                }
+                                if (!response.has(SP.PermissionKind.addListItems)) {
+                                    _this.cancel("Keine Berechtigung die Listenelemente in der Zielbibliothek zu erstellen");
+                                    return;
+                                }
+                                if (!response.has(SP.PermissionKind.editListItems)) {
+                                    _this.cancel("Keine Berechtigung die Listenelemente in der Zielbibliothek zu editieren");
+                                    return;
+                                }
+                                _this.srcRootPath = _this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + _this.name, "");
+                                if (_this.srcRootPath != "") {
+                                    _this.srcRootPath += "/";
+                                    _this.srcRootPath = _this.srcRootPath.substr(1, _this.srcRootPath.length);
+                                }
+                                //           console.log(this.srcRootPath);
+                                if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
+                                    _this.targetRootPath = directory_1.Directory.selectedPath;
+                                    _this.dataService.getFolderFromUrl(_this).then(function (response) {
+                                        //  this.items = [];
+                                        //    this.deleteAfterwards = delafter;
+                                        for (var id = 0; id < _this.selectedItemIds.length; id++) {
+                                            _this.items.push(new itemdl_1.ItemDL(_this.selectedItemIds[id], _this, _this.targetRootPath, _this.srcRootPath, _this.rootFolder.get_listItemAllFields().get_id()));
+                                        }
+                                    }, function (response) { console.log("getFolderFromUrl Error " + response); });
+                                }
+                                else {
+                                    //   this.items = [];
+                                    //  this.deleteAfterwards = delafter;
+                                    for (var id = 0; id < _this.selectedItemIds.length; id++) {
+                                        _this.items.push(new itemdl_1.ItemDL(_this.selectedItemIds[id], _this, "", _this.srcRootPath));
+                                    }
+                                }
+                            }, function (response) {
+                                console.log("getListInfoFromIdError " + response);
+                            });
+                        }, function (response) { console.log("getPermissionErrorTarget " + response); });
                     }, function (response) {
-                        console.log("getListInfoFromIdError " + response);
+                        console.log("getPermissionErrorSrc " + response);
                     });
                 }
                 CopyRoot.prototype.addToArray = function (id, targetFolderURL, srcFolderURL, parentFolderId) {
@@ -104,6 +130,12 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                         }
                         this.parent.screen = 2;
                     }
+                };
+                CopyRoot.prototype.cancel = function (errorMsg) {
+                    if (errorMsg != null && errorMsg != "") {
+                        this.errorReport.push(errorMsg);
+                    }
+                    this.parent.screen = 2;
                 };
                 return CopyRoot;
             }());

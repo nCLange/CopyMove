@@ -16,6 +16,7 @@ import {DataService} from './dataservice';
 export class AppComponent {
     sitecollection: Array<SiteCollection>;
     errorSiteCol: string;
+    
     selected: boolean;
     constructor(private dataService: DataService) {
         this.errorSiteCol = "";
@@ -25,6 +26,7 @@ export class AppComponent {
                 var tempresponse;
                 tempresponse = response;
                 this.sitecollection = tempresponse;
+                console.log(this.sitecollection);
                 if (this.sitecollection.length == 0)
                     this.errorSiteCol = "Couldn't find any Site Collections";
             }, response => {

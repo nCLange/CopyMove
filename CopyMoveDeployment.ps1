@@ -2,20 +2,20 @@
 param (
     [string]$SrcUrl = "http://win-iprrvsfootq/sites/dev",
     [string]$DocLibTitle  = "Site Assets",
-    [string]$DocLibrelPath = "Site Assets",
+    [string]$DocLibrelPath = "SiteAssets",
     [string]$SiteColFilter = "sites"
     
 )
 
 #Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue
 
-dir -Path $PSScriptRoot -Filter "*.dll" | % {
-    [System.Reflection.Assembly]::LoadFile($_.FullName)
-    }
+#dir -Path $PSScriptRoot -Filter "*.dll" | % {
+ #   [System.Reflection.Assembly]::LoadFile($_.FullName)
+  #  }
 
-#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")
-#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
-#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Sharepoint.Client.Search")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Sharepoint.Client.Search")
 
 
 $input = Read-Host 'Deploy on all Site collections? (Y)/(N)'
@@ -26,7 +26,7 @@ $keywordQuery = New-Object Microsoft.SharePoint.Client.Search.Query.KeywordQuery
 $keywordQuery.QueryText = "contentclass:sts_site"
 $keywordQuery.RowLimit=500
 $keywordQuery.SourceId = "8413cd39-2156-4e00-b54d-11efd9abdb89"
-#Write-Host $keywordQuery.BlockDedupeMode
+Write-Host $keywordQuery.BlockDedupeMode
 #$keywordQuery.Properties="Path"
 $keywordQuery.TrimDuplicates= "fill"
 $keywordQuery.TrimDuplicates= !$keywordQuery.TrimDuplicates
@@ -34,6 +34,7 @@ Write-Host $keywordQuery.TrimDuplicates.ToString()
 $searchExec = New-Object Microsoft.SharePoint.Client.Search.Query.SearchExecutor($context)
 $results = $searchExec.ExecuteQuery($keywordQuery)
 $context.ExecuteQuery() 
+
 
 foreach($result in $results.Value[0].ResultRows)
 
