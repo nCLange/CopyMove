@@ -239,9 +239,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                             siteCollections.push(new sitecollection_1.SiteCollection(siteColName, siteName, caller));
                                             siteCollections[siteCollections.length - 1].createDocLib(path, docLibName, "");
                                         }
-                                        console.log(path);
                                     }
-                                    console.log(siteCollections);
+                                    // console.log(siteCollections);
                                     var output = [curProm, siteCollections];
                                     resolve(output);
                                 },

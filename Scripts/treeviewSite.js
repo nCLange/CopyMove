@@ -44,7 +44,6 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe', '.
                     this.dataService = new dataservice_1.DataService();
                 }
                 TreeViewSite.prototype.ngAfterViewChecked = function () {
-                    console.log("hello");
                     if (this.initialSet == false) {
                         if (this.sitecollection && this.sitecollection.length > 0) {
                             this.displaySiteCol = this.sitecollection;
@@ -68,7 +67,8 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe', '.
                 };
                 TreeViewSite.prototype.filterResult = function (inputText) {
                     var _this = this;
-                    if (inputText.length < 3) {
+                    if (!inputText || inputText.length < 3) {
+                        this.counter++;
                         this.displaySiteCol = this.sitecollection;
                         this.loading = false;
                         return;

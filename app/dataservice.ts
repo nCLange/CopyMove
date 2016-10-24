@@ -275,19 +275,14 @@ export class DataService {
                                     siteCollections.push(new SiteCollection(siteColName, siteName, caller));
                                     siteCollections[siteCollections.length - 1].createDocLib(path, docLibName, "");
                                 }
-
-
-
-
-
-                                console.log(path);
+                              //  console.log(path);
                                 //  name = name.replace(list.get_parentWebUrl() + "/", '');
 
                                 //      documentlibraries.push(new DocumentLibrary(path, name, name, null));
 
                             }
 
-                            console.log(siteCollections);
+                           // console.log(siteCollections);
                             var output = [curProm, siteCollections];
                             resolve(output);
                         },

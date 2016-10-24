@@ -47,7 +47,6 @@ export class TreeViewSite {
     }
 
     ngAfterViewChecked() {
-        console.log("hello");
         if (this.initialSet == false) {
             if (this.sitecollection && this.sitecollection.length>0) {
                 this.displaySiteCol = this.sitecollection;
@@ -76,7 +75,8 @@ export class TreeViewSite {
     }
 
     filterResult(inputText) {
-        if (inputText.length < 3) {
+        if (!inputText || inputText.length < 3) {
+            this.counter++;
             this.displaySiteCol = this.sitecollection;
             this.loading=false;
             return;
