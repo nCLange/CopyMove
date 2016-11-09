@@ -1,17 +1,21 @@
 ﻿[CmdletBinding()]
 param (
-    [Parameter(Mandatory = $false)][string]$SrcUrl = "http://win-iprrvsfootq/sites/dev"
+    [string]$SrcUrl = "http://win-iprrvsfootq/sites/dev",
+    [string]$DocLibTitle  = "Site Assets",
+    [string]$DocLibrelPath = "SiteAssets",
+    [string]$SiteColFilter = "sites"
+    
 )
 
 #Add-PSSnapin Microsoft.SharePoint.PowerShell -ErrorAction SilentlyContinue
 
-dir -Path $PSScriptRoot -Filter "*.dll" | % {
-    [System.Reflection.Assembly]::LoadFile($_.FullName)
-    }
+#dir -Path $PSScriptRoot -Filter "*.dll" | % {
+ #   [System.Reflection.Assembly]::LoadFile($_.FullName)
+  #  }
 
-#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")
-#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
-#[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Sharepoint.Client.Search")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Sharepoint.Client.Search")
 
 
 $input = Read-Host 'Deploy on all Site collections? (Y)/(N)'
@@ -19,11 +23,10 @@ $input = Read-Host 'Deploy on all Site collections? (Y)/(N)'
 $context = New-Object Microsoft.SharePoint.Client.ClientContext $SrcUrl
 $keywordQuery = New-Object Microsoft.SharePoint.Client.Search.Query.KeywordQuery($context)
 
-
 $keywordQuery.QueryText = "contentclass:sts_site"
 $keywordQuery.RowLimit=500
 $keywordQuery.SourceId = "8413cd39-2156-4e00-b54d-11efd9abdb89"
-#Write-Host $keywordQuery.BlockDedupeMode
+Write-Host $keywordQuery.BlockDedupeMode
 #$keywordQuery.Properties="Path"
 $keywordQuery.TrimDuplicates= "fill"
 $keywordQuery.TrimDuplicates= !$keywordQuery.TrimDuplicates
@@ -32,10 +35,11 @@ $searchExec = New-Object Microsoft.SharePoint.Client.Search.Query.SearchExecutor
 $results = $searchExec.ExecuteQuery($keywordQuery)
 $context.ExecuteQuery() 
 
+
 foreach($result in $results.Value[0].ResultRows)
 
     {
-  #  if($result["Path"] -notlike "*profile*") { continue }
+    if($result["Path"] -notlike "*${SiteColFilter}*") { continue }
 
         $Url = $result["Path"]
         Write-Host $Url
@@ -67,37 +71,34 @@ foreach($site in $spWebApp.Sites)
         $context = New-Object Microsoft.SharePoint.Client.ClientContext $Url
         $web = $context.Web
         $context.Load($web)
+        $lists = $web.Lists
+        $context.Load($lists)
         $context.ExecuteQuery()
 
 
         #Add docbib
 
-        $docBib = $web.Lists.GetByTitle(“Site Assets”);
-        $context.Load($docBib);
-      <#  $lists = $web.Lists
-        $context.Load($lists)
-        $context.ExecuteQuery()
+        $docBib = $null
+        $docBib = $web.Lists | where{ $_.Title -eq $DocLibTitle}
 
-        $docBib = $web.Lists | where ($_.Title -eq "Site Assets")
-        $context.Load($docBib)
-        $context.ExecuteQuery()
-        if($docBib)#>
-       if($docBib -ne $null)
+       if($docBib)
         {   
-            $docBib.DeleteObject()
-            $context.ExecuteQuery()
+            $library = $docBib
         }
- 
-
+        else 
+        {
+        
         $listTemplate = [Microsoft.SharePoint.SPListTemplateType]::DocumentLibrary
         $ListCreationInfo = New-Object Microsoft.SharePoint.Client.ListCreationInformation
         $ListCreationInfo.Title = “Site Assets”
         $ListCreationInfo.TemplateType = $listTemplate
         $library = $web.Lists.Add($ListCreationInfo)
 
-
         $context.Load($library)
         $context.ExecuteQuery() 
+
+        }
+ 
 
         $generalFolder = $library.RootFolder.Folders.Add('CopyMove')
         $context.Load($generalFolder)
@@ -278,7 +279,7 @@ foreach($site in $spWebApp.Sites)
                                                         width: 700,
                                                         height: 400,
                                                         showClose: false,
-                                                        url: '${Url}/Site Assets/CopyMove/pages/Default.aspx?SPListId={SelectedListId}&amp;SPListURL={Source}&amp;SPListItemId={SelectedItemId}'};
+                                                        url: '${Url}/${DocLibrelPath}/CopyMove/pages/Default.aspx?SPListId={SelectedListId}&amp;SPListURL={Source}&amp;SPListItemId={SelectedItemId}'};
                              SP.UI.ModalDialog.showModalDialog(options);
                              ""/>
                              </CommandUIHandlers>
