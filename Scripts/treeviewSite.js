@@ -49,6 +49,43 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
                 TreeViewSite.prototype.done = function () {
                     window.parent.location.reload(true);
                 };
+<<<<<<< Updated upstream
+=======
+                TreeViewSite.prototype.filterResult = function (inputText) {
+                    var _this = this;
+                    if (!inputText || inputText.length < 3) {
+                        this.counter++;
+                        this.displaySiteCol = this.sitecollection;
+                        this.loading = false;
+                        return;
+                    }
+                    this.displaySiteCol = [];
+                    this.counter++;
+                    this.loading = true;
+                    this.dataService.searchDocLibFilter(this, inputText, this.counter).then(function (response) {
+                        if (response[0] != _this.counter)
+                            return;
+                        _this.loading = false;
+                        _this.displaySiteCol = response[1];
+                    }, function (response) {
+                        console.log("Error SearchDocLibFilter");
+                        if (response[0] != _this.counter)
+                            return;
+                        _this.loading = false;
+                    });
+                };
+                TreeViewSite.prototype.unsetAll = function () {
+                    this.selected = true;
+                    for (var i = 0; i < this.displaySiteCol.length; i++) {
+                        for (var j = 0; j < this.displaySiteCol[i].documentLibraries.length; j++) {
+                            this.displaySiteCol[i].documentLibraries[j].selected = false;
+                            for (var k = 0; k < this.displaySiteCol[i].documentLibraries[j].directories.length; k++) {
+                                this.displaySiteCol[i].documentLibraries[j].directories[k].unsetAll();
+                            }
+                        }
+                    }
+                };
+>>>>>>> Stashed changes
                 __decorate([
                     core_1.Input(), 
                     __metadata('design:type', String)
