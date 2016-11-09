@@ -1,4 +1,4 @@
-System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], function(exports_1, context_1) {
+System.register(["@angular/core", './treeView', './copyroot', './filterpipe', './dataservice'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, treeView_1, copyroot_1, filterpipe_1;
+    var core_1, treeView_1, copyroot_1, filterpipe_1, dataservice_1;
     var TreeViewSite;
     return {
         setters:[
@@ -25,16 +25,32 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
             },
             function (filterpipe_1_1) {
                 filterpipe_1 = filterpipe_1_1;
+            },
+            function (dataservice_1_1) {
+                dataservice_1 = dataservice_1_1;
             }],
         execute: function() {
             TreeViewSite = (function () {
                 function TreeViewSite() {
                     this.searchValue = null;
+                    this.initialSet = false;
+                    this.counter = 0;
+                    this.loading = false;
+                    this.displaySiteCol = [];
                     this.screen = 0;
                     this.filesToCopy = null;
                     this.errorReport = null;
                     this.moved = false;
+                    this.dataService = new dataservice_1.DataService();
                 }
+                TreeViewSite.prototype.ngAfterViewChecked = function () {
+                    if (this.initialSet == false) {
+                        if (this.sitecollection && this.sitecollection.length > 0) {
+                            this.displaySiteCol = this.sitecollection;
+                            this.initialSet = true;
+                        }
+                    }
+                };
                 TreeViewSite.prototype.canceled = function () {
                     this.screen = 0;
                     this.copyroot.canceled = true;
@@ -42,15 +58,13 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
                 TreeViewSite.prototype.clicked = function (delafter) {
                     this.moved = delafter;
                     this.screen = 1;
-                    this.copyroot = new copyroot_1.CopyRoot(delafter, /*this.sitecollection,*/ this);
+                    this.copyroot = new copyroot_1.CopyRoot(delafter, this);
                     this.filesToCopy = this.copyroot.items;
                     this.errorReport = this.copyroot.errorReport;
                 };
                 TreeViewSite.prototype.done = function () {
                     window.parent.location.reload(true);
                 };
-<<<<<<< Updated upstream
-=======
                 TreeViewSite.prototype.filterResult = function (inputText) {
                     var _this = this;
                     if (!inputText || inputText.length < 3) {
@@ -85,7 +99,6 @@ System.register(["@angular/core", './treeView', './copyroot', './filterpipe'], f
                         }
                     }
                 };
->>>>>>> Stashed changes
                 __decorate([
                     core_1.Input(), 
                     __metadata('design:type', String)

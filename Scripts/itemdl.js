@@ -90,7 +90,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                                 _this.dataService.getFolder(_this).then(function (response) {
                                     // this.decCall();
                                     //  if (this.incCall() == true) return;
-                                    _this.dataService.copyDocSet(_this).then(function (response) {
+                                    _this.dataService.copyDocSetByName(_this).then(function (response) {
                                         //       this.decCall();
                                         //      if (this.incCall() == true) return;
                                         _this.dataService.readListItem(_this).then(function (response) {
