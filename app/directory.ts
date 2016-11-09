@@ -76,6 +76,14 @@ export class Directory {
 
 
     }
+
+    unsetAll(){
+        this.selected=false;
+        for(var i=0; i<this.directories.length; i++)
+        {
+            this.directories[i].unsetAll();
+        }
+    }
     
 
 }

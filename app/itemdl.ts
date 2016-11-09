@@ -109,7 +109,7 @@ export class ItemDL {
                             response => {
                                 // this.decCall();
                                 //  if (this.incCall() == true) return;
-                                this.dataService.copyDocSet(this).then(
+                                this.dataService.copyDocSetByName(this).then(
                                     response => {
                                         //       this.decCall();
                                         //      if (this.incCall() == true) return;

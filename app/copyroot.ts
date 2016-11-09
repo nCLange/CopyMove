@@ -20,7 +20,7 @@ export class CopyRoot {
     rootFolder: SP.Folder;
     maxCalls: number;
     currentCalls: number;
-    private deleteAfterwards: boolean;
+  //  private deleteAfterwards: boolean;
     dataService: DataService;
     folderString: string;
     siteCol: SiteCollection;
@@ -32,7 +32,7 @@ export class CopyRoot {
     errorReport: Array<string>;
     parent: any;
     delafter: boolean;
-    targetName : string;
+    targetName: string;
     srcListUrl: string;
 
 
@@ -65,40 +65,69 @@ export class CopyRoot {
         this.selectedItemIds = tempItemIds[1].split(",").map(Number);
         this.dataService.getListInfoFromId(this).then(
             response => {
-                this.srcRootPath = this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + this.name, "");
-                if (this.srcRootPath != "") {
-                    this.srcRootPath += "/";
-                    this.srcRootPath = this.srcRootPath.substr(1, this.srcRootPath.length);
-                }
-     //           console.log(this.srcRootPath);
 
-                if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
-                    this.targetRootPath = Directory.selectedPath;
-                    this.dataService.getFolderFromUrl(this).then(
-                        response => {
-                            //  this.items = [];
-                            this.deleteAfterwards = delafter;
-                            for (var id = 0; id < this.selectedItemIds.length; id++) {
-                                this.items.push(new ItemDL(this.selectedItemIds[id], this, this.targetRootPath, this.srcRootPath, this.rootFolder.get_listItemAllFields().get_id()));
-                            }
-                        },
-                        response => { console.log("getFolderFromUrl Error " + response); });
-
-                }
-                else {
-                    //   this.items = [];
-                    this.deleteAfterwards = delafter;
-                    for (var id = 0; id < this.selectedItemIds.length; id++) {
-                        this.items.push(new ItemDL(this.selectedItemIds[id], this, "", this.srcRootPath));
+                this.dataService.getListPermission(this.srcUrl, this.srcListId, false).then(response => {
+                    if (!(response as SP.BasePermissions).has(SP.PermissionKind.viewListItems)) {
+                        this.cancel("Keine Berechtigung den Listeninhalt in der Quellbibliothek zu lesen");
+                        return;
                     }
-                }
-            },
-            response => {
-                console.log("getListInfoFromIdError " + response)
+                    if (!(response as SP.BasePermissions).has(SP.PermissionKind.deleteListItems) && this.delafter) {
+                        this.cancel("Keine Berechtigung die Listenelemente in der Quellbibliothek zu löschen");
+                        return;
+                    }
 
-            }
+                    this.dataService.getListPermission(this.srcUrl, this.targetTitle, true).then(response => {
+                        if (!(response as SP.BasePermissions).has(SP.PermissionKind.viewListItems)) {
+                            this.cancel("Keine Berechtigung den Listeninhalt in der Zielbibliothek zu lesen");
+                            return;
+                        }
+                        if (!(response as SP.BasePermissions).has(SP.PermissionKind.addListItems)) {
+                            this.cancel("Keine Berechtigung die Listenelemente in der Zielbibliothek zu erstellen");
+                            return;
+                        }
+                        if (!(response as SP.BasePermissions).has(SP.PermissionKind.editListItems)) {
+                            this.cancel("Keine Berechtigung die Listenelemente in der Zielbibliothek zu editieren");
+                            return;
+                        }
 
-        );
+                        this.srcRootPath = this.srcRootPath.replace(_spPageContextInfo.siteServerRelativeUrl + "/" + this.name, "");
+                        if (this.srcRootPath != "") {
+                            this.srcRootPath += "/";
+                            this.srcRootPath = this.srcRootPath.substr(1, this.srcRootPath.length);
+                        }
+                        //           console.log(this.srcRootPath);
+
+                        if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
+                            this.targetRootPath = Directory.selectedPath;
+                            this.dataService.getFolderFromUrl(this).then(
+                                response => {
+                                    //  this.items = [];
+                                //    this.deleteAfterwards = delafter;
+                                    for (var id = 0; id < this.selectedItemIds.length; id++) {
+                                        this.items.push(new ItemDL(this.selectedItemIds[id], this, this.targetRootPath, this.srcRootPath, this.rootFolder.get_listItemAllFields().get_id()));
+                                    }
+                                },
+                                response => { console.log("getFolderFromUrl Error " + response); });
+
+                        }
+                        else {
+                            //   this.items = [];
+                          //  this.deleteAfterwards = delafter;
+                            for (var id = 0; id < this.selectedItemIds.length; id++) {
+                                this.items.push(new ItemDL(this.selectedItemIds[id], this, "", this.srcRootPath));
+                            }
+                        }
+                    },
+                        response => {
+                            console.log("getListInfoFromIdError " + response)
+
+                        }
+
+                    );
+                }, response => { console.log("getPermissionErrorTarget " + response) });
+            }, response => {
+                console.log("getPermissionErrorSrc " + response)
+            });
 
     }
 
@@ -107,11 +136,11 @@ export class CopyRoot {
     }
 
     done(caller: ItemDL, errorMsg) {
-        if (errorMsg != null && errorMsg != ""){
+        if (errorMsg != null && errorMsg != "") {
             this.errorReport.push(caller.name + ": " + errorMsg);
         }
-      /*  for(var i=0; i<20; i++)
-              this.errorReport.push(i+" Hello");*/
+        /*  for(var i=0; i<20; i++)
+                this.errorReport.push(i+" Hello");*/
 
         this.doneCounter++;
         if (this.doneCounter >= this.items.length) {
@@ -137,5 +166,12 @@ export class CopyRoot {
             }
             this.parent.screen = 2;
         }
+    }
+
+    cancel(errorMsg) {
+        if (errorMsg != null && errorMsg != "") {
+            this.errorReport.push(errorMsg);
+        }
+        this.parent.screen = 2;
     }
 }

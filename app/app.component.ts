@@ -16,6 +16,7 @@ import {DataService} from './dataservice';
 export class AppComponent {
     sitecollection: Array<SiteCollection>;
     errorSiteCol: string;
+    
     selected: boolean;
     constructor(private dataService: DataService) {
         this.errorSiteCol = "";
@@ -25,22 +26,22 @@ export class AppComponent {
                 var tempresponse;
                 tempresponse = response;
                 this.sitecollection = tempresponse;
-                if(this.sitecollection.length==0) 
+                console.log(this.sitecollection);
+                if (this.sitecollection.length == 0)
                     this.errorSiteCol = "Couldn't find any Site Collections";
             }, response => {
                 console.log("Failure " + response);
-                 this.errorSiteCol="Failure with the search API: "+response;
+                this.errorSiteCol = "Failure with the search API: " + response;
             });
     }
 
     unsetAll() {
-        this.selected=true;
+        this.selected = true;
         for (var i = 0; i < this.sitecollection.length; i++) {
             for (var j = 0; j < this.sitecollection[i].documentLibraries.length; j++) {
                 this.sitecollection[i].documentLibraries[j].selected = false;
                 for (var k = 0; k < this.sitecollection[i].documentLibraries[j].directories.length; k++) {
-                    this.sitecollection[i].documentLibraries[j].directories[k].selected = false;
-                    //loop for all directories
+                    this.sitecollection[i].documentLibraries[j].directories[k].unsetAll();
                 }
             }
         }

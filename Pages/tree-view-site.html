@@ -15,92 +15,96 @@
 </script>
 
 <div id="copymove">
-    <hr>
-    <div class="content">
-        <div *ngIf="screen==0">
-            <input type="text" name="SearchForDL" class="searchBar" placeholder="Filter Dossiers..." [value]="searchValue" (input)="searchValue=$event.target.value;"
-            />
-            <!-- <img class="magglass" src="../../_layouts/15/images/search32x32.png" />-->
-            <div class="loadingSiteCol" *ngIf="sitecollection.length<1">
-                <div *ngIf="errorSiteCol.length<1">
-                    <img src="../../_layouts/15/images/progress-circle-24.gif" />
-                </div>
-                <div *ngIf="errorSiteCol.length>0">
-                    <span>{{errorSiteCol}}</span>
-                </div>
-            </div>
-            <ul id="listIcon" class="siteColList">
-                <div *ngFor="let site of sitecollection | SiteColFilter:searchValue" selection-model>
-                    <div *ngIf="site.visible==true && site.documentLibraries.length>0">
-                        <li>
+	<hr>
+	<div class="content">
+		<div *ngIf="screen==0">
+			<!--<input type="text" name="SearchForDL" class="searchBar" placeholder="Filter Dossiers..." [value]="searchValue" (input)="searchValue=$event.target.value;" />-->
+			<input type="text" name="SearchForDL" class="searchBar" placeholder="Filter Dossiers..." (input)="filterResult($event.target.value);" />
+			<!-- <img class="magglass" src="../../_layouts/15/images/search32x32.png" />-->
+			<div class="loadingSiteCol" *ngIf="sitecollection.length<1 || loading==true">
+				<div *ngIf="errorSiteCol.length<1">
+					<img src="../../_layouts/15/images/progress-circle-24.gif" />
+				</div>
+				<div *ngIf="errorSiteCol.length>0">
+					<span>{{errorSiteCol}}</span>
+				</div>
+			</div>
+			<ul id="listIcon" class="siteColList">
+			<!--	<div *ngFor="let site of sitecollection | SiteColFilter:searchValue" selection-model>-->
+				<div *ngFor="let site of displaySiteCol" selection-model>
+					<div *ngIf="(site.visible==true && site.documentLibraries.length>0) || site.gotSearched==false">
+						<li>
 
-                            <span (click)="site.toggle()"><img src="../images/Sitecol.svg" width="16" height="16">&nbsp;{{ site.name }}</span>
-                            <div *ngIf="site.expanded">
-                                <tree-view-doclib [documentlibrary]="site.documentLibraries">
-                                </tree-view-doclib>
-                            </div>
+							<span (click)="site.toggle()"><img src="../images/Sitecol.svg" width="16" height="16">&nbsp;{{ site.name }}</span>
+							<div *ngIf="site.expanded && site.gotSearched==true">
+								<tree-view-doclib [documentlibrary]="site.documentLibraries">
+								</tree-view-doclib>
+							</div>
+							<div *ngIf="site.expanded && site.gotSearched==false">
+								<img src="../../_layouts/15/images/progress-circle-24.gif" />
+							</div>
 
-                        </li>
-                    </div>
-                </div>
-            </ul>
-            <div *ngIf="selected==true">
-                <div class="footer">
-                    <hr>
-                    <button id="cm-button" class="ctrlButton" onclick="return false" (click)="clicked(true)"><b>Move</b></button>
-                    <button id="cm-button" class="ctrlButton" onclick="return false" (click)="clicked(false)"><b>Copy</b></button>
-                    <button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Close</button>
-                </div>
-            </div>
-            <div *ngIf="selected!=true">
-                <div class="footer">
-                    <hr>
-                    <div class="destRemind">Double-click to select destination</div>
-                    <button id="cm-button" class="ctrlButton" onclick="return false" disabled>Move</button>
-                    <button id="cm-button" class="ctrlButton" onclick="return false" disabled>Copy</button>
-                    <button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Close</button>
-                </div>
-            </div>
-        </div>
-        <div *ngIf="screen==1">
-            <span class="warning">Do not close this window until all files and folders are copied / moved.</span>
-            <ul class="copyList">
-                <li *ngFor="let items of filesToCopy" selection-model>
-                    <div>
-                        <div class="itemscopied">{{items.name}}</div>
-                        <div class="statuscopied">
-                            <div *ngIf="items.status=='Done'" class="finish">{{items.status}}</div>
-                            <div *ngIf="items.status!='Done'&&items.status!='Error'" class="progress">{{items.status}}</div>
-                            <div *ngIf="items.status=='Error'" class="error">{{items.status}}</div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-            <div class="footer">
-                <hr>
-                <button id="cm-button" onclick="return false" (click)="canceled()" class="ctrlButton">Cancel</button>
-            </div>
-        </div>
-        <div *ngIf="screen==2">
-            <div *ngIf="errorReport.length>0">
-                <ul class="anError">
-                    <li *ngFor="let error of errorReport" selection-model>
-                        <span>{{error}}</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="noError" *ngIf="errorReport.length==0">
-                <div *ngIf="moved==true">
-                    <span> Everything moved </span>
-                </div>
-                <div *ngIf="moved!=true">
-                    <span> Everything copied </span>
-                </div>
-            </div>
-            <div class="footer">
-                <hr>
-                <button id="cm-button" onclick="return false" (click)="done()" class="ctrlButton">Done</button>
-            </div>
-        </div>
-    </div>
+						</li>
+					</div>
+				</div>
+			</ul>
+			<div *ngIf="selected==true">
+				<div class="footer">
+					<hr>
+					<button id="cm-button" class="ctrlButton" onclick="return false" (click)="clicked(true)"><b>Move</b></button>
+					<button id="cm-button" class="ctrlButton" onclick="return false" (click)="clicked(false)"><b>Copy</b></button>
+					<button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Close</button>
+				</div>
+			</div>
+			<div *ngIf="selected!=true">
+				<div class="footer">
+					<hr>
+					<div class="destRemind">Double-click to select destination</div>
+					<button id="cm-button" class="ctrlButton" onclick="return false" disabled>Move</button>
+					<button id="cm-button" class="ctrlButton" onclick="return false" disabled>Copy</button>
+					<button id="cm-button" class="ctrlButton" onclick="return false" (click)="done()">Close</button>
+				</div>
+			</div>
+		</div>
+		<div *ngIf="screen==1">
+			<span class="warning">Do not close this window until all files and folders are copied / moved.</span>
+			<ul class="copyList">
+				<li *ngFor="let items of filesToCopy" selection-model>
+					<div>
+						<div class="itemscopied">{{items.name}}</div>
+						<div class="statuscopied">
+							<div *ngIf="items.status=='Done'" class="finish">{{items.status}}</div>
+							<div *ngIf="items.status!='Done'&&items.status!='Error'" class="progress">{{items.status}}</div>
+							<div *ngIf="items.status=='Error'" class="error">{{items.status}}</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<div class="footer">
+				<hr>
+				<button id="cm-button" onclick="return false" (click)="canceled()" class="ctrlButton">Cancel</button>
+			</div>
+		</div>
+		<div *ngIf="screen==2">
+			<div *ngIf="errorReport.length>0">
+				<ul class="anError">
+					<li *ngFor="let error of errorReport" selection-model>
+						<span>{{error}}</span>
+					</li>
+				</ul>
+			</div>
+			<div class="noError" *ngIf="errorReport.length==0">
+				<div *ngIf="moved==true">
+					<span> Everything moved </span>
+				</div>
+				<div *ngIf="moved!=true">
+					<span> Everything copied </span>
+				</div>
+			</div>
+			<div class="footer">
+				<hr>
+				<button id="cm-button" onclick="return false" (click)="done()" class="ctrlButton">Done</button>
+			</div>
+		</div>
+	</div>
 </div>

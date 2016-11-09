@@ -1,10 +1,11 @@
-﻿import {Component, Input } from "@angular/core";
+﻿import {Component, Input, OnInit} from "@angular/core";
 import {SiteCollection} from './sitecollection';
 import {TreeViewDocLib} from './treeView';
 import {DocumentLibrary} from './documentlibrary';
 import {CopyRoot} from './copyroot';
 import {ItemDL} from './itemdl';
 import {SiteColPipe} from './filterpipe';
+import {DataService} from './dataservice';
 
 
 @Component({
@@ -26,13 +27,32 @@ export class TreeViewSite {
     @Input() errorReport: Array<String>;
     copyroot: CopyRoot;
     @Input() moved: boolean;
+    dataService: DataService;
+    initialSet = false;
+    counter = 0;
+    loading = false;
+
+    displaySiteCol: Array<SiteCollection> = [];
 
     constructor() {
         this.screen = 0;
         this.filesToCopy = null;
         this.errorReport = null;
         this.moved = false;
+        this.dataService = new DataService();
 
+
+
+
+    }
+
+    ngAfterViewChecked() {
+        if (this.initialSet == false) {
+            if (this.sitecollection && this.sitecollection.length>0) {
+                this.displaySiteCol = this.sitecollection;
+                this.initialSet = true;
+            }
+        }
     }
 
     canceled() {
@@ -44,18 +64,16 @@ export class TreeViewSite {
     clicked(delafter) {
         this.moved = delafter;
         this.screen = 1;
-        this.copyroot  = new CopyRoot(delafter, /*this.sitecollection,*/this);
+        this.copyroot = new CopyRoot(delafter, this);
         this.filesToCopy = this.copyroot.items;
         this.errorReport = this.copyroot.errorReport;
-        
+
     }
 
-    done(){
+    done() {
         window.parent.location.reload(true);
     }
 
-<<<<<<< Updated upstream
-=======
     filterResult(inputText) {
         if (!inputText || inputText.length < 3) {
             this.counter++;
@@ -93,6 +111,5 @@ export class TreeViewSite {
         }
     }
 
->>>>>>> Stashed changes
 
 }
