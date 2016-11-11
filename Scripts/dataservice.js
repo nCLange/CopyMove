@@ -60,8 +60,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     ctx.load(list, "EffectiveBasePermissions");
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
-                            console.log(list);
-                            console.log(user);
                             // var permission = list.getUserEffectivePermissions(user.get_loginName());
                             var permission = list.get_effectiveBasePermissions();
                             resolve(permission);
@@ -71,9 +69,11 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     });
                 };
                 DataService.prototype.getListInfoFromId = function (caller) {
-                    var ctx = new SP.ClientContext(caller.srcUrl);
+                    //var ctx = new SP.ClientContext(caller.srcUrl);
+                    var ctx = SP.ClientContext.get_current();
                     // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     var srcList = ctx.get_web().get_lists().getById(caller.srcListId);
+                    // console.log()
                     var fieldcollection = srcList.get_fields();
                     var folder;
                     var rootFolder = srcList.get_rootFolder();
@@ -112,9 +112,11 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     caller.srcRootPath = folder.get_serverRelativeUrl().substr(0, folder.get_serverRelativeUrl().lastIndexOf("/"));
                                 resolve();
                             }, function () {
+                                console.log("1");
                                 reject(arguments[1].get_message());
                             });
                         }, function () {
+                            console.log("2");
                             reject(arguments[1].get_message());
                         });
                     });
@@ -159,7 +161,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                         var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                         //console.log(siteResult);
                                         for (var x = 0; x < siteResult.length; x++) {
-                                            //if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
+                                            // if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
                                             sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                         }
                                     }
@@ -202,7 +204,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     var docResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                     for (var x = 0; x < docResult.length; x++) {
                                         //                                console.log(docResult[x].Cells.results);
-                                        console.log(docResult[x].Cells.results);
+                                        //console.log(docResult[x].Cells.results);
                                         var siteName = that.JSONObjectHelper(docResult[x].Cells.results, "SiteName");
                                         var path = that.JSONObjectHelper(docResult[x].Cells.results, "Path");
                                         if (!path.includes("/profile/" + type))
@@ -391,12 +393,12 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                 if (list.get_baseTemplate() == 101) {
                                     // console.log(list);
                                     // console.log(list.get_defaultDisplayFormUrl());
-                                    console.log(list.get_entityTypeName());
+                                    //console.log(list.get_entityTypeName());
                                     //   console.log(list);
                                     //  console.log(list.get_documentTemplateUrl());
                                     var name = "";
                                     if (list.get_documentTemplateUrl()) {
-                                        var name = list.get_documentTemplateUrl().substr(0, list.get_documentTemplateUrl().lastIndexOf("/Forms/"));
+                                        name = list.get_documentTemplateUrl().substr(0, list.get_documentTemplateUrl().lastIndexOf("/Forms/"));
                                         //   console.log(name);
                                         name = name.replace(list.get_parentWebUrl() + "/", '');
                                     }
@@ -412,7 +414,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                         name = stringtoDecode;
                                     }
                                     //var name = "";
-                                    console.log(name);
+                                    //  console.log(name);
                                     if (list.get_title() != "App Packages" && list.get_title() != "Style Library" && list.get_title() != "Site Assets" && list.get_title() != "Websiteobjekte" && list.get_title() != "SiteAssets")
                                         documentlibraries.push(new documentlibrary_1.DocumentLibrary(name, list.get_title(), list.get_entityTypeName(), parent));
                                 }

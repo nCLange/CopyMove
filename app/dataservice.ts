@@ -47,8 +47,6 @@ export class DataService {
         return new Promise(function (resolve, reject) {
             ctx.executeQueryAsync(
                 function () {
-                    console.log(list);
-                    console.log(user);
                     // var permission = list.getUserEffectivePermissions(user.get_loginName());
                     var permission = list.get_effectiveBasePermissions();
                     resolve(permission);
@@ -61,9 +59,11 @@ export class DataService {
 
 
     getListInfoFromId(caller: CopyRoot) {
-        var ctx = new SP.ClientContext(caller.srcUrl);
+        //var ctx = new SP.ClientContext(caller.srcUrl);
+        var ctx = SP.ClientContext.get_current();
         // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
         var srcList = ctx.get_web().get_lists().getById(caller.srcListId);
+       // console.log()
         var fieldcollection = srcList.get_fields();
         var folder: any;
         var rootFolder = srcList.get_rootFolder();
@@ -115,11 +115,13 @@ export class DataService {
                             resolve();
                         },
                         function () {
+                            console.log("1");
                             reject(arguments[1].get_message());
                         }
                     )
                 },
                 function () {
+                    console.log("2");
                     reject(arguments[1].get_message());
                 });
         });
@@ -157,9 +159,6 @@ export class DataService {
         var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
         var stringindex = relUrl.indexOf("/");
         type = relUrl.substr(stringindex + 1, 3);
-
-
-
 
         return new Promise(function (resolve, reject) {
 
@@ -231,7 +230,7 @@ export class DataService {
 
                             for (var x = 0; x < docResult.length; x++) {
                                 //                                console.log(docResult[x].Cells.results);
-                                console.log(docResult[x].Cells.results);
+                                //console.log(docResult[x].Cells.results);
                                 var siteName: string = that.JSONObjectHelper(docResult[x].Cells.results, "SiteName");
                                 var path = that.JSONObjectHelper(docResult[x].Cells.results, "Path");
 
@@ -456,12 +455,12 @@ export class DataService {
                         if (list.get_baseTemplate() == 101) {
                             // console.log(list);
                             // console.log(list.get_defaultDisplayFormUrl());
-                            console.log(list.get_entityTypeName());
+                            //console.log(list.get_entityTypeName());
                             //   console.log(list);
                             //  console.log(list.get_documentTemplateUrl());
                             var name = "";
                             if (list.get_documentTemplateUrl()) {
-                                var name = list.get_documentTemplateUrl().substr(0, list.get_documentTemplateUrl().lastIndexOf("/Forms/"));
+                                name = list.get_documentTemplateUrl().substr(0, list.get_documentTemplateUrl().lastIndexOf("/Forms/"));
                                 //   console.log(name);
                                 name = name.replace(list.get_parentWebUrl() + "/", '');
                             }
@@ -477,7 +476,7 @@ export class DataService {
                                 name = stringtoDecode;
                             }
                             //var name = "";
-                            console.log(name);
+                          //  console.log(name);
                             if (list.get_title() != "App Packages" && list.get_title() != "Style Library" && list.get_title() != "Site Assets" && list.get_title() != "Websiteobjekte" && list.get_title() != "SiteAssets")
                                 documentlibraries.push(new DocumentLibrary(name, list.get_title(), list.get_entityTypeName(), parent));
                         }

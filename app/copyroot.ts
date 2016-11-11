@@ -76,7 +76,7 @@ export class CopyRoot {
                         return;
                     }
 
-                    this.dataService.getListPermission(this.srcUrl, this.targetTitle, true).then(response => {
+                    this.dataService.getListPermission(this.targetUrl, this.targetTitle, true).then(response => {
                         if (!(response as SP.BasePermissions).has(SP.PermissionKind.viewListItems)) {
                             this.cancel("Keine Berechtigung den Listeninhalt in der Zielbibliothek zu lesen");
                             return;
@@ -119,14 +119,14 @@ export class CopyRoot {
                         }
                     },
                         response => {
-                            console.log("getListInfoFromIdError " + response)
+                            console.log("getPermissionErrorTarget " + response)
 
                         }
 
                     );
-                }, response => { console.log("getPermissionErrorTarget " + response) });
+                }, response => { console.log("getPermissionErrorSrc " + response) });
             }, response => {
-                console.log("getPermissionErrorSrc " + response)
+                console.log("getListInfoFromIdError" + response)
             });
 
     }

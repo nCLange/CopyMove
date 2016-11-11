@@ -55,7 +55,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                                 _this.cancel("Keine Berechtigung die Listenelemente in der Quellbibliothek zu löschen");
                                 return;
                             }
-                            _this.dataService.getListPermission(_this.srcUrl, _this.targetTitle, true).then(function (response) {
+                            _this.dataService.getListPermission(_this.targetUrl, _this.targetTitle, true).then(function (response) {
                                 if (!response.has(SP.PermissionKind.viewListItems)) {
                                     _this.cancel("Keine Berechtigung den Listeninhalt in der Zielbibliothek zu lesen");
                                     return;
@@ -92,11 +92,11 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                                     }
                                 }
                             }, function (response) {
-                                console.log("getListInfoFromIdError " + response);
+                                console.log("getPermissionErrorTarget " + response);
                             });
-                        }, function (response) { console.log("getPermissionErrorTarget " + response); });
+                        }, function (response) { console.log("getPermissionErrorSrc " + response); });
                     }, function (response) {
-                        console.log("getPermissionErrorSrc " + response);
+                        console.log("getListInfoFromIdError" + response);
                     });
                 }
                 CopyRoot.prototype.addToArray = function (id, targetFolderURL, srcFolderURL, parentFolderId) {
