@@ -161,8 +161,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                         var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                         //console.log(siteResult);
                                         for (var x = 0; x < siteResult.length; x++) {
-                                            // if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
-                                            sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
+                                            if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
+                                                sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                         }
                                     }
                                     catch (err) {
