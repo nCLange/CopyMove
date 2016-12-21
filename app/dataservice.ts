@@ -63,7 +63,7 @@ export class DataService {
         var ctx = SP.ClientContext.get_current();
         // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
         var srcList = ctx.get_web().get_lists().getById(caller.srcListId);
-       // console.log()
+        // console.log()
         var fieldcollection = srcList.get_fields();
         var folder: any;
         var rootFolder = srcList.get_rootFolder();
@@ -180,8 +180,8 @@ export class DataService {
                                 //console.log(siteResult);
                                 for (var x = 0; x < siteResult.length; x++) {
                                     if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
-                                    sitecollection.push(
-                                        new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
+                                        sitecollection.push(
+                                            new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                 }
                             }
                             catch (err) { var sitecollection = []; reject(err); }
@@ -247,11 +247,12 @@ export class DataService {
 
                                 var name: string = that.JSONObjectHelper(docResult[x].Cells.results, "Title");
                                 if (!name.includes("All Documents") && !name.includes("Documents")) {
-                                    //  var position = name.indexOf(" - ");
+                                    var position = name.indexOf(" - ");
                                     //  var siteColName = name.substr(0, name.indexOf(" - "));
                                     var siteColName = siteName.substr(siteName.lastIndexOf("/") + 1, siteName.length - siteName.lastIndexOf("/") - 1);
                                     var docLibName = name;
-                                    //  var docLibName = name.substr(position + 3, name.length - position + 3);
+                                    if (position > -1)
+                                        docLibName = name.substr(position + 3, name.length - position + 3);
                                     //        console.log("Position: " + position + " siteCol: " + siteColName + " docLib: " + docLibName);
 
 
@@ -476,7 +477,7 @@ export class DataService {
                                 name = stringtoDecode;
                             }
                             //var name = "";
-                          //  console.log(name);
+                            //  console.log(name);
                             if (list.get_title() != "App Packages" && list.get_title() != "Style Library" && list.get_title() != "Site Assets" && list.get_title() != "Websiteobjekte" && list.get_title() != "SiteAssets")
                                 documentlibraries.push(new DocumentLibrary(name, list.get_title(), list.get_entityTypeName(), parent));
                         }
