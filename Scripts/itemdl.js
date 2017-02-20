@@ -198,10 +198,11 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     return new Promise(function (resolve, reject) {
                         var fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL + outerthat.name;
                         fullURL = fullURL.replace(window.location.protocol + "//" + window.location.host, "");
-                        if (fullURL.length > 260) {
+                        console.log(fullURL);
+                        if (fullURL.length > 256) {
                             outerthat.parent.hasError = true;
                             outerthat.status = "Error";
-                            reject("Targeturl is " + (fullURL.length - 260) + " signs too long");
+                            reject("Targeturl is " + (fullURL.length - 256) + " signs too long");
                             return;
                         }
                         inTimeOut2();
