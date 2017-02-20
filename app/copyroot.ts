@@ -20,7 +20,6 @@ export class CopyRoot {
     rootFolder: SP.Folder;
     maxCalls: number;
     currentCalls: number;
-  //  private deleteAfterwards: boolean;
     dataService: DataService;
     folderString: string;
     siteCol: SiteCollection;
@@ -34,10 +33,14 @@ export class CopyRoot {
     delafter: boolean;
     targetName: string;
     srcListUrl: string;
+    readCounter: number;
+    //fileAmount: number;
+    ready: boolean;
+    hasError: boolean;
+    rootItems: Array<ItemDL>; // first items
 
 
-    constructor(delafter: boolean, /*sitecollections: Array<SiteCollection>,*/ parent: any) {
-
+    constructor(delafter: boolean, parent: any) {
 
         this.errorReport = [];
         this.targetUrl = SiteCollection.targetPath;
@@ -47,25 +50,27 @@ export class CopyRoot {
         this.targetRootPath = "";
         this.rootFolder = null;
         this.dataService = new DataService();
-        this.maxCalls = 3;
+        this.maxCalls = 1;
         this.currentCalls = 0;
         this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
         this.fields = [];
         this.canceled = false;
-        this.items = [];
-        this.doneCounter = 0;
+        this.items = []; //Array of items to be copied
+        this.doneCounter = 0; //counter of what finished copying
+        this.readCounter = 0; //counter of what is read
+        // this.fileAmount = 0;
         this.parent = parent;
         this.delafter = delafter;
-
+        this.ready = false; //Is ready to do rest of the copying
+        this.hasError = false; // An Error was found 
+        this.rootItems = [];
 
         this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
-        // var wat = new RegExp('[\?&]SPListURL=([^&#]*)').exec(window.location.href)[1];
 
         var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
         this.selectedItemIds = tempItemIds[1].split(",").map(Number);
         this.dataService.getListInfoFromId(this).then(
             response => {
-
                 this.dataService.getListPermission(this.srcUrl, this.srcListId, false).then(response => {
                     if (!(response as SP.BasePermissions).has(SP.PermissionKind.viewListItems)) {
                         this.cancel("Keine Berechtigung den Listeninhalt in der Quellbibliothek zu lesen");
@@ -95,34 +100,30 @@ export class CopyRoot {
                             this.srcRootPath += "/";
                             this.srcRootPath = this.srcRootPath.substr(1, this.srcRootPath.length);
                         }
-                        //           console.log(this.srcRootPath);
 
                         if (Directory.selectedPath != undefined && Directory.selectedPath != "" && Directory.selectedPath != null) {
                             this.targetRootPath = Directory.selectedPath;
                             this.dataService.getFolderFromUrl(this).then(
                                 response => {
-                                    //  this.items = [];
-                                //    this.deleteAfterwards = delafter;
                                     for (var id = 0; id < this.selectedItemIds.length; id++) {
-                                        this.items.push(new ItemDL(this.selectedItemIds[id], this, this.targetRootPath, this.srcRootPath, this.rootFolder.get_listItemAllFields().get_id()));
+                                        var item = new ItemDL(this.selectedItemIds[id], this, this.targetRootPath, this.srcRootPath, this.rootFolder.get_listItemAllFields().get_id())
+                                        this.items.push(item);
+                                        this.rootItems.push(item);
                                     }
                                 },
                                 response => { console.log("getFolderFromUrl Error " + response); });
-
                         }
                         else {
-                            //   this.items = [];
-                          //  this.deleteAfterwards = delafter;
                             for (var id = 0; id < this.selectedItemIds.length; id++) {
-                                this.items.push(new ItemDL(this.selectedItemIds[id], this, "", this.srcRootPath));
+                                var item = new ItemDL(this.selectedItemIds[id], this, "", this.srcRootPath)
+                                this.items.push(item);
+                                this.rootItems.push(item);
                             }
                         }
                     },
                         response => {
                             console.log("getPermissionErrorTarget " + response)
-
                         }
-
                     );
                 }, response => { console.log("getPermissionErrorSrc " + response) });
             }, response => {
@@ -132,36 +133,37 @@ export class CopyRoot {
     }
 
     addToArray(id: number, targetFolderURL: string, srcFolderURL: string, parentFolderId: number) {
-        this.items.push(new ItemDL(id, this, targetFolderURL, srcFolderURL, parentFolderId));
+        var item = new ItemDL(id, this, targetFolderURL, srcFolderURL, parentFolderId);
+        this.items.push(item);
+        return item;
     }
 
     done(caller: ItemDL, errorMsg) {
         if (errorMsg != null && errorMsg != "") {
             this.errorReport.push(caller.name + ": " + errorMsg);
         }
-        /*  for(var i=0; i<20; i++)
-                this.errorReport.push(i+" Hello");*/
-
         this.doneCounter++;
         if (this.doneCounter >= this.items.length) {
             if (this.delafter) {
                 var error = false;
-                for (var i = this.items.length - 1; i >= 0; i--) {
-                    if (this.items[i].status == "Done" && this.items[i].type == ContentType.File) {
-                        this.items[i].dataService.deleteEntry(this.items[i]);
-                    }
-                    else if (this.items[i].status != "Done" && this.items[i].type == ContentType.File) {
-                        error = true;
-                    }
-                    else if (this.items[i].status == "Done" && this.items[i].type != ContentType.File) {
-                        if (error == false)
-                            this.items[i].dataService.deleteEntry(this.items[i]);
-                    }
-                    else {
-                        error = true;
-                    }
 
-                    //Behandlung von Level Ordner hinzufügen - niedrigeres Lvl = Abbruch
+                if (this.hasError == false) {
+                    for (var i = this.items.length - 1; i >= 0; i--) {
+                        if (this.items[i].status == "Done" && this.items[i].type == ContentType.File) {
+                            if (error == false)
+                                this.items[i].dataService.deleteEntry(this.items[i]).then(response => { }, response => { console.log(response); error = true; });
+                        }
+                        else if (this.items[i].status != "Done" && this.items[i].type == ContentType.File) {
+                            error = true;
+                        }
+                        else if (this.items[i].status == "Done" && this.items[i].type != ContentType.File) {
+                            if (error == false)
+                                this.items[i].dataService.deleteEntry(this.items[i]).then(response => { }, response => { console.log(response); error = true; });
+                        }
+                        else {
+                            error = true;
+                        }
+                    }
                 }
             }
             this.parent.screen = 2;

@@ -1,9 +1,7 @@
 ﻿[CmdletBinding()]
 param (
     [string]$SrcUrl = "http://win-iprrvsfootq/sites/dev",
-    [string]$DocLibTitle  = "Site Assets",
-    [string]$DocLibrelPath = "SiteAssets",
-    [string]$SiteColFilter = "sites"
+    [string]$SiteColFilter = "profile"
     
 )
 
@@ -51,21 +49,7 @@ foreach($result in $results.Value[0].ResultRows)
          }
 
 
-<#$rootSite = New-Object Microsoft.SharePoint.SPSite($SrcUrl)
-$spWebApp = $rootSite.WebApplication
 
-foreach($site in $spWebApp.Sites)
-{
-    foreach($siteAdmin in $site.RootWeb.SiteAdministrators)
-    {
-        }
-        else {
-         if($siteAdmin.ParentWeb.Url -notlike '*profile*'){ continue}
-        }
-
-        Write-Host "$($siteAdmin.ParentWeb.Url) - $($siteAdmin.DisplayName)"
-        $Url = $siteAdmin.ParentWeb.Url
-        #>
         $VerbosePreference = "Continue"
 
         $context = New-Object Microsoft.SharePoint.Client.ClientContext $Url
@@ -79,7 +63,7 @@ foreach($site in $spWebApp.Sites)
         #Add docbib
 
         $docBib = $null
-        $docBib = $web.Lists | where{ $_.Title -eq $DocLibTitle}
+        $docBib = $web.Lists | where{ $_.Title -eq "Site Assets" -or $_.Title -eq "SiteAssets"}
 
        if($docBib)
         {   
@@ -279,7 +263,7 @@ foreach($site in $spWebApp.Sites)
                                                         width: 700,
                                                         height: 400,
                                                         showClose: false,
-                                                        url: '${Url}/${DocLibrelPath}/CopyMove/pages/Default.aspx?SPListId={SelectedListId}&amp;SPListURL={Source}&amp;SPListItemId={SelectedItemId}'};
+                                                        url: '${Url}/siteAssets/CopyMove/pages/Default.aspx?SPListId={SelectedListId}&amp;SPListURL={Source}&amp;SPListItemId={SelectedItemId}'};
                              SP.UI.ModalDialog.showModalDialog(options);
                              ""/>
                              </CommandUIHandlers>

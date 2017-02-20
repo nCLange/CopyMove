@@ -1,4 +1,4 @@
-System.register(['@angular/core', './sitecollection', './documentlibrary', './directory', './itemdl', './listFields', './fieldcontent', 'rxjs/add/operator/map'], function(exports_1, context_1) {
+System.register(['@angular/core', './sitecollection', './documentlibrary', './directory', './itemdl', './listFields', './fieldcontent'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -34,23 +34,19 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
             },
             function (fieldcontent_1_1) {
                 fieldcontent_1 = fieldcontent_1_1;
-            },
-            function (_1) {}],
+            }],
         execute: function() {
-            //import 'rxjs/add/operator/catch';
-            //import 'rxjs/Rx';
-            //import {Http, Response, Headers} from '@angular/http';
+            //import {Observable} from 'rxjs/Observable';
+            //import 'rxjs/add/operator/map';
             DataService = (function () {
                 function DataService() {
                     this.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
-                    // this.searchWebUrl = window.location.protocol + "//" + window.location.host;
                     this.searchWebUrl = this.appWebUrl;
                 }
                 DataService.prototype.getListPermission = function (url, title, isTitle) {
                     var ctx = new SP.ClientContext(url);
                     var web = ctx.get_web();
                     var list;
-                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     if (isTitle)
                         list = web.get_lists().getByTitle(title);
                     else
@@ -69,11 +65,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     });
                 };
                 DataService.prototype.getListInfoFromId = function (caller) {
-                    //var ctx = new SP.ClientContext(caller.srcUrl);
                     var ctx = SP.ClientContext.get_current();
-                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     var srcList = ctx.get_web().get_lists().getById(caller.srcListId);
-                    // console.log()
                     var fieldcollection = srcList.get_fields();
                     var folder;
                     var rootFolder = srcList.get_rootFolder();
@@ -86,13 +79,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         ctx.executeQueryAsync(function () {
                             caller.name = rootFolder.get_serverRelativeUrl().replace(srcList.get_parentWebUrl() + "/", '');
                             caller.title = srcList.get_title();
-                            var consoleOut = "";
-                            //   console.log(rootFolder.get_serverRelativeUrl());
-                            //   console.log(srcList.get_parentWebUrl());
                             for (var i = 0; i < fieldcollection.get_count(); i++) {
-                                //  if(fieldcollection.itemAt(i).get_internalName()=="_CopySource") console.log("GUID: "+fieldcollection.itemAt(i).get_id());
                                 if (!fieldcollection.itemAt(i).get_fromBaseType() && !fieldcollection.itemAt(i).get_hidden()) {
-                                    consoleOut += fieldcollection.itemAt(i).get_internalName() + "||" + fieldcollection.itemAt(i).get_title() + "/";
                                     var listField = new listFields_1.ListField(fieldcollection.itemAt(i).get_internalName(), fieldcollection.itemAt(i).get_typeAsString());
                                     if (listField.allowed)
                                         caller.fields.push(listField);
@@ -112,19 +100,15 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     caller.srcRootPath = folder.get_serverRelativeUrl().substr(0, folder.get_serverRelativeUrl().lastIndexOf("/"));
                                 resolve();
                             }, function () {
-                                console.log("1");
                                 reject(arguments[1].get_message());
                             });
                         }, function () {
-                            console.log("2");
                             reject(arguments[1].get_message());
                         });
                     });
                 };
                 DataService.prototype.getFolderFromUrl = function (caller) {
                     var ctx = new SP.ClientContext(caller.targetUrl);
-                    //  var appContextSite = new SP.AppContextSite(ctx, caller.targetUrl);
-                    // console.log(caller.targetUrl + "/" + caller.targetTitle+ "/" + caller.targetRootPath);
                     var currentFolder = ctx.get_web().getFolderByServerRelativeUrl(caller.targetUrl + "/" + caller.targetName + "/" + caller.targetRootPath);
                     //console.log(caller.targetTitle+"/"+caller.targetRootPath);
                     ctx.load(currentFolder);
@@ -149,8 +133,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                             var executor = new SP.RequestExecutor(that.appWebUrl);
                             executor.executeAsync({
-                                //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
-                                //Leere Bibliotheken werden ignoriert , beheben?
                                 url: that.searchWebUrl + "/_api/search/query?querytext='contentclass:sts_site'&trimduplicates=false&selectproperties'Title,Path'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'",
                                 method: "GET",
                                 headers: { "Accept": "application/json; odata=verbose" },
@@ -159,10 +141,9 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     var sitecollection = [];
                                     try {
                                         var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                                        //console.log(siteResult);
                                         for (var x = 0; x < siteResult.length; x++) {
-                                            if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
-                                                sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
+                                            // if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
+                                            sitecollection.push(new sitecollection_1.SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                         }
                                     }
                                     catch (err) {
@@ -181,6 +162,39 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 };
+                DataService.prototype.getDocLibInfo = function (parent, pathURL, guid) {
+                    var that = this;
+                    var ctx = new SP.ClientContext(pathURL);
+                    var list = ctx.get_web().get_lists().getById(guid);
+                    var documentlibraries = [];
+                    ctx.load(list);
+                    return new Promise(function (resolve, reject) {
+                        ctx.executeQueryAsync(function () {
+                            // var list = listenum.get_current();
+                            var name = "";
+                            if (list.get_documentTemplateUrl()) {
+                                name = list.get_documentTemplateUrl().substr(0, list.get_documentTemplateUrl().lastIndexOf("/Forms/"));
+                                name = name.replace(list.get_parentWebUrl() + "/", '');
+                            }
+                            else {
+                                var stringtoDecode = list.get_entityTypeName();
+                                stringtoDecode = stringtoDecode.replace(/_x002f_/g, "/");
+                                stringtoDecode = stringtoDecode.replace(/_x002d_/g, "-");
+                                stringtoDecode = stringtoDecode.replace(/_x0020_/g, " ");
+                                stringtoDecode = stringtoDecode.replace(/_x0028_/g, "(");
+                                stringtoDecode = stringtoDecode.replace(/_x0029_/g, ")");
+                                stringtoDecode = stringtoDecode.replace(/_x0023_/g, "#");
+                                stringtoDecode = stringtoDecode.replace(/_x002e_/g, ".");
+                                name = stringtoDecode;
+                            }
+                            var doclib = new documentlibrary_1.DocumentLibrary(name, list.get_title(), list.get_entityTypeName(), parent);
+                            resolve(doclib);
+                        }, function (data) {
+                            console.log(data);
+                            reject(data);
+                        });
+                    });
+                };
                 DataService.prototype.searchDocLibFilter = function (caller, input, curProm) {
                     var type = "";
                     var that = this;
@@ -194,64 +208,32 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                             var executor = new SP.RequestExecutor(that.appWebUrl);
                             executor.executeAsync({
-                                //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
-                                //Leere Bibliotheken werden ignoriert , beheben?
-                                url: that.searchWebUrl + "/_api/search/query?querytext='Title:*" + input + "* contentclass:sts_list_documentlibrary'&trimduplicates=false&selectproperties='Title,Path,SiteName'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'",
+                                url: that.searchWebUrl + "/_api/search/query?querytext='Title:*" + input + "* contentclass:sts_list_documentlibrary'&trimduplicates=false&selectproperties='Title,Path,SiteName,ListID'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'",
                                 method: "GET",
                                 headers: { "Accept": "application/json; odata=verbose" },
                                 success: function (data) {
                                     var myoutput = JSON.parse((data.body.toString()));
                                     var docResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+                                    console.log(docResult);
                                     for (var x = 0; x < docResult.length; x++) {
-                                        //                                console.log(docResult[x].Cells.results);
-                                        //console.log(docResult[x].Cells.results);
+                                        /*   if (!path.includes("/profile/" + type))
+                                            continue;*/
                                         var siteName = that.JSONObjectHelper(docResult[x].Cells.results, "SiteName");
-                                        var path = that.JSONObjectHelper(docResult[x].Cells.results, "Path");
-                                        if (!path.includes("/profile/" + type))
-                                            continue;
-                                        // rank
-                                        // OriginalPath : https://dev-restricted.basf.net/profile/ZRR-2016/Dossiers/XX-XX-18-16/Forms/AllItems.aspx
-                                        //SiteName = https://dev-restricted.basf.net/profile/ZRR-2016
-                                        //Path = https://dev-restricted.basf.net/profile/ZRR2016/Dossiers/XX-XX-18-16/Forms/AllItems.aspx
-                                        //Performance Test 6360... - All Documents
-                                        path = path.substr(0, path.lastIndexOf("/Forms/"));
-                                        path = path.replace(siteName + "/", '');
-                                        var name = that.JSONObjectHelper(docResult[x].Cells.results, "Title");
-                                        if (!name.includes("All Documents") && !name.includes("Documents")) {
-                                            //  var position = name.indexOf(" - ");
-                                            //  var siteColName = name.substr(0, name.indexOf(" - "));
-                                            var siteColName = siteName.substr(siteName.lastIndexOf("/") + 1, siteName.length - siteName.lastIndexOf("/") - 1);
-                                            var docLibName = name;
-                                            //  var docLibName = name.substr(position + 3, name.length - position + 3);
-                                            //        console.log("Position: " + position + " siteCol: " + siteColName + " docLib: " + docLibName);
-                                            var found = -1;
-                                            var founddocLib = -1;
-                                            for (var i = 0; i < siteCollections.length; i++) {
-                                                if (siteCollections[i].path == siteName) {
-                                                    found = i;
-                                                    for (var j = 0; j < siteCollections[i].documentLibraries.length; j++) {
-                                                        if (siteCollections[i].documentLibraries[j].name == docLibName) {
-                                                            founddocLib = j;
-                                                            break;
-                                                        }
-                                                    }
-                                                    if (founddocLib == -1) {
-                                                        siteCollections[i].createDocLib(path, docLibName, "");
-                                                    }
-                                                    founddocLib = -1;
-                                                    break;
-                                                }
-                                            }
-                                            if (found != -1) {
-                                                found = -1;
-                                            }
-                                            else {
-                                                siteCollections.push(new sitecollection_1.SiteCollection(siteColName, siteName, caller));
-                                                siteCollections[siteCollections.length - 1].createDocLib(path, docLibName, "");
+                                        var guid = that.JSONObjectHelper(docResult[x].Cells.results, "ListID");
+                                        var siteColName = siteName.substr(siteName.lastIndexOf("/") + 1, siteName.length - siteName.lastIndexOf("/") - 1);
+                                        var founddocLib = false;
+                                        for (var i = 0; i < siteCollections.length; i++) {
+                                            if (siteCollections[i].path == siteName) {
+                                                siteCollections[i].createDocLib(guid);
+                                                founddocLib = true;
+                                                break;
                                             }
                                         }
+                                        if (founddocLib == false) {
+                                            siteCollections.push(new sitecollection_1.SiteCollection(siteColName, siteName, caller));
+                                            siteCollections[siteCollections.length - 1].createDocLib(guid);
+                                        }
                                     }
-                                    // console.log(siteCollections);
                                     var output = [curProm, siteCollections];
                                     resolve(output);
                                 },
@@ -264,67 +246,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 };
-                /*
-                    handleError(error: Response) {
-                        console.error(error);
-                        return Observable.throw(error.json().error || 'Server error');
-                    }*/
-                /* searchDocLibFilterObservable = (caller, input): Observable<DocumentLibrary> => {
-                     var type = "";
-                     let that = this;
-                       var relUrl = _spPageContextInfo.siteServerRelativeUrl.substr(1);
-                       var stringindex = relUrl.indexOf("/");
-                       type = relUrl.substr(stringindex+1,3);
-                       console.log(type);
-                     var documentlibraries = [];
-                     var url = that.searchWebUrl + "/_api/search/query?querytext='Title:*" + input + "* contentclass:sts_list_documentlibrary'&trimduplicates=false&selectproperties='Title,Path,SiteName'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'";
-             
-                     return this._http.get(url).map((response: Response) => {var backback = <DocumentLibrary>response.json()}.catch(response:Response => {<DocumentLibrary>response.json()}));
-             */
-                // $.getScript(that.searchWebUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
-                /*
-                                var executor = new SP.RequestExecutor(that.appWebUrl);
-                                executor.executeAsync(
-                                    {
-                                        //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'",
-                                        //Leere Bibliotheken werden ignoriert , beheben?
-                                        url: that.searchWebUrl + "/_api/search/query?querytext='Title:*" + input + "* contentclass:sts_list_documentlibrary'&trimduplicates=false&selectproperties='Title,Path,SiteName'&rowlimit=500&sourceid='8413cd39-2156-4e00-b54d-11efd9abdb89'",
-                                        method: "GET",
-                                     //   headers: { "Accept": "application/json; odata=verbose" },
-                                        success: function (data) {
-                                            var myoutput = JSON.parse((data.body.toString()));
-                                            var docResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                                            for (var x = 0; x < docResult.length; x++) {
-                                                console.log(docResult[x].Cells.results);
-                
-                                                var path = that.JSONObjectHelper(docResult[x].Cells.results, "Path");
-                
-                                                var name = that.JSONObjectHelper(docResult[x].Cells.results, "Title");
-                                                var siteNames = that.JSONObjectHelper(docResult[x].Cells.results, "SiteName");
-                                                console.log(name);
-                
-                                                path = path.substr(0, path.lastIndexOf("/Forms/"));
-                                                path = path.replace(siteNames + "/", '');
-                                                console.log(path);
-                                                //  name = name.replace(list.get_parentWebUrl() + "/", '');
-                
-                                                documentlibraries.push(new DocumentLibrary(path, name, name, null));
-                
-                                            }
-                
-                                            console.log(docResult);
-                                            resolve(documentlibraries);
-                                        },
-                                        error: function (data) {
-                                            var sitecollection = [];
-                                            reject(sitecollection);
-                                        }
-                
-                                    }
-                                )
-                          //  });
-                       // });*/
-                //   }
                 DataService.prototype.JSONObjectHelper = function (inputArray, key) {
                     for (var i = 0; i < inputArray.length; i++) {
                         if (inputArray[i].Key == key) {
@@ -333,55 +254,9 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     }
                     return null;
                 };
-                DataService.prototype.searchDocumentLibrary2 = function (pathURL, parent) {
-                    //var executor = new SP.RequestExecutor(this.appWebUrl);
-                    var that = this;
-                    return new Promise(function (resolve, reject) {
-                        //   $.getScript(pathURL + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
-                        var executor = new SP.RequestExecutor(that.appWebUrl);
-                        console.log(that.appWebUrl);
-                        console.log(pathURL);
-                        executor.executeAsync({
-                            //url: this.appWebUrl + "/_api/SP.AppContextSite(@target)/web/title?@target='" + siteURL + "'", 
-                            //Leere Bibliotheken werden ignoriert , beheben?
-                            url: pathURL + "/_api/web/lists?$expand=rootFolder",
-                            // url: pathURL + "/_api/web/lists",
-                            method: "GET",
-                            headers: { "Accept": "application/json; odata=verbose" },
-                            success: function (data) {
-                                var myoutput = JSON.parse((data.body.toString()));
-                                var documentlibraries = [];
-                                var dossierResult = myoutput.d.results;
-                                for (var x = 0; x < dossierResult.length; x++) {
-                                    console.log(dossierResult);
-                                    if (dossierResult[x].BaseType == 1 && dossierResult[x].Title != "App Packages" && dossierResult[x].Title != "Site Assets" && dossierResult[x].Title != "Translation Packages" && dossierResult[x].Title != "Converted Forms" && dossierResult[x].Title != "Form Templates" && dossierResult[x].Title != "List Template Gallery" && dossierResult[x].Title != "Master Page Gallery" && dossierResult[x].Title != "Site Pages" && dossierResult[x].Title != "Solution Gallery" && dossierResult[x].Title != "Style Library" && dossierResult[x].Title != "Theme Gallery" && dossierResult[x].Title != "Web Part Gallery" && dossierResult[x].Title != "wfpub") {
-                                        var name = dossierResult[x].RootFolder.ServerRelativeUrl.replace(dossierResult[x].ParentWebUrl + "/", '');
-                                        console.log(name);
-                                        documentlibraries.push(new documentlibrary_1.DocumentLibrary(name, dossierResult[x].Title, dossierResult[x].EntityTypeName, parent));
-                                    }
-                                }
-                                resolve(documentlibraries);
-                            },
-                            error: function (data) {
-                                var documentlibraries = [];
-                                console.log(data);
-                                reject(documentlibraries);
-                            }
-                        });
-                    });
-                    // });
-                };
                 DataService.prototype.searchDocumentLibrary3 = function (pathURL, parent) {
-                    //var executor = new SP.RequestExecutor(this.appWebUrl);
                     var that = this;
                     var ctx = new SP.ClientContext(pathURL);
-                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
-                    // console.log("Dossiers_x002f_XX_x002d_AP_x002d_1_x002d_16");
-                    //  var stringtoDecode = "Dossiers_x002f_XX_x002d_AP_x002d_1_x002d_16";
-                    /*console.log(stringtoDecode);
-                    stringtoDecode = stringtoDecode.replace(/_/g,"");
-                    console.log(stringtoDecode);*/
-                    // unescape(stringtoDecode);
                     var lists = ctx.get_web().get_lists();
                     var documentlibraries = [];
                     ctx.load(lists);
@@ -391,15 +266,9 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             while (listenum.moveNext()) {
                                 var list = listenum.get_current();
                                 if (list.get_baseTemplate() == 101) {
-                                    // console.log(list);
-                                    // console.log(list.get_defaultDisplayFormUrl());
-                                    //console.log(list.get_entityTypeName());
-                                    //   console.log(list);
-                                    //  console.log(list.get_documentTemplateUrl());
                                     var name = "";
                                     if (list.get_documentTemplateUrl()) {
                                         name = list.get_documentTemplateUrl().substr(0, list.get_documentTemplateUrl().lastIndexOf("/Forms/"));
-                                        //   console.log(name);
                                         name = name.replace(list.get_parentWebUrl() + "/", '');
                                     }
                                     else {
@@ -413,31 +282,25 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                         stringtoDecode = stringtoDecode.replace(/_x002e_/g, ".");
                                         name = stringtoDecode;
                                     }
-                                    //var name = "";
-                                    //  console.log(name);
                                     if (list.get_title() != "App Packages" && list.get_title() != "Style Library" && list.get_title() != "Site Assets" && list.get_title() != "Websiteobjekte" && list.get_title() != "SiteAssets")
                                         documentlibraries.push(new documentlibrary_1.DocumentLibrary(name, list.get_title(), list.get_entityTypeName(), parent));
                                 }
                             }
+                            documentlibraries.sort(function (a, b) { return a.title.toLowerCase().localeCompare(b.title.toLowerCase()); });
                             resolve(documentlibraries);
                         }, function (data) {
                             console.log(data);
                             reject([]);
                         });
-                        //   $.getScript(pathURL + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                     });
-                    // });
                 };
                 DataService.prototype.searchDirectories = function (pathUrl, relPath, parent) {
                     var that = this;
                     return new Promise(function (resolve, reject) {
                         $.getScript(pathUrl + "/_layouts/15/SP.RequestExecutor.js").done(function (script, textStatus) {
                             var executor = new SP.RequestExecutor(that.appWebUrl);
-                            //var executor = new SP.RequestExecutor(pathUrl);
                             executor.executeAsync({
                                 url: pathUrl + "/_api/web/GetFolderByServerRelativeUrl('" + relPath + "')/Folders?$expand=ListItemAllFields",
-                                //Leere Bibliotheken werden ignoriert , beheben?
-                                //url: (pathUrl+"/_api/web/GetFolderByServerRelativeUrl('"+relPath+"')"),
                                 method: "GET",
                                 headers: { "Accept": "application/json; odata=verbose" },
                                 success: function (data) {
@@ -448,6 +311,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                         if (siteResult[x].Name != "Forms" && !siteResult[x].ListItemAllFields.ContentTypeId.startsWith("0x0120D520"))
                                             directory.push(new directory_1.Directory(siteResult[x].Name, parent));
                                     }
+                                    directory.sort(function (a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
                                     resolve(directory);
                                 },
                                 error: function (data) {
@@ -502,10 +366,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     line += "<soap12:Body>";
                     line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
                     line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.name + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
-                    // line += "<SourceUrl>"+ caller.name + "</SourceUrl>";
-                    // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
                     line += "<DestinationUrls>";
-                    //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
                     line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name + "</string>";
                     line += "</DestinationUrls>";
                     line += "</CopyIntoItemsLocal>";
@@ -520,10 +381,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     line += "<soap12:Body>";
                     line += "<CopyIntoItemsLocal xmlns=\"http://schemas.microsoft.com/sharepoint/soap/\">";
                     line += "<SourceUrl>" + caller.parent.srcUrl + "/" + caller.parent.name + "/" + caller.srcFolderURL + caller.name + "</SourceUrl>";
-                    // line += "<SourceUrl>"+ caller.name + "</SourceUrl>";
-                    // line += "<SourceUrl>http://win-iprrvsfootq/sites/dev/DocaDoca/testing.txt</SourceUrl>";
                     line += "<DestinationUrls>";
-                    //   line += "<string>http://win-iprrvsfootq/sites/dev/DocumentTest1/testing.txt</string>";
                     line += "<string>" + caller.parent.targetUrl + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name + "</string>";
                     line += "</DestinationUrls>";
                     line += "</CopyIntoItemsLocal>";
@@ -558,8 +416,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 };
                 DataService.prototype.soapAjax = function (caller) {
                     var that = this;
-                    console.log(caller.parent.srcUrl + "/" + caller.parent.name + "/" + caller.srcFolderURL + caller.name);
-                    console.log(caller.parent.targetUrl + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name);
                     var xmlstring = this.buildSoapEnvelope(caller);
                     return new Promise(function (resolve, reject) {
                         jQuery.ajax({
@@ -572,8 +428,11 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             },
                             contentType: "application/soap+xml; charset=utf-8",
                             success: function (xData, status) {
-                                console.log("returnData:");
-                                console.log(xData);
+                                var soapResult = $(xData).find('CopyResult');
+                                if (soapResult.attr("ErrorCode") != "Success") {
+                                    reject(soapResult.attr("ErrorCode") + "-" + soapResult.attr("ErrorMessage"));
+                                    return;
+                                }
                                 that.getListIDFromFile(caller).then(function (response) { resolve(); }, function (response) { reject(response); });
                             },
                             error: function (xData, status) {
@@ -585,7 +444,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 };
                 DataService.prototype.getListIDFromFile = function (caller) {
                     var ctx = new SP.ClientContext(caller.parent.targetUrl);
-                    //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
                     var file = ctx.get_web().getFileByServerRelativeUrl("/" + caller.parent.targetUrl.replace(/^(?:\/\/|[^\/]+)*\//, "") + "/" + caller.parent.targetName + "/" + caller.targetFolderURL + caller.name);
                     ctx.load(file, 'ListItemAllFields');
                     ctx.load(file);
@@ -599,12 +457,9 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     });
                 };
                 DataService.prototype.getContent = function (caller) {
-                    //      var targetLib = caller.parent.targetTitle;
                     var that = this;
-                    var listItem;
                     var ctx = new SP.ClientContext(caller.parent.srcUrl);
-                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
-                    listItem = ctx.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+                    var listItem = ctx.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
                     var cType = listItem.get_contentType();
                     ctx.load(listItem);
                     ctx.load(cType);
@@ -612,23 +467,18 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         ctx.executeQueryAsync(function () {
                             if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.folder) {
                                 if (cType.get_id().toString().startsWith("0x0120D520")) {
-                                    // console.log("Doc Set: " + caller.id);
                                     caller.type = itemdl_1.ContentType.DocSet;
-                                    //console.log(cType.get_id().toString().substring(0, cType.get_id().toString().length - 34));
                                     caller.contentTypeId = cType.get_id().toString().substring(0, cType.get_id().toString().length - 34);
                                     caller.contentTypeName = cType.get_name();
                                 }
                                 else {
-                                    // console.log("Folder: " + caller.id);
                                     caller.type = itemdl_1.ContentType.Folder;
                                 }
                             }
                             else if (listItem.get_fileSystemObjectType() == SP.FileSystemObjectType.file) {
-                                //console.log("File: " + caller.id);
                                 caller.type = itemdl_1.ContentType.File;
                             }
                             else {
-                                //console.log("Unknown " + caller.id);
                                 reject("Unknown Format in" + caller.id);
                             }
                             resolve();
@@ -639,11 +489,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 };
                 DataService.prototype.getFolder = function (caller) {
                     var that = this;
-                    var targetList;
-                    var listItem;
                     var ctx = new SP.ClientContext(caller.parent.srcUrl);
-                    //var appContextSite = new SP.AppContextSite(ctx, caller.parent.srcUrl);
-                    listItem = ctx.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
+                    var listItem = ctx.get_web().get_lists().getByTitle(caller.parent.title).getItemById(caller.id);
                     var files = listItem.get_folder().get_files();
                     var folders = listItem.get_folder().get_folders();
                     var folder = listItem.get_folder();
@@ -655,9 +502,11 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         ctx.executeQueryAsync(function () {
                             caller.name = folder.get_name();
                             for (var i = 0; i < files.get_count(); i++) {
+                                // caller.parent.fileAmount++;
                                 caller.addToQueue(files.getItemAtIndex(i).get_listItemAllFields().get_id());
                             }
                             for (var i = 0; i < folders.get_count(); i++) {
+                                //caller.parent.fileAmount++;
                                 caller.addToQueue(folders.getItemAtIndex(i).get_listItemAllFields().get_id());
                             }
                             caller.targetFolderURL += caller.name + "/";
@@ -668,55 +517,27 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 };
-                // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
                 DataService.prototype.copyFolder = function (caller) {
                     var targetList;
                     var listItem;
-                    console.log(caller.name);
                     var ctx = new SP.ClientContext(caller.parent.targetUrl);
-                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
                     var itemCreateInfo;
                     targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
                     var thisFolder;
-                    // folderItem.
                     ctx.load(targetList);
                     if (caller.parentFolderId == null) {
                         thisFolder = targetList.get_rootFolder().get_folders().add(caller.name);
                     }
                     else {
                         thisFolder = targetList.getItemById(caller.parentFolderId).get_folder().get_folders().add(caller.name);
-                    } // Überarbeiten
-                    //   console.log(caller.parentFolder.get_folders());
+                    }
                     ctx.load(thisFolder, "ListItemAllFields");
                     ctx.load(thisFolder);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
-                            // caller.parentFolder= thisFolder;
                             caller.parentFolderId = thisFolder.get_listItemAllFields().get_id();
-                            /*  var thisListItem:SP.ListItem = thisFolder.get_listItemAllFields();
-                            //  thisListItem.set_item("Title",caller.name);
-                              thisListItem.update();
-                              ctx.load(thisListItem);
-                              ctx.executeQueryAsync(
-                                  function(){
-                                     // console.log(thisListItem.get_item("Title"));
-                                      caller.releaseQueue();
-                                      resolve();
-                                  },
-                                  function(){
-                                       reject(arguments[1].get_message());
-                                  }
-                              );*/
-                            caller.releaseQueue();
                             resolve();
                         }, function (x, args) {
-                            /*    if (args.get_errorTypeName() == "Microsoft.SharePoint.SPException" && args.get_message().includes("already exists")) {
-            
-                                    console.log("Already exists " + caller.id);
-                                    caller.releaseQueue();
-                                    resolve();
-            
-                                }*/
                             reject(arguments[1].get_message());
                         });
                     });
@@ -727,7 +548,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     var listItem;
                     var root;
                     var ctx = new SP.ClientContext(caller.parent.targetUrl);
-                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
                     targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
                     if (caller.parentFolderId == null)
                         root = targetList.get_rootFolder();
@@ -753,7 +573,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCTId);
                             ctx.executeQueryAsync(function () {
                                 that.getFolderFromDocSet(caller).then(function (response) {
-                                    caller.releaseQueue();
+                                    // caller.releaseQueue();
                                     resolve();
                                 }, function (response) {
                                     reject("0:" + response);
@@ -761,7 +581,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             }, function () {
                                 if (arguments[1].get_message().includes("already exists")) {
                                     that.getFolderFromDocSet(caller).then(function (response) {
-                                        caller.releaseQueue();
+                                        //  caller.releaseQueue();
                                         resolve();
                                     }, function (response) {
                                         reject("2:" + response);
@@ -775,58 +595,72 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 };
-                // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
-                DataService.prototype.copyDocSet = function (caller) {
-                    var that = this;
-                    var targetList;
-                    var listItem;
-                    var root;
-                    var ctx = new SP.ClientContext(caller.parent.targetUrl);
-                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
-                    targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
-                    if (caller.parentFolderId == null)
-                        root = targetList.get_rootFolder();
-                    else
-                        root = targetList.getItemById(caller.parentFolderId).get_folder();
-                    ctx.load(targetList);
-                    var cTypeId = caller.contentTypeId;
-                    var newCT = ctx.get_web().get_contentTypes().getById(cTypeId);
-                    ctx.load(root);
-                    ctx.load(newCT);
-                    return new Promise(function (resolve, reject) {
-                        ctx.executeQueryAsync(function () {
-                            SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
-                            ctx.executeQueryAsync(function () {
-                                that.getFolderFromDocSet(caller).then(function (response) {
-                                    caller.releaseQueue();
-                                    resolve();
-                                }, function (response) {
-                                    reject("0:" + response);
-                                });
-                            }, function () {
-                                if (arguments[1].get_message().includes("already exists")) {
-                                    that.getFolderFromDocSet(caller).then(function (response) {
-                                        caller.releaseQueue();
-                                        resolve();
-                                    }, function (response) {
-                                        reject("2:" + response);
-                                    });
-                                }
-                                else
-                                    reject("1:" + arguments[1].get_message());
-                            });
-                        }, function (x, args) {
-                            reject("3:" + arguments[1].get_message());
-                        });
-                    });
-                };
+                /*   // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
+                   copyDocSet(caller: ItemDL) {
+               
+                       let that = this;
+               
+                       var targetList: SP.List;
+                       var listItem: SP.ListItem;
+                       var root: SP.Folder;
+                       var ctx = new SP.ClientContext(caller.parent.targetUrl);
+                       // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
+               
+                       targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
+                       if (caller.parentFolderId == null)
+                           root = targetList.get_rootFolder();
+                       else
+                           root = targetList.getItemById(caller.parentFolderId).get_folder();
+               
+                       ctx.load(targetList);
+                       var cTypeId = caller.contentTypeId;
+                       var newCT: SP.ContentType = ctx.get_web().get_contentTypes().getById(cTypeId);
+               
+                       ctx.load(root);
+                       ctx.load(newCT);
+               
+                       return new Promise(function (resolve, reject) {
+                           ctx.executeQueryAsync(
+                               function () {
+                                   SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
+                                   ctx.executeQueryAsync(
+                                       function () {
+                                           that.getFolderFromDocSet(caller).then(
+                                               response => {
+                                                 //  caller.releaseQueue();
+                                                   resolve();
+                                               },
+                                               response => {
+                                                   reject("0:" + response)
+                                               });
+                                       },
+                                       function () {
+                                           if (arguments[1].get_message().includes("already exists")) {
+                                               that.getFolderFromDocSet(caller).then(
+                                                   response => {
+                                                     //  caller.releaseQueue();
+                                                             resolve();
+                                                   },
+                                                   response => {
+                                                       reject("2:" + response)
+                                                   });
+                                           }
+                                           else
+                                               reject("1:" + arguments[1].get_message());
+                                       });
+                               },
+                               function (x, args) {
+                                   reject("3:" + arguments[1].get_message());
+                               }
+                           );
+                       });
+                   }*/
                 DataService.prototype.getFolderFromDocSet = function (caller) {
                     var that = this;
                     var targetList;
                     var listItem;
                     var folders;
                     var ctx = new SP.ClientContext(caller.parent.targetUrl);
-                    //var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
                     targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
                     if (caller.parentFolderId == null)
                         folders = targetList.get_rootFolder().get_folders();
@@ -839,7 +673,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         ctx.executeQueryAsync(function () {
                             // console.log(folders);
                             for (var i = 0; i < folders.get_count(); i++) {
-                                //    console.log(folders.getItemAtIndex(i)); 
                                 if (folders.getItemAtIndex(i).get_name() == caller.name) {
                                     caller.parentFolderId = folders.getItemAtIndex(i).get_listItemAllFields().get_id();
                                     caller.targetId = folders.getItemAtIndex(i).get_listItemAllFields().get_id();
@@ -866,14 +699,12 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         file = listItem.get_file();
                     else
                         file = listItem.get_folder();
-                    // console.log("ID "+caller.id);
                     ctx.load(listItem);
                     ctx.load(file);
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
                             caller.name = file.get_name();
                             caller.srcUrl = file.get_serverRelativeUrl();
-                            //  caller.title = file.get_title();
                             for (var i = 0; i < caller.parent.fields.length; i++) {
                                 caller.contents.push(new fieldcontent_1.FieldContent(listItem.get_item(caller.parent.fields[i].name), caller.parent.fields[i]));
                             }
@@ -920,31 +751,19 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                     targetItem.set_item(caller.contents[i].field.name, caller.contents[i].value);
                                 }
                             }
-                            /* if(caller.type==ContentType.File){
-                                 var file = targetItem.get_file();
-                             file.checkIn("Copied",SP.CheckinType.majorCheckIn);
-                                 ctx.load(file);
-                             }*/
                             targetItem.update();
                             ctx.executeQueryAsync(function () { resolve(); }, function () { reject(arguments[1].get_message()); });
-                            // console.log(targetItem);
-                            // resolve();
-                        }, 
-                        //Fail
-                        function (data) {
+                        }, function (data) {
                             reject(arguments[1].get_message());
                         });
                     });
                 };
                 DataService.prototype.readFile = function (pathUrl) {
                     var executor = new SP.RequestExecutor(this.appWebUrl);
-                    //var executor = new SP.RequestExecutor(pathUrl);
                     var that = this;
                     return new Promise(function (resolve, reject) {
                         executor.executeAsync({
                             url: pathUrl + "/_api/web/GetFileByServerRelativeUrl('" + pathUrl + "')/Folders",
-                            //Leere Bibliotheken werden ignoriert , beheben?
-                            //url: (pathUrl+"/_api/web/GetFolderByServerRelativeUrl('"+relPath+"')"),
                             method: "GET",
                             headers: { "Accept": "application/json; odata=verbose" },
                             success: function (data) {
@@ -971,8 +790,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function (data) {
                             listItem.deleteObject();
-                            ctx.executeQueryAsync(); // why Error Bug when Last Item deleteObject outside
-                            resolve();
+                            ctx.executeQueryAsync(function () { resolve(); }, function () { reject(arguments[1].get_message()); });
+                            // resolve();
                         }, function (data) {
                             reject(arguments[1].get_message());
                         });
@@ -1000,11 +819,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                 };
                 DataService.prototype.checkCopySource = function (caller) {
                     var ctx = new SP.ClientContext(caller.parent.targetUrl);
-                    // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl).get_web();
                     var targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
                     var targetItem = targetList.getItemById(caller.targetId);
-                    // var targetField =
-                    //    console.log(caller.parent.targetUrl + "/" + caller.parent.name + "/" + caller.targetFolderURL + caller.name);
                     ctx.load(targetItem);
                     ctx.executeQueryAsync(function (data) {
                         console.log(targetItem.get_item("_CopySource"));

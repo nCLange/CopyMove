@@ -73,8 +73,15 @@ export class SiteCollection {
 
     }
 
-    createDocLib(path,title,junk){
-        this.documentLibraries.push(new DocumentLibrary(path,title,junk,this));
+    createDocLib(guid){
+        this.dataService.getDocLibInfo(this,this.path,guid).then(
+            response =>{
+                this.documentLibraries.push(response as DocumentLibrary);
+                this.documentLibraries.sort(function (a, b) { return a.title.toLowerCase().localeCompare(b.title.toLowerCase())});
+            },
+            response =>{console.log(response);}
+        )
+      //  this.documentLibraries.push(new DocumentLibrary(path,title,junk,this));
         this.expanded=true;
         this.visible=true;
         this.gotSearched=true;

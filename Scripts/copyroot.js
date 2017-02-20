@@ -22,7 +22,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
             }],
         execute: function() {
             CopyRoot = (function () {
-                function CopyRoot(delafter, /*sitecollections: Array<SiteCollection>,*/ parent) {
+                function CopyRoot(delafter, parent) {
                     var _this = this;
                     this.errorReport = [];
                     this.targetUrl = sitecollection_1.SiteCollection.targetPath;
@@ -32,17 +32,21 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     this.targetRootPath = "";
                     this.rootFolder = null;
                     this.dataService = new dataservice_1.DataService();
-                    this.maxCalls = 3;
+                    this.maxCalls = 1;
                     this.currentCalls = 0;
                     this.srcUrl = _spPageContextInfo.webAbsoluteUrl;
                     this.fields = [];
                     this.canceled = false;
-                    this.items = [];
-                    this.doneCounter = 0;
+                    this.items = []; //Array of items to be copied
+                    this.doneCounter = 0; //counter of what finished copying
+                    this.readCounter = 0; //counter of what is read
+                    // this.fileAmount = 0;
                     this.parent = parent;
                     this.delafter = delafter;
+                    this.ready = false; //Is ready to do rest of the copying
+                    this.hasError = false; // An Error was found 
+                    this.rootItems = [];
                     this.srcListId = new RegExp('[\?&]SPListId=([^&#]*)').exec(window.location.href)[1];
-                    // var wat = new RegExp('[\?&]SPListURL=([^&#]*)').exec(window.location.href)[1];
                     var tempItemIds = new RegExp('[\?&]SPListItemId=([^&#]*)').exec(window.location.href);
                     this.selectedItemIds = tempItemIds[1].split(",").map(Number);
                     this.dataService.getListInfoFromId(this).then(function (response) {
@@ -73,22 +77,21 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                                     _this.srcRootPath += "/";
                                     _this.srcRootPath = _this.srcRootPath.substr(1, _this.srcRootPath.length);
                                 }
-                                //           console.log(this.srcRootPath);
                                 if (directory_1.Directory.selectedPath != undefined && directory_1.Directory.selectedPath != "" && directory_1.Directory.selectedPath != null) {
                                     _this.targetRootPath = directory_1.Directory.selectedPath;
                                     _this.dataService.getFolderFromUrl(_this).then(function (response) {
-                                        //  this.items = [];
-                                        //    this.deleteAfterwards = delafter;
                                         for (var id = 0; id < _this.selectedItemIds.length; id++) {
-                                            _this.items.push(new itemdl_1.ItemDL(_this.selectedItemIds[id], _this, _this.targetRootPath, _this.srcRootPath, _this.rootFolder.get_listItemAllFields().get_id()));
+                                            var item = new itemdl_1.ItemDL(_this.selectedItemIds[id], _this, _this.targetRootPath, _this.srcRootPath, _this.rootFolder.get_listItemAllFields().get_id());
+                                            _this.items.push(item);
+                                            _this.rootItems.push(item);
                                         }
                                     }, function (response) { console.log("getFolderFromUrl Error " + response); });
                                 }
                                 else {
-                                    //   this.items = [];
-                                    //  this.deleteAfterwards = delafter;
                                     for (var id = 0; id < _this.selectedItemIds.length; id++) {
-                                        _this.items.push(new itemdl_1.ItemDL(_this.selectedItemIds[id], _this, "", _this.srcRootPath));
+                                        var item = new itemdl_1.ItemDL(_this.selectedItemIds[id], _this, "", _this.srcRootPath);
+                                        _this.items.push(item);
+                                        _this.rootItems.push(item);
                                     }
                                 }
                             }, function (response) {
@@ -100,31 +103,34 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     });
                 }
                 CopyRoot.prototype.addToArray = function (id, targetFolderURL, srcFolderURL, parentFolderId) {
-                    this.items.push(new itemdl_1.ItemDL(id, this, targetFolderURL, srcFolderURL, parentFolderId));
+                    var item = new itemdl_1.ItemDL(id, this, targetFolderURL, srcFolderURL, parentFolderId);
+                    this.items.push(item);
+                    return item;
                 };
                 CopyRoot.prototype.done = function (caller, errorMsg) {
                     if (errorMsg != null && errorMsg != "") {
                         this.errorReport.push(caller.name + ": " + errorMsg);
                     }
-                    /*  for(var i=0; i<20; i++)
-                            this.errorReport.push(i+" Hello");*/
                     this.doneCounter++;
                     if (this.doneCounter >= this.items.length) {
                         if (this.delafter) {
                             var error = false;
-                            for (var i = this.items.length - 1; i >= 0; i--) {
-                                if (this.items[i].status == "Done" && this.items[i].type == itemdl_1.ContentType.File) {
-                                    this.items[i].dataService.deleteEntry(this.items[i]);
-                                }
-                                else if (this.items[i].status != "Done" && this.items[i].type == itemdl_1.ContentType.File) {
-                                    error = true;
-                                }
-                                else if (this.items[i].status == "Done" && this.items[i].type != itemdl_1.ContentType.File) {
-                                    if (error == false)
-                                        this.items[i].dataService.deleteEntry(this.items[i]);
-                                }
-                                else {
-                                    error = true;
+                            if (this.hasError == false) {
+                                for (var i = this.items.length - 1; i >= 0; i--) {
+                                    if (this.items[i].status == "Done" && this.items[i].type == itemdl_1.ContentType.File) {
+                                        if (error == false)
+                                            this.items[i].dataService.deleteEntry(this.items[i]).then(function (response) { }, function (response) { console.log(response); error = true; });
+                                    }
+                                    else if (this.items[i].status != "Done" && this.items[i].type == itemdl_1.ContentType.File) {
+                                        error = true;
+                                    }
+                                    else if (this.items[i].status == "Done" && this.items[i].type != itemdl_1.ContentType.File) {
+                                        if (error == false)
+                                            this.items[i].dataService.deleteEntry(this.items[i]).then(function (response) { }, function (response) { console.log(response); error = true; });
+                                    }
+                                    else {
+                                        error = true;
+                                    }
                                 }
                             }
                         }

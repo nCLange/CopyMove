@@ -1,13 +1,10 @@
-System.register(['./documentlibrary', './dataservice'], function(exports_1, context_1) {
+System.register(['./dataservice'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var documentlibrary_1, dataservice_1;
+    var dataservice_1;
     var SiteCollection;
     return {
         setters:[
-            function (documentlibrary_1_1) {
-                documentlibrary_1 = documentlibrary_1_1;
-            },
             function (dataservice_1_1) {
                 dataservice_1 = dataservice_1_1;
             }],
@@ -57,8 +54,13 @@ System.register(['./documentlibrary', './dataservice'], function(exports_1, cont
                     SiteCollection.targetPath = this.path;
                     this.parent.unsetAll();
                 };
-                SiteCollection.prototype.createDocLib = function (path, title, junk) {
-                    this.documentLibraries.push(new documentlibrary_1.DocumentLibrary(path, title, junk, this));
+                SiteCollection.prototype.createDocLib = function (guid) {
+                    var _this = this;
+                    this.dataService.getDocLibInfo(this, this.path, guid).then(function (response) {
+                        _this.documentLibraries.push(response);
+                        _this.documentLibraries.sort(function (a, b) { return a.title.toLowerCase().localeCompare(b.title.toLowerCase()); });
+                    }, function (response) { console.log(response); });
+                    //  this.documentLibraries.push(new DocumentLibrary(path,title,junk,this));
                     this.expanded = true;
                     this.visible = true;
                     this.gotSearched = true;
