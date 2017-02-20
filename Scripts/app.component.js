@@ -34,7 +34,6 @@ System.register(['@angular/core', './treeviewsite', './dataservice'], function(e
                         var tempresponse;
                         tempresponse = response;
                         _this.sitecollection = tempresponse;
-                        console.log(_this.sitecollection);
                         if (_this.sitecollection.length == 0)
                             _this.errorSiteCol = "Couldn't find any Site Collections";
                     }, function (response) {

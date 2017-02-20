@@ -26,7 +26,6 @@ export class AppComponent {
                 var tempresponse;
                 tempresponse = response;
                 this.sitecollection = tempresponse;
-                console.log(this.sitecollection);
                 if (this.sitecollection.length == 0)
                     this.errorSiteCol = "Couldn't find any Site Collections";
             }, response => {

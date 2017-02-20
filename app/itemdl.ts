@@ -233,11 +233,11 @@ export class ItemDL {
 
             let fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL + outerthat.name;
             fullURL = fullURL.replace(window.location.protocol + "//" + window.location.host, "");
-            console.log(fullURL);
+            fullURL = encodeURI(fullURL);
             if (fullURL.length > 256) {
                 outerthat.parent.hasError = true;
                 outerthat.status = "Error";
-                reject("Targeturl is " + (fullURL.length - 256) + " signs too long");
+                reject("Targeturl of the item is " + (fullURL.length - 256) + " signs too long");
                 return;
             }
 
