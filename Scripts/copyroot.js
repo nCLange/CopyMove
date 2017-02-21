@@ -108,6 +108,7 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                     return item;
                 };
                 CopyRoot.prototype.done = function (caller, errorMsg) {
+                    var _this = this;
                     if (errorMsg != null && errorMsg != "") {
                         this.errorReport.push(caller.name + ": " + errorMsg);
                     }
@@ -119,14 +120,14 @@ System.register(['./dataservice', './itemdl', './sitecollection', './documentlib
                                 for (var i = this.items.length - 1; i >= 0; i--) {
                                     if (this.items[i].status == "Done" && this.items[i].type == itemdl_1.ContentType.File) {
                                         if (error == false)
-                                            this.items[i].dataService.deleteEntry(this.items[i]).then(function (response) { }, function (response) { console.log(response); error = true; });
+                                            this.items[i].dataService.deleteEntry(this.items[i]).then(function (response) { }, function (response) { console.log(response); error = true; _this.items[i].status == "Error"; _this.errorReport.push(_this.items[i].name + " could not be deleted, deletion process was stopped: " + response); });
                                     }
                                     else if (this.items[i].status != "Done" && this.items[i].type == itemdl_1.ContentType.File) {
                                         error = true;
                                     }
                                     else if (this.items[i].status == "Done" && this.items[i].type != itemdl_1.ContentType.File) {
                                         if (error == false)
-                                            this.items[i].dataService.deleteEntry(this.items[i]).then(function (response) { }, function (response) { console.log(response); error = true; });
+                                            this.items[i].dataService.deleteEntry(this.items[i]).then(function (response) { }, function (response) { console.log(response); error = true; _this.items[i].status == "Error"; _this.errorReport.push(_this.items[i].name + " could not be deleted, deletion process was stopped: " + response); });
                                     }
                                     else {
                                         error = true;

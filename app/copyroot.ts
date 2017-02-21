@@ -151,14 +151,14 @@ export class CopyRoot {
                     for (var i = this.items.length - 1; i >= 0; i--) {
                         if (this.items[i].status == "Done" && this.items[i].type == ContentType.File) {
                             if (error == false)
-                                this.items[i].dataService.deleteEntry(this.items[i]).then(response => { }, response => { console.log(response); error = true; });
+                                this.items[i].dataService.deleteEntry(this.items[i]).then(response => { }, response => { console.log(response); error = true; this.items[i].status == "Error"; this.errorReport.push(this.items[i].name+" could not be deleted, deletion process was stopped: "+response);});
                         }
                         else if (this.items[i].status != "Done" && this.items[i].type == ContentType.File) {
                             error = true;
                         }
                         else if (this.items[i].status == "Done" && this.items[i].type != ContentType.File) {
                             if (error == false)
-                                this.items[i].dataService.deleteEntry(this.items[i]).then(response => { }, response => { console.log(response); error = true; });
+                                this.items[i].dataService.deleteEntry(this.items[i]).then(response => { }, response => { console.log(response); error = true; this.items[i].status == "Error"; this.errorReport.push(this.items[i].name+" could not be deleted, deletion process was stopped: "+response);});
                         }
                         else {
                             error = true;

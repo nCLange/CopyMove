@@ -146,7 +146,7 @@ export class DataService {
                             try {
                                 var siteResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
                                 for (var x = 0; x < siteResult.length; x++) {
-                                    // if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
+                                 if (that.searchJSONForValue(siteResult[x].Cells.results, "Path").includes("/profile/" + type))
                                     sitecollection.push(
                                         new SiteCollection(that.searchJSONForValue(siteResult[x].Cells.results, "Title"), that.searchJSONForValue(siteResult[x].Cells.results, "Path"), caller));
                                 }
@@ -228,10 +228,10 @@ export class DataService {
                         success: function (data) {
                             var myoutput = JSON.parse((data.body.toString()));
                             var docResult = myoutput.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
-                            console.log(docResult);
                             for (var x = 0; x < docResult.length; x++) {
-                                /*   if (!path.includes("/profile/" + type))
-                                    continue;*/
+                                var checkpath = that.JSONObjectHelper(docResult[x].Cells.results, "Path");
+                                 if (!checkpath.includes("/profile/" + type))
+                                    continue;
                                 var siteName: string = that.JSONObjectHelper(docResult[x].Cells.results, "SiteName");
                                 var guid = that.JSONObjectHelper(docResult[x].Cells.results, "ListID");
 

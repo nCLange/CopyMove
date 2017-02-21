@@ -1,7 +1,7 @@
 ﻿[CmdletBinding()]
 param (
     [string]$SrcUrl = "http://win-iprrvsfootq/sites/dev",
-    [string]$SiteColFilter = "sites"
+    [string]$SiteColFilter = "profile"
     
 )
 
