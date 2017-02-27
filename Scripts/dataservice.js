@@ -232,6 +232,7 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                         if (founddocLib == false) {
                                             siteCollections.push(new sitecollection_1.SiteCollection(siteColName, siteName, caller));
                                             siteCollections[siteCollections.length - 1].createDocLib(guid);
+                                            break;
                                         }
                                     }
                                     var output = [curProm, siteCollections];
@@ -501,6 +502,8 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                     return new Promise(function (resolve, reject) {
                         ctx.executeQueryAsync(function () {
                             caller.name = folder.get_name();
+                            caller.targetFolderURL += caller.name + "/";
+                            caller.srcFolderURL += caller.name + "/";
                             for (var i = 0; i < files.get_count(); i++) {
                                 // caller.parent.fileAmount++;
                                 caller.addToQueue(files.getItemAtIndex(i).get_listItemAllFields().get_id());
@@ -509,8 +512,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                                 //caller.parent.fileAmount++;
                                 caller.addToQueue(folders.getItemAtIndex(i).get_listItemAllFields().get_id());
                             }
-                            caller.targetFolderURL += caller.name + "/";
-                            caller.srcFolderURL += caller.name + "/";
                             resolve();
                         }, function () {
                             reject(arguments[1].get_message());
@@ -563,7 +564,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                             var newCTId = null;
                             for (var i = 0; i < newCTs.get_count(); i++) {
                                 if (newCTs.getItemAtIndex(i).get_name() == caller.contentTypeName) {
-                                    console.log(caller.contentTypeName);
                                     newCTId = newCTs.getItemAtIndex(i).get_id();
                                     break;
                                 }
@@ -595,66 +595,6 @@ System.register(['@angular/core', './sitecollection', './documentlibrary', './di
                         });
                     });
                 };
-                /*   // Muss die neuen Objekte hier starten um Fehlern vorzubeugen
-                   copyDocSet(caller: ItemDL) {
-               
-                       let that = this;
-               
-                       var targetList: SP.List;
-                       var listItem: SP.ListItem;
-                       var root: SP.Folder;
-                       var ctx = new SP.ClientContext(caller.parent.targetUrl);
-                       // var appContextSite = new SP.AppContextSite(ctx, caller.parent.targetUrl);
-               
-                       targetList = ctx.get_web().get_lists().getByTitle(caller.parent.targetTitle);
-                       if (caller.parentFolderId == null)
-                           root = targetList.get_rootFolder();
-                       else
-                           root = targetList.getItemById(caller.parentFolderId).get_folder();
-               
-                       ctx.load(targetList);
-                       var cTypeId = caller.contentTypeId;
-                       var newCT: SP.ContentType = ctx.get_web().get_contentTypes().getById(cTypeId);
-               
-                       ctx.load(root);
-                       ctx.load(newCT);
-               
-                       return new Promise(function (resolve, reject) {
-                           ctx.executeQueryAsync(
-                               function () {
-                                   SP.DocumentSet.DocumentSet.create(ctx, root, caller.name, newCT.get_id());
-                                   ctx.executeQueryAsync(
-                                       function () {
-                                           that.getFolderFromDocSet(caller).then(
-                                               response => {
-                                                 //  caller.releaseQueue();
-                                                   resolve();
-                                               },
-                                               response => {
-                                                   reject("0:" + response)
-                                               });
-                                       },
-                                       function () {
-                                           if (arguments[1].get_message().includes("already exists")) {
-                                               that.getFolderFromDocSet(caller).then(
-                                                   response => {
-                                                     //  caller.releaseQueue();
-                                                             resolve();
-                                                   },
-                                                   response => {
-                                                       reject("2:" + response)
-                                                   });
-                                           }
-                                           else
-                                               reject("1:" + arguments[1].get_message());
-                                       });
-                               },
-                               function (x, args) {
-                                   reject("3:" + arguments[1].get_message());
-                               }
-                           );
-                       });
-                   }*/
                 DataService.prototype.getFolderFromDocSet = function (caller) {
                     var that = this;
                     var targetList;
