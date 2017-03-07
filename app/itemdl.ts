@@ -231,7 +231,7 @@ export class ItemDL {
         this.parent.readCounter++;
         return new Promise(function (resolve, reject) {
             let fullURL=null;
-            if(outerthat.type=ContentType.File)
+            if(outerthat.type==ContentType.File)
                 fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL + outerthat.name;
             else
                 fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL;

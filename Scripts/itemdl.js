@@ -197,7 +197,7 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     this.parent.readCounter++;
                     return new Promise(function (resolve, reject) {
                         var fullURL = null;
-                        if (outerthat.type = ContentType.File)
+                        if (outerthat.type == ContentType.File)
                             fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL + outerthat.name;
                         else
                             fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL;
