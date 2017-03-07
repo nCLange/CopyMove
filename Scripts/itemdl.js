@@ -196,7 +196,11 @@ System.register(['./dataservice'], function(exports_1, context_1) {
                     this.status = "Ready";
                     this.parent.readCounter++;
                     return new Promise(function (resolve, reject) {
-                        var fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL + outerthat.name;
+                        var fullURL = null;
+                        if (outerthat.type = ContentType.File)
+                            fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL + outerthat.name;
+                        else
+                            fullURL = outerthat.parent.targetUrl + "/" + outerthat.parent.targetName + "/" + outerthat.targetFolderURL;
                         fullURL = fullURL.replace(window.location.protocol + "//" + window.location.host, "");
                         fullURL = decodeURIComponent(fullURL);
                         if (fullURL.length > 260) {
